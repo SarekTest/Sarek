@@ -6,9 +6,17 @@ public class AroundAdvice {
   private final Before before;
   private final After after;
 
+  public static final Before BEFORE_DEFAULT = (target, method, args) -> true;
+
+  public static final After AFTER_DEFAULT = (target, method, args, proceedMode, returnValue, throwable) -> {
+    if (throwable != null)
+      throw throwable;
+    return returnValue;
+  };
+
   public AroundAdvice(Before before, After after) {
-    this.before = before;
-    this.after = after;
+    this.before = before == null ? BEFORE_DEFAULT : before;
+    this.after = after == null ? AFTER_DEFAULT : after;
   }
 
   public boolean before(Object target, Method method, Object[] args) {
@@ -36,7 +44,7 @@ public class AroundAdvice {
      * @param args        method arguments, possibly changed by shouldProceed
      * @param proceedMode true if intercepted method was called
      * @param returnValue result of intercepted method, if it was called and there was no exception; null otherwise
-     * @param throwable   exception thrown by intercepted methof, if any
+     * @param throwable   exception thrown by intercepted method, if any
      * @return result which should be returned to the caller; could either be the same as returnValue or something different
      * @throws Throwable Feel free to throw any checked exception type declared by the intercepted method or another
      *                   unchecked throwable; could either be the passed on 'throwable' parameter or something else
