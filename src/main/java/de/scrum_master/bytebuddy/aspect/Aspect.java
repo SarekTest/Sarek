@@ -21,7 +21,9 @@ public abstract class Aspect {
     @Origin Method method,
     @AllArguments(readOnly = false, typing = DYNAMIC) Object[] args
   ) {
-    // Get advice for target object instance - TODO: handle static methods if target is 'instanceof Class'
+    // Get advice for target object instance
+    // TODO: handle static methods if target is 'instanceof Class'
+    // TODO: handle constructors
     AroundAdvice advice = adviceRegistry.get(target);
     // If no advice is registered, proceed to target method normally
     if (advice == null)
