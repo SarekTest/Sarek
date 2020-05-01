@@ -89,6 +89,8 @@ public class Weaver {
   }
 
   public void unregisterTransformer(boolean reset) {
+    for (Object target : targets)
+      removeTarget(target);
     if (reset)
       resetTransformer();
     instrumentation.removeTransformer(transformer);
