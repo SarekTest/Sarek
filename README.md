@@ -1,45 +1,108 @@
 # Simple AOP framework for aspects with around advice via ByteBuddy
 
-How to use:
+## How to use
 
-* Build via `mvn install` in order to deploy the artifact to your local Maven repository. This is necessary because the
-  library is not available on Maven Central (yet).
+Build via `mvn install` in order to deploy the artifact to your local Maven repository. This is necessary because the
+library is not available on Maven Central (yet).
 
-* Add something like this to your own project:
+### Weave application classes only
+
+Add something like this to your own project if you want to weave application classes only (no classes on the boot
+classpath):
  
   ```xml
+  <properties>
+    <bytebuddy.version>1.10.9</bytebuddy.version>
+    <bytebuddy-aspect.version>1.0-SNAPSHOT</bytebuddy-aspect.version>
+    <bytebuddy-aspect-agent.jar>${settings.localRepository}/de/scrum-master/bytebuddy-aspect-agent/${bytebuddy-aspect.version}/bytebuddy-aspect-agent-${bytebuddy-aspect.version}.jar</bytebuddy-aspect-agent.jar>
+  </properties>
+
   <dependency>
     <groupId>de.scrum-master</groupId>
     <artifactId>bytebuddy-aspect</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>${bytebuddy-aspect.version}</version>
   </dependency>
+  <dependency>
+    <groupId>net.bytebuddy</groupId>
+    <artifactId>byte-buddy</artifactId>
+    version>${bytebuddy.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>net.bytebuddy</groupId>
+    <artifactId>byte-buddy-agent</artifactId>
+    version>${bytebuddy.version}</version>
+  </dependency>
+
+  <plugin>
+    <!-- Change to 'maven-failsafe-plugin' for integration tests -->
+    <artifactId>maven-surefire-plugin</artifactId>
+    <configuration>
+      <!-- Do not reuse forked VMs because of potentially unexpected instrumentation bleed-over -->
+      <reuseForks>false</reuseForks>
+      <!-- Java agent must be on command line in order to weave bootstrap classes. -->
+      <argLine>
+        -javaagent:../../bytebuddy-aspect-agent/target/bytebuddy-aspect-agent-1.0-SNAPSHOT.jar
+      </argLine>
+    </configuration>
+  </plugin>
   ```
 
-* Either build your own Java Agent utilisung this library or use `ByteBuddyAgent` in order to bootstrap
-  bytecode instrumentation.
-    - In the former case your `premain` and/or `agentmain` methods will get `Instrumentation` instances injected.
-    - In the latter case `ByteBuddyAgent.install()` will return you the `Instrumentation` instance you need. You would
-      then also need this on your classpath:
-      ```xml
-      <dependency>
-        <groupId>net.bytebuddy</groupId>
-        <artifactId>byte-buddy-agent</artifactId>
-        version>1.10.9</version>
-      </dependency>
-      ```
+You can take a look at [NoAgentIT](https://github.com/kriegaex/ByteBuddyAspect/blob/master/bytebuddy-aspect-test-parent/bytebuddy-aspect-test-no-agent/src/test/java/de/scrum_master/bytebuddy/aspect/NoAgentIT.java)
+if you want to get an idea how to use the aspect framework with your application classes.
 
-* This framework uses ByteBuddy in a way to avoid modifying class structures, e.g. by changing modifiers like `private`
-  or `final`, by adding methods or field etc. The reason for these limitations is that I wanted the aspects to also be
-  applicable to bootstrap JRE classes like `String` or more generally to already loaded classes. For retransforming
-  loaded classes there are limitations as mentioned above.
+### Weave bootstrap JRE/JDK classes too
 
-* If you are targeting classes loaded by the JRE bootstrap classloader, you need to put this library and also ByteBuddy
-  on the boot classpath via `-Xbootclasspath/a:${bytebuddy-aspect.jar};${bytebuddy.jar}` where the two variables have to 
-  be defined in your Maven POM or otherwise expanded directly on your Java command line. The Maven property definitions
-  could look like this: 
+If you also want to weave classes on the boot classpath, i.e. JRE/JDK classes or whatever else is on your boot
+classpath, then use the same properties as above but modify the dependencies and Surefire/Failsafe configuration like
+this:
+ 
   ```xml
-  <bytebuddy.version>1.10.9</bytebuddy.version>
-  <bytebuddy.jar>${settings.localRepository}/net/bytebuddy/byte-buddy/${bytebuddy.version}/byte-buddy-${bytebuddy.version}.jar</bytebuddy.jar>
-  <bytebuddy-aspect.jar>${settings.localRepository}/de/scrum-master/bytebuddy-aspect/1.0-SNAPSHOT/bytebuddy-aspect-1.0-SNAPSHOT.jar</bytebuddy-aspect.jar>
+  <properties>
+    <bytebuddy.version>1.10.9</bytebuddy.version>
+    <bytebuddy-aspect.version>1.0-SNAPSHOT</bytebuddy-aspect.version>
+    <bytebuddy-aspect-agent.jar>${settings.localRepository}/de/scrum-master/bytebuddy-aspect-agent/${bytebuddy-aspect.version}/bytebuddy-aspect-agent-${bytebuddy-aspect.version}.jar</bytebuddy-aspect-agent.jar>
+  </properties>
+
+  <dependency>
+    <groupId>de.scrum-master</groupId>
+    <artifactId>bytebuddy-aspect-agent</artifactId>
+    <version>${bytebuddy-aspect.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>de.scrum-master</groupId>
+    <artifactId>bytebuddy-aspect</artifactId>
+    <version>${bytebuddy-aspect.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>net.bytebuddy</groupId>
+    <artifactId>byte-buddy</artifactId>
+    version>${bytebuddy.version}</version>
+  </dependency>
+
+  <plugin>
+    <!-- Change to 'maven-failsafe-plugin' for integration tests -->
+    <artifactId>maven-surefire-plugin</artifactId>
+    <configuration>
+      <!-- Do not reuse forked VMs because of potentially unexpected instrumentation bleed-over -->
+      <reuseForks>false</reuseForks>
+      <!-- Java agent must be on command line in order to weave bootstrap classes. -->
+      <argLine>
+        -javaagent:../../bytebuddy-aspect-agent/target/bytebuddy-aspect-agent-1.0-SNAPSHOT.jar
+      </argLine>
+    </configuration>
+  </plugin>
   ```
-  If you do not wish to intercept bootstrap classes, you can skip this step.
+
+You can take a look at [CommandLineAgentIT](https://github.com/kriegaex/ByteBuddyAspect/blob/master/bytebuddy-aspect-test-parent/bytebuddy-aspect-test-use-agent/src/test/java/de/scrum_master/bytebuddy/aspect/CommandLineAgentIT.java)
+if you want to get an idea how to use the aspect framework with bootstrap classes, i.e. usually JRE/JDK classes which
+might even have been loaded already (or not, it does not really make a difference in this case) and usually are
+unreachable for instrumentation with normal test frameworks.
+
+## Technical background
+
+This framework uses ByteBuddy in a way to avoid modifying class structures, e.g. by changing modifiers like `private` or
+`final`, by adding methods or field etc. The reason for these limitations is that I wanted the aspects to also be
+applicable to bootstrap JRE classes like `String` or more generally to already loaded classes. For retransforming
+loaded classes there are limitations as mentioned above.
+
+_(to be continued)_
