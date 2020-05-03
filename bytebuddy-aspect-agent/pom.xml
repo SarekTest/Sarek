@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>de.scrum-master</groupId>
+    <artifactId>bytebuddy-aspect-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>bytebuddy-aspect-agent</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <organization>
+    <name>Scrum-Master.de - Agile Project Management</name>
+    <url>https://scrum-master.de</url>
+  </organization>
+
+  <build>
+    <plugins>
+
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Agent-Class>de.scrum_master.bytebuddy.ByteBuddyAspectAgent</Agent-Class>
+              <Premain-Class>de.scrum_master.bytebuddy.ByteBuddyAspectAgent</Premain-Class>
+              <Can-Redefine-Classes>true</Can-Redefine-Classes>
+              <Can-Retransform-Classes>true</Can-Retransform-Classes>
+              <Can-Set-Native-Method-Prefix>true</Can-Set-Native-Method-Prefix>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
+
+</project>

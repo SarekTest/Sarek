@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,7 +28,10 @@ import static net.bytebuddy.matcher.ElementMatchers.any;
 import static net.bytebuddy.matcher.ElementMatchers.none;
 
 public class Weaver {
-  private static final Advice ADVICE_TO_GENERIC_ASPECT = Advice.to(Aspect.class);
+  private static final Advice ADVICE_TO_GENERIC_ASPECT = Advice.to(
+    Aspect.class,
+    ClassFileLocator.ForClassLoader.ofSystemLoader()
+  );
 
   // Do not use ByteBuddyAgent.install() in this class but get an Instrumentation instance injected.
   // Otherwise bytebuddy-agent.jar would have to be on the boot classpath. To put bytebuddy.jar there
@@ -46,8 +50,7 @@ public class Weaver {
     Junction<MethodDescription> methodMatcher,
     AroundAdvice advice,
     Object... targets
-  ) throws IllegalArgumentException, IOException
-  {
+  ) throws IllegalArgumentException, IOException {
     if (instrumentation == null)
       throw new IllegalArgumentException("instrumentation must not be null");
     this.instrumentation = instrumentation;
@@ -102,11 +105,12 @@ public class Weaver {
 
   protected AgentBuilder createAgentBuilder() throws IOException {
 
+//    instrumentation.appendToBootstrapClassLoaderSearch(new JarFile("target/bytebuddy-aspect-1.0-SNAPSHOT.jar"));
 //    instrumentation.appendToBootstrapClassLoaderSearch(new JarFile("C:/Users/alexa/.m2/repository/net/bytebuddy/byte-buddy/1.10.9/byte-buddy-1.10.9.jar"));
-//    instrumentation.appendToBootstrapClassLoaderSearch(new JarFile("C:/Users/alexa/.m2/repository/de/scrum-master/bytebuddy-aspect/1.0-SNAPSHOT/bytebuddy-aspect-1.0-SNAPSHOT.jar"));
 
-    File tempDirectory = Files.createTempDirectory("agent-bootstrap").toFile();
+//    File tempDirectory = Files.createTempDirectory("agent-bootstrap").toFile();
 
+/*
     Map<TypeDescription, byte[]> types = Stream
       .of(
         Aspect.class,
@@ -130,6 +134,7 @@ public class Weaver {
         instrumentation
       )
       .inject(types);
+*/
 
 //    ClassInjector.UsingUnsafe.Factory factory = ClassInjector.UsingUnsafe.Factory.resolve(instrumentation);
 //    factory.make(null, null).inject(types);
@@ -139,7 +144,7 @@ public class Weaver {
       .ignore(none())
 
 //      .with(new AgentBuilder.InjectionStrategy.UsingUnsafe.OfFactory(factory))
-      .with(new AgentBuilder.InjectionStrategy.UsingInstrumentation(instrumentation, tempDirectory))
+//      .with(new AgentBuilder.InjectionStrategy.UsingInstrumentation(instrumentation, tempDirectory))
       .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
 //      .with(AgentBuilder.RedefinitionStrategy.REDEFINITION)
       .with(AgentBuilder.RedefinitionStrategy.Listener.StreamWriting.toSystemError())

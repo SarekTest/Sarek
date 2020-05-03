@@ -1,7 +1,9 @@
 package de.scrum_master.bytebuddy.aspect;
 
 import de.scrum_master.app.Calculator;
+import de.scrum_master.app.StringWrapper;
 import net.bytebuddy.agent.ByteBuddyAgent;
+import org.junit.After;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -12,8 +14,25 @@ import static de.scrum_master.testing.TestHelper.isClassLoaded;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 import static org.junit.Assert.*;
 
-public class WeaverTest {
+/**
+ * This test checks features which do not involve bootloader classes.
+ * So we do not need a Java agent here.
+ *
+ * TODO: multiple advices on same object
+ * TODO: static methods
+ * TODO: global mocks
+ * TODO: inject ByteBuddy + aspect framework into boot classloader in order to use non-loaded JRE classes
+ */
+public class NoAgentIT {
   private static final Instrumentation INSTRUMENTATION = ByteBuddyAgent.install();
+
+  private Weaver weaver;
+
+  @After
+  public void cleanUp() {
+    if (weaver != null)
+      weaver.unregisterTransformer();
+  }
 
   @Test
   public void weaveLoadedApplicationClass() throws IOException {
@@ -25,7 +44,7 @@ public class WeaverTest {
     assertTrue(isClassLoaded(CLASS_NAME));
 
     // Create weaver, directly registering a target in the constructor
-    Weaver weaver = new Weaver(
+    weaver = new Weaver(
       INSTRUMENTATION,
       named(CLASS_NAME),
       isMethod(),
@@ -46,20 +65,19 @@ public class WeaverTest {
   }
 
   @Test
-  public void weaveNotLoadedJREBootstrapClass() throws IOException {
+  public void cannotWeaveNotLoadedJREBootstrapClass() throws IOException {
     final String CLASS_NAME = "java.util.UUID";
-    final String UUID_TEXT_STUB = "111-222-333-444";
 
     // Create weaver *before* bootstrap class is loaded (should not make a difference, but check anyway)
     assertFalse(isClassLoaded(CLASS_NAME));
-    Weaver weaver = new Weaver(
+    weaver = new Weaver(
       INSTRUMENTATION,
       named(CLASS_NAME),
       named("toString"),
-      // Skip target method and return fixed result -> a classical stub
+      // No-op advice just passing through results and exceptions
       new AroundAdvice(
         (target, method, args) -> false,
-        (target, method, args, proceedMode, returnValue, throwable) -> UUID_TEXT_STUB
+        (target, method, args, proceedMode, returnValue, throwable) -> false
       )
     );
 
@@ -67,41 +85,46 @@ public class WeaverTest {
     UUID uuid = UUID.randomUUID();
     assertTrue(isClassLoaded(CLASS_NAME));
 
-    // The target instance has not been registered on the weaver yet
-    assertNotEquals(UUID_TEXT_STUB, uuid.toString());
-
-    // After registration on the weaver, the aspect affects the target instance
-    weaver.addTarget(uuid);
-    assertEquals(UUID_TEXT_STUB, uuid.toString());
-
-    // Another instance is unaffected by the aspect
-    assertNotEquals(UUID_TEXT_STUB, UUID.randomUUID().toString());
-
-    // After deregistration, the target instance is also unaffected again
-    weaver.removeTarget(uuid);
-    assertNotEquals(UUID_TEXT_STUB, uuid.toString());
-
-    // The same instance can be registered again
-    weaver.addTarget(uuid);
-    assertEquals(UUID_TEXT_STUB, uuid.toString());
-
-    // After unregistering the whole transformer from instrumentation, the aspect is ineffective
-    weaver.unregisterTransformer();
-    assertNotEquals(UUID_TEXT_STUB, uuid.toString());
+    // Even though no target instance has been registered on the weaver, the aspect runs in order to check
+    // if the advice should fire. But in order to do that, the aspect classes need to exist in the target
+    // class' classloader, which in this case they do not because the test runs without the Java agent
+    // injecting them into the boot classloader.
+    assertThrows(NoClassDefFoundError.class, uuid::toString);
   }
 
   @Test
-  public void weaveLoadedJREBootstrapClass() throws IOException {
+  public void cannotWeaveLoadedJREBootstrapClass() throws IOException {
     final String CLASS_NAME = "java.lang.String";
-    final String TEXT = "To be, or not to be, that is the question";
 
     // Create weaver *after* bootstrap class is loaded (should not make a difference, but check anyway)
     assertTrue(isClassLoaded(CLASS_NAME));
-    Weaver weaver = new Weaver(
+    weaver = new Weaver(
       INSTRUMENTATION,
       named(CLASS_NAME),
       named("replaceAll").and(takesArguments(String.class, String.class)),
-      createAdvice_String_equalsIgnoreCase()
+      // No-op advice just passing through results and exceptions
+      new AroundAdvice(
+        (target, method, args) -> false,
+        (target, method, args, proceedMode, returnValue, throwable) -> false
+      )
+    );
+
+    // Even though no target instance has been registered on the weaver, the aspect runs in order to check
+    // if the advice should fire. But in order to do that, the aspect classes need to exist in the target
+    // class' classloader, which in this case they do not because the test runs without the Java agent
+    // injecting them into the boot classloader.
+    assertThrows(NoClassDefFoundError.class, () -> "uuid".replaceAll("foo", "bar"));
+  }
+
+  @Test
+  public void complexAroundAdvice() throws IOException {
+    StringWrapper TEXT = new StringWrapper("To be, or not to be, that is the question");
+
+    Weaver weaver = new Weaver(
+      INSTRUMENTATION,
+      is(StringWrapper.class),
+      named("replaceAll").and(takesArguments(String.class, String.class)),
+      replaceAllAdvice()
     );
 
     // Before registering TEXT as an advice target instance, 'replaceAll' behaves normally
@@ -118,29 +141,26 @@ public class WeaverTest {
     // (4) Aspect modifies replacement parameter
     assertEquals("To ❤, or not to ❤, that is the question", TEXT.replaceAll("be", "modify"));
 
-    // Negative test: aspect has no effect on a String not registered as a target
-    assertEquals("Let it go", "Let it be".replaceAll("be", "go"));
-    assertEquals("Let it skip", "Let it be".replaceAll("be", "skip"));
-    assertEquals("Let it modify", "Let it be".replaceAll("be", "modify"));
+    // Negative test: aspect has no effect on an instance not registered as a target
+    StringWrapper noTarget = new StringWrapper("Let it be");
+    assertEquals("Let it go", noTarget.replaceAll("be", "go"));
+    assertEquals("Let it skip", noTarget.replaceAll("be", "skip"));
+    assertEquals("Let it modify", noTarget.replaceAll("be", "modify"));
 
     // After unregistering TEXT as an advice target instance, 'replaceAll' behaves normally again
     weaver.removeTarget(TEXT);
     assertEquals("To modify, or not to modify, that is the question", TEXT.replaceAll("be", "modify"));
-
-    // House-keeping: unregister the transformer from instrumentation, even though there are
-    // no targets registered on it anymore
-    weaver.unregisterTransformer();
   }
 
   /**
    * This is an example for a somewhat more complex aspect doing the following:
-   *   1. conditionally skip proceeding to target method
-   *   2. conditionally modify method argument before proceeding
-   *   3. catch exception thrown by traget method and return a value instead
-   *   4. in case target method was not called (proceed), return special value
-   *   5. otherwise pass through return value from target method
+   * 1. conditionally skip proceeding to target method
+   * 2. conditionally modify method argument before proceeding
+   * 3. catch exception thrown by target method and return a value instead
+   * 4. in case target method was not called (proceed), return special value
+   * 5. otherwise pass through return value from target method
    */
-  private AroundAdvice createAdvice_String_equalsIgnoreCase() {
+  private AroundAdvice replaceAllAdvice() {
     return new AroundAdvice(
       // Should proceed?
       (target, method, args) -> {
@@ -157,7 +177,7 @@ public class WeaverTest {
         if (throwable != null)
           return "caught exception from proceed";
         if (!proceedMode)
-          return ((String) target).replace("e", "ε").replace("o", "0");
+          return ((StringWrapper) target).replace("e", "ε").replace("o", "0");
         return returnValue;
       }
     );

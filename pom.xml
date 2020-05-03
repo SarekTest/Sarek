@@ -4,8 +4,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>de.scrum-master</groupId>
-  <artifactId>bytebuddy-aspect</artifactId>
+  <artifactId>bytebuddy-aspect-parent</artifactId>
   <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
   <organization>
     <name>Scrum-Master.de - Agile Project Management</name>
@@ -17,73 +18,113 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-
     <bytebuddy.version>1.10.9</bytebuddy.version>
-<!--    <version.bytebuddy>1.10.10-SNAPSHOT</version.bytebuddy>-->
-    <bytebuddy.jar>${settings.localRepository}/net/bytebuddy/byte-buddy/${bytebuddy.version}/byte-buddy-${bytebuddy.version}.jar</bytebuddy.jar>
   </properties>
 
   <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.2</version>
-        <executions>
-          <execution>
-            <id>default-test</id>
-            <phase>test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <!--
-            Using Maven Dependency Plugin goal 'properties' in phase 'initialize' and then something like
-            ${net.bytebuddy:byte-buddy-agent:jar} according to https://stackoverflow.com/a/56396097/1082681
-            works in Surefire but is not correctly resolved for IntelliJ IDEA run configurations. So I
-            defined the JAR paths as properties.
-          -->
-          <argLine>
-            -Xbootclasspath/a:target/classes;${bytebuddy.jar}
-          </argLine>
-        </configuration>
-      </plugin>
-    </plugins>
+    <pluginManagement>
+      <plugins>
+
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.2.0</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.22.2</version>
+          <configuration>
+            <!-- Do not reuse forked VMs because of potentially unexpected instrumentation bleed-over -->
+            <reuseForks>false</reuseForks>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>2.22.2</version>
+          <configuration>
+            <!-- Do not reuse forked VMs because of potentially unexpected instrumentation bleed-over -->
+            <reuseForks>false</reuseForks>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>integration-test</goal>
+                <goal>verify</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>3.1.2</version>
+        </plugin>
+
+      </plugins>
+    </pluginManagement>
   </build>
 
-  <dependencies>
+  <dependencyManagement>
+    <dependencies>
 
-    <dependency>
-      <groupId>net.bytebuddy</groupId>
-      <artifactId>byte-buddy</artifactId>
-      <version>${bytebuddy.version}</version>
-    </dependency>
+      <dependency>
+        <groupId>net.bytebuddy</groupId>
+        <artifactId>byte-buddy</artifactId>
+        <version>${bytebuddy.version}</version>
+      </dependency>
 
-    <!-- Test dependencies -->
+      <!-- Test dependencies -->
 
-    <dependency>
-      <groupId>net.bytebuddy</groupId>
-      <artifactId>byte-buddy-agent</artifactId>
-      <version>${bytebuddy.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13</version>
-      <scope>test</scope>
-    </dependency>
-    <!-- For test via ByteBuddyAgent.install() -->
-    <dependency>
-      <groupId>com.sun</groupId>
-      <artifactId>tools</artifactId>
-      <version>1.8</version>
-      <scope>system</scope>
-      <systemPath>${java.home}/../lib/tools.jar</systemPath>
-    </dependency>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.13</version>
+        <scope>test</scope>
+      </dependency>
+      <!-- For agent ad hoc attachment, e.g. via ByteBuddyAgent.install() -->
+      <!-- TODO: Figure out how to do it in JDK 9+ and how to make it (auto-)configurable -->
+<!--
+      <dependency>
+        <groupId>oracle.jdk</groupId>
+        <artifactId>tools</artifactId>
+        <version>8</version>
+        <scope>system</scope>
+        <systemPath>${java.home}/../lib/tools.jar</systemPath>
+      </dependency>
+-->
+      <dependency>
+        <groupId>net.bytebuddy</groupId>
+        <artifactId>byte-buddy-agent</artifactId>
+        <version>${bytebuddy.version}</version>
+        <scope>test</scope>
+      </dependency>
 
-  </dependencies>
+      <dependency>
+        <groupId>de.scrum-master</groupId>
+        <artifactId>bytebuddy-aspect</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>de.scrum-master</groupId>
+        <artifactId>bytebuddy-aspect-agent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>de.scrum-master</groupId>
+        <artifactId>bytebuddy-aspect-test-common</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <scope>test</scope>
+      </dependency>
 
+    </dependencies>
+  </dependencyManagement>
+
+  <modules>
+    <module>bytebuddy-aspect</module>
+    <module>bytebuddy-aspect-agent</module>
+    <module>bytebuddy-aspect-test-parent</module>
+  </modules>
 </project>
