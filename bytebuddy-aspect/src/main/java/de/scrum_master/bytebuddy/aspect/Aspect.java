@@ -21,10 +21,9 @@ public abstract class Aspect {
     @Origin Method method,
     @AllArguments(readOnly = false, typing = DYNAMIC) Object[] args
   ) {
-    // Get advice for target object instance
-    // TODO: handle static methods if target is 'instanceof Class'
-    // TODO: handle constructors
-    AroundAdvice advice = adviceRegistry.get(target);
+    // Get advice for target object instance or target class
+    AroundAdvice advice = getAroundAdvice(target, method);
+
     // If no advice is registered, proceed to target method normally
     if (advice == null)
       return true;
@@ -56,11 +55,13 @@ public abstract class Aspect {
     @Return(readOnly = false, typing = DYNAMIC) Object returnValue,
     @Thrown(readOnly = false, typing = DYNAMIC) Throwable throwable
   ) {
-    // Get advice for target object instance - TODO: handle static methods if target is 'instanceof Class'
-    AroundAdvice advice = adviceRegistry.get(target);
+    // Get advice for target object instance or target class
+    AroundAdvice advice = getAroundAdvice(target, method);
+
     // If no advice is registered, just pass through result
     if (advice == null)
       return;
+
     try {
       returnValue = advice.after(target, method, args, proceedMode, returnValue, throwable);
       throwable = null;
@@ -68,6 +69,22 @@ public abstract class Aspect {
       throwable = e;
       returnValue = null;
     }
+  }
+
+  /**
+   * Keep this method public because it must be callable from advice code woven into other classes
+   */
+  public static AroundAdvice getAroundAdvice(Object target, Method method) {
+    // TODO: handle constructors
+    AroundAdvice advice = null;
+    // Non-static method? -> search for instance advice
+    if (target != null)
+      advice = adviceRegistry.get(target);
+    // Static method or no instance advice? -> search for class advice
+    if (advice == null) {
+      advice = adviceRegistry.get(method.getDeclaringClass());
+    }
+    return advice;
   }
 
 }

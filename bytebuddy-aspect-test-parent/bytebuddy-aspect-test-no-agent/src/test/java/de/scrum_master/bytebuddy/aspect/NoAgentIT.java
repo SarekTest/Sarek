@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 /**
  * This test checks features which do not involve bootloader classes.
  * So we do not need a Java agent here.
- *
+ * <p>
  * TODO: multiple advices on same object
  * TODO: static methods
  * TODO: global mocks
@@ -39,7 +39,6 @@ public class NoAgentIT {
     final String CLASS_NAME = "de.scrum_master.app.Calculator";
 
     // Load application class
-    assertFalse(isClassLoaded(CLASS_NAME));
     Calculator calculator = new Calculator();
     assertTrue(isClassLoaded(CLASS_NAME));
 
@@ -47,7 +46,7 @@ public class NoAgentIT {
     weaver = new Weaver(
       INSTRUMENTATION,
       named(CLASS_NAME),
-      isMethod(),
+      named("add"),
       new AroundAdvice(
         null,
         (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
@@ -181,6 +180,55 @@ public class NoAgentIT {
         return returnValue;
       }
     );
+  }
+
+  @Test
+  public void staticMethodCall() throws IOException {
+    // Create weaver, directly registering a target class in the constructor
+    weaver = new Weaver(
+      INSTRUMENTATION,
+      is(Calculator.class),
+      named("greet"),
+      new AroundAdvice(
+        null,
+        (target, method, args, proceedMode, returnValue, throwable) -> "Hi world!"
+      ),
+      Calculator.class
+    );
+
+    // Registered class is affected by aspect
+    assertEquals("Hi world!", Calculator.greet("Sir"));
+
+    // After unregistering the transformer, the class is unaffected by the aspect
+    weaver.unregisterTransformer();
+    assertEquals("Hello Sir", Calculator.greet("Sir"));
+  }
+
+  @Test
+  public void perClassAdvice() throws IOException {
+    // Create weaver, directly registering a target class in the constructor
+    weaver = new Weaver(
+      INSTRUMENTATION,
+      is(Calculator.class),
+      isMethod(),
+      new AroundAdvice(
+        null,
+        (target, method, args, proceedMode, returnValue, throwable) ->
+          returnValue instanceof Integer
+            ? ((int) returnValue) * 11
+            : "Welcome, dear " + args[0]
+      ),
+      Calculator.class
+    );
+
+    // Registered class is affected by aspect, both for static and instance methods
+    assertEquals("Welcome, dear Sir", Calculator.greet("Sir"));
+    assertEquals(33, new Calculator().add(1, 2));
+
+    // After unregistering the transformer, the class is unaffected by the aspect
+    weaver.unregisterTransformer();
+    assertEquals("Hello Sir", Calculator.greet("Sir"));
+    assertEquals(3, new Calculator().add(1, 2));
   }
 
 }
