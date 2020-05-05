@@ -47,12 +47,12 @@
       <artifactId>byte-buddy-agent</artifactId>
     </dependency>
     <!-- For agent ad hoc attachment, e.g. via ByteBuddyAgent.install() -->
-<!--
-    <dependency>
-      <groupId>oracle.jdk</groupId>
-      <artifactId>tools</artifactId>
-    </dependency>
--->
+    <!--
+        <dependency>
+          <groupId>oracle.jdk</groupId>
+          <artifactId>tools</artifactId>
+        </dependency>
+    -->
 
   </dependencies>
 

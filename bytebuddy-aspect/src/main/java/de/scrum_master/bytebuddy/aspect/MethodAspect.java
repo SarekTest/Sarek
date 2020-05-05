@@ -9,10 +9,11 @@ import java.util.Map;
 
 import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAMIC;
 
-public abstract class Aspect {
+public abstract class MethodAspect {
 
   // TODO: What happens if more than one transformer matches the same instance or class?
-  public static final Map<Object, AroundAdvice> adviceRegistry = Collections.synchronizedMap(new HashMap<>());
+  // TODO: Try @Advice.Local for transferring additional state between before/after advices if necessary
+  public static final Map<Object, MethodAroundAdvice> adviceRegistry = Collections.synchronizedMap(new HashMap<>());
 
   @SuppressWarnings("UnusedAssignment")
   @OnMethodEnter(skipOn = OnDefaultValue.class)
@@ -22,7 +23,7 @@ public abstract class Aspect {
     @AllArguments(readOnly = false, typing = DYNAMIC) Object[] args
   ) {
     // Get advice for target object instance or target class
-    AroundAdvice advice = getAroundAdvice(target, method);
+    MethodAroundAdvice advice = getAroundAdvice(target, method);
 
     // If no advice is registered, proceed to target method normally
     if (advice == null)
@@ -31,7 +32,7 @@ public abstract class Aspect {
     // Copy 'args' array because ByteBuddy performs special bytecode manipulation on 'args'.
     // See also https://github.com/raphw/byte-buddy/issues/850#issuecomment-621387855.
     // The only way to make it back here for argument changes applied to the array in the delegate advice
-    // called by advice.shouldProceed() is to pass it a copy and then re-assign that copy back to 'args'.
+    // called by advice.before() is to pass it a copy and then re-assign that copy back to 'args'.
     Object[] argsCopy = new Object[args.length];
     System.arraycopy(args, 0, argsCopy, 0, args.length);
 
@@ -56,7 +57,7 @@ public abstract class Aspect {
     @Thrown(readOnly = false, typing = DYNAMIC) Throwable throwable
   ) {
     // Get advice for target object instance or target class
-    AroundAdvice advice = getAroundAdvice(target, method);
+    MethodAroundAdvice advice = getAroundAdvice(target, method);
 
     // If no advice is registered, just pass through result
     if (advice == null)
@@ -74,9 +75,9 @@ public abstract class Aspect {
   /**
    * Keep this method public because it must be callable from advice code woven into other classes
    */
-  public static AroundAdvice getAroundAdvice(Object target, Method method) {
+  public static MethodAroundAdvice getAroundAdvice(Object target, Method method) {
     // TODO: handle constructors
-    AroundAdvice advice = null;
+    MethodAroundAdvice advice = null;
     // Non-static method? -> search for instance advice
     if (target != null)
       advice = adviceRegistry.get(target);

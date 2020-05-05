@@ -1,6 +1,6 @@
 package de.scrum_master.bytebuddy.aspect;
 
-import de.scrum_master.app.Calculator;
+import de.scrum_master.app.UnderTest;
 import de.scrum_master.bytebuddy.ByteBuddyAspectAgent;
 import org.junit.After;
 import org.junit.Test;
@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
  * ('bytebuddy-aspect-agent') and 'bytebuddy-aspect' have been created. Just run 'mvn package' first. In IDEA
  * you can also edit the run configuration for this test or a group of tests and add a "before launch" action,
  * select "run Maven goal" and then add goal 'package'.
- *
+ * <p>
  * Furthermore, make sure add this to the Maven Failsafe condiguration:
  * <argLine>-javaagent:target/bytebuddy-aspect-agent-1.0-SNAPSHOT.jar</argLine>
  * Otherwise you will see a NoClassDefFoundError when running the tests for the bootstrap JRE classes because
@@ -37,11 +37,11 @@ public class CommandLineAgentIT {
 
   @Test
   public void weaveLoadedApplicationClass() throws IOException {
-    final String CLASS_NAME = "de.scrum_master.app.Calculator";
+    final String CLASS_NAME = "de.scrum_master.app.UnderTest";
 
     // Load application class
     assertFalse(isClassLoaded(CLASS_NAME));
-    Calculator calculator = new Calculator();
+    UnderTest calculator = new UnderTest();
     assertTrue(isClassLoaded(CLASS_NAME));
 
     // Create weaver, directly registering a target in the constructor
@@ -49,7 +49,7 @@ public class CommandLineAgentIT {
       INSTRUMENTATION,
       named(CLASS_NAME),
       isMethod(),
-      new AroundAdvice(
+      new MethodAroundAdvice(
         null,
         (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
       ),
@@ -58,7 +58,7 @@ public class CommandLineAgentIT {
 
     // Registered target is affected by aspect, unregistered one is not
     assertEquals(55, calculator.add(2, 3));
-    assertNotEquals(55, new Calculator().add(2, 3));
+    assertNotEquals(55, new UnderTest().add(2, 3));
 
     // After unregistering the transformer, the target is unaffected by the aspect
     weaver.unregisterTransformer();
@@ -77,7 +77,7 @@ public class CommandLineAgentIT {
       named(CLASS_NAME),
       named("toString"),
       // Skip target method and return fixed result -> a classical stub
-      new AroundAdvice(
+      new MethodAroundAdvice(
         (target, method, args) -> false,
         (target, method, args, proceedMode, returnValue, throwable) -> UUID_TEXT_STUB
       )
@@ -151,14 +151,14 @@ public class CommandLineAgentIT {
 
   /**
    * This is an example for a somewhat more complex aspect doing the following:
-   *   1. conditionally skip proceeding to target method
-   *   2. conditionally modify method argument before proceeding
-   *   3. catch exception thrown by target method and return a value instead
-   *   4. in case target method was not called (proceed), return special value
-   *   5. otherwise pass through return value from target method
+   * 1. conditionally skip proceeding to target method
+   * 2. conditionally modify method argument before proceeding
+   * 3. catch exception thrown by target method and return a value instead
+   * 4. in case target method was not called (proceed), return special value
+   * 5. otherwise pass through return value from target method
    */
-  private AroundAdvice replaceAllAdvice() {
-    return new AroundAdvice(
+  private MethodAroundAdvice replaceAllAdvice() {
+    return new MethodAroundAdvice(
       // Should proceed?
       (target, method, args) -> {
         String replacement = (String) args[1];

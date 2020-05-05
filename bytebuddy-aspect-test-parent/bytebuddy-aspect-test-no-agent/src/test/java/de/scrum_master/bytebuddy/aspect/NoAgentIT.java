@@ -1,13 +1,14 @@
 package de.scrum_master.bytebuddy.aspect;
 
-import de.scrum_master.app.Calculator;
 import de.scrum_master.app.StringWrapper;
+import de.scrum_master.app.UnderTest;
 import net.bytebuddy.agent.ByteBuddyAgent;
 import org.junit.After;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.util.Arrays;
 import java.util.UUID;
 
 import static de.scrum_master.testing.TestHelper.isClassLoaded;
@@ -36,10 +37,10 @@ public class NoAgentIT {
 
   @Test
   public void weaveLoadedApplicationClass() throws IOException {
-    final String CLASS_NAME = "de.scrum_master.app.Calculator";
+    final String CLASS_NAME = "de.scrum_master.app.UnderTest";
 
     // Load application class
-    Calculator calculator = new Calculator();
+    UnderTest calculator = new UnderTest();
     assertTrue(isClassLoaded(CLASS_NAME));
 
     // Create weaver, directly registering a target in the constructor
@@ -47,7 +48,7 @@ public class NoAgentIT {
       INSTRUMENTATION,
       named(CLASS_NAME),
       named("add"),
-      new AroundAdvice(
+      new MethodAroundAdvice(
         null,
         (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
       ),
@@ -56,7 +57,7 @@ public class NoAgentIT {
 
     // Registered target is affected by aspect, unregistered one is not
     assertEquals(55, calculator.add(2, 3));
-    assertNotEquals(55, new Calculator().add(2, 3));
+    assertNotEquals(55, new UnderTest().add(2, 3));
 
     // After unregistering the transformer, the target is unaffected by the aspect
     weaver.unregisterTransformer();
@@ -74,7 +75,7 @@ public class NoAgentIT {
       named(CLASS_NAME),
       named("toString"),
       // No-op advice just passing through results and exceptions
-      new AroundAdvice(
+      new MethodAroundAdvice(
         (target, method, args) -> false,
         (target, method, args, proceedMode, returnValue, throwable) -> false
       )
@@ -102,7 +103,7 @@ public class NoAgentIT {
       named(CLASS_NAME),
       named("replaceAll").and(takesArguments(String.class, String.class)),
       // No-op advice just passing through results and exceptions
-      new AroundAdvice(
+      new MethodAroundAdvice(
         (target, method, args) -> false,
         (target, method, args, proceedMode, returnValue, throwable) -> false
       )
@@ -159,8 +160,8 @@ public class NoAgentIT {
    * 4. in case target method was not called (proceed), return special value
    * 5. otherwise pass through return value from target method
    */
-  private AroundAdvice replaceAllAdvice() {
-    return new AroundAdvice(
+  private MethodAroundAdvice replaceAllAdvice() {
+    return new MethodAroundAdvice(
       // Should proceed?
       (target, method, args) -> {
         String replacement = (String) args[1];
@@ -187,21 +188,21 @@ public class NoAgentIT {
     // Create weaver, directly registering a target class in the constructor
     weaver = new Weaver(
       INSTRUMENTATION,
-      is(Calculator.class),
+      is(UnderTest.class),
       named("greet"),
-      new AroundAdvice(
+      new MethodAroundAdvice(
         null,
         (target, method, args, proceedMode, returnValue, throwable) -> "Hi world!"
       ),
-      Calculator.class
+      UnderTest.class
     );
 
     // Registered class is affected by aspect
-    assertEquals("Hi world!", Calculator.greet("Sir"));
+    assertEquals("Hi world!", UnderTest.greet("Sir"));
 
     // After unregistering the transformer, the class is unaffected by the aspect
     weaver.unregisterTransformer();
-    assertEquals("Hello Sir", Calculator.greet("Sir"));
+    assertEquals("Hello Sir", UnderTest.greet("Sir"));
   }
 
   @Test
@@ -209,26 +210,56 @@ public class NoAgentIT {
     // Create weaver, directly registering a target class in the constructor
     weaver = new Weaver(
       INSTRUMENTATION,
-      is(Calculator.class),
+      is(UnderTest.class),
       isMethod(),
-      new AroundAdvice(
+      new MethodAroundAdvice(
         null,
         (target, method, args, proceedMode, returnValue, throwable) ->
           returnValue instanceof Integer
             ? ((int) returnValue) * 11
             : "Welcome, dear " + args[0]
       ),
-      Calculator.class
+      UnderTest.class
     );
 
     // Registered class is affected by aspect, both for static and instance methods
-    assertEquals("Welcome, dear Sir", Calculator.greet("Sir"));
-    assertEquals(33, new Calculator().add(1, 2));
+    assertEquals("Welcome, dear Sir", UnderTest.greet("Sir"));
+    assertEquals(33, new UnderTest().add(1, 2));
 
     // After unregistering the transformer, the class is unaffected by the aspect
     weaver.unregisterTransformer();
-    assertEquals("Hello Sir", Calculator.greet("Sir"));
-    assertEquals(3, new Calculator().add(1, 2));
+    assertEquals("Hello Sir", UnderTest.greet("Sir"));
+    assertEquals(3, new UnderTest().add(1, 2));
+  }
+
+  @Test
+  public void constructorAdvice() throws IOException {
+    // Create weaver, directly registering a target class in the constructor
+    final ThreadLocal<Integer> callCount = ThreadLocal.withInitial(() -> 0);
+    weaver = new Weaver(
+      INSTRUMENTATION,
+      is(UnderTest.class),
+      takesArguments(String.class),
+      new ConstructorAroundAdvice(
+        (method, args) -> {
+          args[0] = "ADVISED";
+          callCount.set(callCount.get() + 1);
+        },
+        (target, method, args) ->
+          System.out.println("target = " + target + ", method = " + method + ", args = " + Arrays.deepToString(args))
+      ),
+      UnderTest.class
+    );
+
+    // Registered class is affected by aspect
+    assertEquals("ADVISED", new UnderTest("whatever").getName());
+    assertEquals("ADVISED", new UnderTest("whenever").getName());
+    assertEquals(2, (int) callCount.get());
+
+    // After unregistering the transformer, the class is unaffected by the aspect
+    weaver.unregisterTransformer();
+    assertEquals("whatever", new UnderTest("whatever").getName());
+    assertEquals(2, (int) callCount.get());
   }
 
 }
