@@ -36,10 +36,14 @@ public class Weaver {
   private final Junction<TypeDescription> typeMatcher;
   private final Junction<MethodDescription> methodMatcher;
   private final ResettableClassFileTransformer transformer;
-  private final AroundAdvice<? extends Executable> advice;
-  private final boolean forConstructor;
+  private final AroundAdvice<?> advice;
+  private final AdviceType adviceType;
   // TODO: maybe replace by a Set<WeakReference>
   private final Set<Object> targets = Collections.synchronizedSet(new HashSet<>());
+
+  public enum AdviceType {
+    METHOD, CONSTRUCTOR, STATIC_INITIALISER
+  }
 
   public Weaver(
     Instrumentation instrumentation,
@@ -48,8 +52,7 @@ public class Weaver {
     MethodAroundAdvice advice,
     Object... targets
   ) throws IllegalArgumentException, IOException {
-
-    this(instrumentation, typeMatcher, methodMatcher, false, advice, targets);
+    this(instrumentation, typeMatcher, methodMatcher, AdviceType.METHOD, advice, targets);
   }
 
   public Weaver(
@@ -59,14 +62,14 @@ public class Weaver {
     ConstructorAroundAdvice advice,
     Object... targets
   ) throws IllegalArgumentException, IOException {
-    this(instrumentation, typeMatcher, methodMatcher, true, advice, targets);
+    this(instrumentation, typeMatcher, methodMatcher, AdviceType.CONSTRUCTOR, advice, targets);
   }
 
   protected Weaver(
     Instrumentation instrumentation,
     Junction<TypeDescription> typeMatcher,
     Junction<MethodDescription> methodMatcher,
-    boolean forConstructor,
+    AdviceType adviceType,
     AroundAdvice<? extends Executable> advice,
     Object... targets
   ) throws IllegalArgumentException, IOException {
@@ -75,7 +78,7 @@ public class Weaver {
     this.instrumentation = instrumentation;
     this.typeMatcher = typeMatcher == null ? any() : typeMatcher;
     this.methodMatcher = methodMatcher == null ? any() : methodMatcher;
-    this.forConstructor = forConstructor;
+    this.adviceType = adviceType;
     if (advice == null)
       throw new IllegalArgumentException("advice must not be null");
     this.advice = advice;
@@ -87,12 +90,7 @@ public class Weaver {
   }
 
   public Weaver addTarget(Object target) throws IllegalArgumentException {
-    Map<Object, AroundAdvice<? extends Executable>> adviceRegistry =
-      (Map<Object, AroundAdvice<? extends Executable>>) (
-        forConstructor
-          ? ConstructorAspect.adviceRegistry
-          : MethodAspect.adviceRegistry
-      );
+    Map<Object, AroundAdvice<?>> adviceRegistry = (Map<Object, AroundAdvice<?>>) getAdviceRegistry();
     synchronized (adviceRegistry) {
       if (adviceRegistry.get(target) != null)
         throw new IllegalArgumentException("target is already registered");
@@ -103,17 +101,23 @@ public class Weaver {
   }
 
   public Weaver removeTarget(Object target) {
-    Map<Object, AroundAdvice<? extends Executable>> adviceRegistry =
-      (Map<Object, AroundAdvice<? extends Executable>>) (
-        forConstructor
-          ? ConstructorAspect.adviceRegistry
-          : MethodAspect.adviceRegistry
-      );
+    Map<Object, AroundAdvice<?>> adviceRegistry = (Map<Object, AroundAdvice<?>>) getAdviceRegistry();
     synchronized (adviceRegistry) {
       adviceRegistry.remove(target);
       targets.remove(target);
     }
     return this;
+  }
+
+  protected Map<Object, ? extends AroundAdvice<?>> getAdviceRegistry() {
+    switch (adviceType) {
+      case CONSTRUCTOR:
+        return ConstructorAspect.adviceRegistry;
+      case STATIC_INITIALISER:
+        return null;  // TODO: return StaticInitialiserAspect.adviceRegistry;
+      default:
+        return MethodAspect.adviceRegistry;
+    }
   }
 
   protected ResettableClassFileTransformer registerTransformer() throws IOException {
@@ -147,8 +151,8 @@ public class Weaver {
       // Match type + method, then bind to advice
       .type(typeMatcher)
       .transform((builder, typeDescription, classLoader, module) ->
-        builder.visit((forConstructor ? ADVICE_TO_CONSTRUCTOR_ASPECT : ADVICE_TO_ASPECT).on(
-          methodMatcher.and(forConstructor ? isConstructor() : isMethod()))
+        builder.visit((adviceType.equals(AdviceType.CONSTRUCTOR) ? ADVICE_TO_CONSTRUCTOR_ASPECT : ADVICE_TO_ASPECT).on(
+          methodMatcher.and(adviceType.equals(AdviceType.CONSTRUCTOR) ? isConstructor() : isMethod()))
         )
       );
   }
