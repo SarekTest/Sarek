@@ -8,7 +8,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
-import java.util.Arrays;
 import java.util.UUID;
 
 import static de.scrum_master.testing.TestHelper.isClassLoaded;
@@ -40,7 +39,7 @@ public class NoAgentIT {
     final String CLASS_NAME = "de.scrum_master.app.UnderTest";
 
     // Load application class
-    UnderTest calculator = new UnderTest();
+    UnderTest underTest = new UnderTest();
     assertTrue(isClassLoaded(CLASS_NAME));
 
     // Create weaver, directly registering a target in the constructor
@@ -52,16 +51,16 @@ public class NoAgentIT {
         null,
         (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
       ),
-      calculator
+      underTest
     );
 
     // Registered target is affected by aspect, unregistered one is not
-    assertEquals(55, calculator.add(2, 3));
+    assertEquals(55, underTest.add(2, 3));
     assertNotEquals(55, new UnderTest().add(2, 3));
 
     // After unregistering the transformer, the target is unaffected by the aspect
     weaver.unregisterTransformer();
-    assertEquals(15, calculator.add(7, 8));
+    assertEquals(15, underTest.add(7, 8));
   }
 
   @Test
@@ -236,17 +235,21 @@ public class NoAgentIT {
   public void constructorAdvice() throws IOException {
     // Create weaver, directly registering a target class in the constructor
     final ThreadLocal<Integer> callCount = ThreadLocal.withInitial(() -> 0);
+
+    // Before registering the transformer, the class is unaffected by the aspect
+    assertEquals("whatever", new UnderTest("whatever").getName());
+    assertEquals(0, (int) callCount.get());
+
     weaver = new Weaver(
       INSTRUMENTATION,
       is(UnderTest.class),
       takesArguments(String.class),
       new ConstructorAroundAdvice(
-        (method, args) -> {
+        (constructor, args) -> {
           args[0] = "ADVISED";
           callCount.set(callCount.get() + 1);
         },
-        (target, method, args) ->
-          System.out.println("target = " + target + ", method = " + method + ", args = " + Arrays.deepToString(args))
+        null
       ),
       UnderTest.class
     );
@@ -260,6 +263,74 @@ public class NoAgentIT {
     weaver.unregisterTransformer();
     assertEquals("whatever", new UnderTest("whatever").getName());
     assertEquals(2, (int) callCount.get());
+  }
+
+  @Test
+  public void multipleWeavers() throws IOException {
+    UnderTest underTest = new UnderTest();
+    weaver = new Weaver(
+      INSTRUMENTATION,
+      is(UnderTest.class),
+      named("add"),
+      new MethodAroundAdvice(null, (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11),
+      underTest
+    );
+
+    // Weaver is active for registered instance
+    assertEquals(55, underTest.add(2, 3));
+
+    Weaver weaver2 = new Weaver(
+      INSTRUMENTATION,
+      is(UnderTest.class),
+      named("greet"),
+      new MethodAroundAdvice(null, (target, method, args, proceedMode, returnValue, throwable) -> "Hi world!"),
+      UnderTest.class
+    );
+
+    // Both weavers are active because the second one targets a static method and thus is registered under the class
+    assertEquals(55, underTest.add(2, 3));
+    assertEquals("Hi world!", UnderTest.greet("Sir"));
+
+    // Cannot create a weaver, trying to register an already registered target to it from the constructor
+    assertThrows(
+      IllegalArgumentException.class,
+      () -> new Weaver(INSTRUMENTATION, is(UnderTest.class), null, new MethodAroundAdvice(null, null), underTest)
+    );
+
+    // Cannot create a weaver, trying to register an already registered target to it from the constructor
+    assertThrows(
+      IllegalArgumentException.class,
+      () -> new Weaver(INSTRUMENTATION, is(UnderTest.class), null, new MethodAroundAdvice(null, null), UnderTest.class)
+    );
+
+    // Both weavers are active because the second one targets a static method and thus is registered under the class
+    assertEquals(55, underTest.add(2, 3));
+    assertEquals("Hi world!", UnderTest.greet("Sir"));
+
+    //After unregistering one target, it can be registered on another weaver
+    weaver2.removeTarget(UnderTest.class);
+    weaver.addTarget(UnderTest.class);
+
+    // Now the aspect advising 'greet' is global because the whole class has been registered
+    assertEquals(55, underTest.add(2, 3));
+    assertEquals(99, underTest.add(4, 5));
+
+    // Another advice type can be registered for the same class (method vs. constructor)
+    Weaver weaver3 = new Weaver(
+      INSTRUMENTATION,
+      is(UnderTest.class),
+      takesArguments(String.class),
+      new ConstructorAroundAdvice((constructor, args) -> args[0] = "ADVISED", null),
+      UnderTest.class
+    );
+
+    // Now both class-global aspects are active at the same time
+    assertEquals(99, underTest.add(4, 5));
+    assertEquals("ADVISED", new UnderTest("whatever").getName());
+
+    // House-keeping: unregister transformers which are not taken care of by the @After method
+    weaver2.unregisterTransformer();
+    weaver3.unregisterTransformer();
   }
 
 }
