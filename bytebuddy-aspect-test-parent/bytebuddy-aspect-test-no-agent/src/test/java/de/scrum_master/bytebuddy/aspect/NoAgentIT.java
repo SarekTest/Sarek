@@ -19,8 +19,6 @@ import static org.junit.Assert.*;
  * So we do not need a Java agent here.
  * <p>
  * TODO: multiple advices on same object
- * TODO: static methods
- * TODO: global mocks
  * TODO: inject ByteBuddy + aspect framework into boot classloader in order to use non-loaded JRE classes
  */
 public class NoAgentIT {
@@ -294,13 +292,13 @@ public class NoAgentIT {
     // Cannot create a weaver, trying to register an already registered target to it from the constructor
     assertThrows(
       IllegalArgumentException.class,
-      () -> new Weaver(INSTRUMENTATION, is(UnderTest.class), null, new MethodAroundAdvice(null, null), underTest)
+      () -> new Weaver(INSTRUMENTATION, is(UnderTest.class), any(), new MethodAroundAdvice(null, null), underTest)
     );
 
     // Cannot create a weaver, trying to register an already registered target to it from the constructor
     assertThrows(
       IllegalArgumentException.class,
-      () -> new Weaver(INSTRUMENTATION, is(UnderTest.class), null, new MethodAroundAdvice(null, null), UnderTest.class)
+      () -> new Weaver(INSTRUMENTATION, is(UnderTest.class), any(), new MethodAroundAdvice(null, null), UnderTest.class)
     );
 
     // Both weavers are active because the second one targets a static method and thus is registered under the class

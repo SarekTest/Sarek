@@ -10,7 +10,6 @@ import net.bytebuddy.matcher.ElementMatcher.Junction;
 
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
-import java.lang.reflect.Executable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -20,14 +19,7 @@ import static net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy.RETR
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public class Weaver {
-  private static final Advice ADVICE_TO_ASPECT = Advice.to(
-    MethodAspect.class,
-    ClassFileLocator.ForClassLoader.ofSystemLoader()
-  );
-  private static final Advice ADVICE_TO_CONSTRUCTOR_ASPECT = Advice.to(
-    ConstructorAspect.class,
-    ClassFileLocator.ForClassLoader.ofSystemLoader()
-  );
+  private static final ClassFileLocator CLASS_FILE_LOCATOR = ClassFileLocator.ForClassLoader.ofSystemLoader();
 
   // Do not use ByteBuddyAgent.install() in this class but get an Instrumentation instance injected.
   // Otherwise bytebuddy-agent.jar would have to be on the boot classpath. To put bytebuddy.jar there
@@ -42,7 +34,34 @@ public class Weaver {
   private final Set<Object> targets = Collections.synchronizedSet(new HashSet<>());
 
   public enum AdviceType {
-    METHOD, CONSTRUCTOR, STATIC_INITIALISER
+    METHOD(
+      Advice.to(MethodAspect.class, CLASS_FILE_LOCATOR),
+      isMethod()
+    ),
+    CONSTRUCTOR(
+      Advice.to(ConstructorAspect.class, CLASS_FILE_LOCATOR),
+      isConstructor()
+    ),
+    STATIC_INITIALISER(
+      Advice.to(StaticInitialiserAspect.class, CLASS_FILE_LOCATOR),
+      isTypeInitializer()
+    );
+
+    private final Advice advice;
+    private final Junction<MethodDescription> methodType;
+
+    AdviceType(Advice advice, Junction<MethodDescription> methodType) {
+      this.advice = advice;
+      this.methodType = methodType;
+    }
+
+    public Advice getAdvice() {
+      return advice;
+    }
+
+    public Junction<MethodDescription> getMethodType() {
+      return methodType;
+    }
   }
 
   public Weaver(
@@ -65,12 +84,21 @@ public class Weaver {
     this(instrumentation, typeMatcher, methodMatcher, AdviceType.CONSTRUCTOR, advice, targets);
   }
 
+  public Weaver(
+    Instrumentation instrumentation,
+    Junction<TypeDescription> typeMatcher,
+    StaticInitialiserAroundAdvice advice,
+    Object... targets
+  ) throws IllegalArgumentException, IOException {
+    this(instrumentation, typeMatcher, any(), AdviceType.STATIC_INITIALISER, advice, targets);
+  }
+
   protected Weaver(
     Instrumentation instrumentation,
     Junction<TypeDescription> typeMatcher,
     Junction<MethodDescription> methodMatcher,
     AdviceType adviceType,
-    AroundAdvice<? extends Executable> advice,
+    AroundAdvice<?> advice,
     Object... targets
   ) throws IllegalArgumentException, IOException {
     if (instrumentation == null)
@@ -114,7 +142,7 @@ public class Weaver {
       case CONSTRUCTOR:
         return ConstructorAspect.adviceRegistry;
       case STATIC_INITIALISER:
-        return null;  // TODO: return StaticInitialiserAspect.adviceRegistry;
+        return StaticInitialiserAspect.adviceRegistry;
       default:
         return MethodAspect.adviceRegistry;
     }
@@ -151,8 +179,9 @@ public class Weaver {
       // Match type + method, then bind to advice
       .type(typeMatcher)
       .transform((builder, typeDescription, classLoader, module) ->
-        builder.visit((adviceType.equals(AdviceType.CONSTRUCTOR) ? ADVICE_TO_CONSTRUCTOR_ASPECT : ADVICE_TO_ASPECT).on(
-          methodMatcher.and(adviceType.equals(AdviceType.CONSTRUCTOR) ? isConstructor() : isMethod()))
+        builder.visit(
+          adviceType.getAdvice()
+            .on(adviceType.getMethodType().and(methodMatcher))
         )
       );
   }

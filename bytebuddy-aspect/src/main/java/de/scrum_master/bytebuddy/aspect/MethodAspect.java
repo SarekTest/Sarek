@@ -76,7 +76,6 @@ public abstract class MethodAspect {
    * Keep this method public because it must be callable from advice code woven into other classes
    */
   public static MethodAroundAdvice getAroundAdvice(Object target, Method method) {
-    // TODO: handle constructors
     MethodAroundAdvice advice = null;
     // Non-static method? -> search for instance advice
     if (target != null)

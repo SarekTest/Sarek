@@ -1,10 +1,13 @@
 package de.scrum_master.app;
 
 public class UnderTest {
+  public static String staticText = "default";
+
   private String name;
 
   static {
     System.out.println("static initialiser");
+    staticText = "static initialiser";
   }
 
   public UnderTest() {
