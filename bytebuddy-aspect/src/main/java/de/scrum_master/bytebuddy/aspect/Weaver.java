@@ -76,12 +76,14 @@ public class Weaver {
     this.typeMatcher = typeMatcher == null ? any() : typeMatcher;
     this.methodMatcher = methodMatcher == null ? any() : methodMatcher;
     this.forConstructor = forConstructor;
-    this.transformer = registerTransformer();
     if (advice == null)
       throw new IllegalArgumentException("advice must not be null");
     this.advice = advice;
     for (Object target : targets)
       addTarget(target);
+    // Register transformer last so as not to have a dangling active transformer if an exception occurs
+    // in the constructor, e.g. because trying to register already registered targets
+    this.transformer = registerTransformer();
   }
 
   public Weaver addTarget(Object target) throws IllegalArgumentException {
