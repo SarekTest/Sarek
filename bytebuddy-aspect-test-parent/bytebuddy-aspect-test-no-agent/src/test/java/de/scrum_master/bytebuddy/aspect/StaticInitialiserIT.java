@@ -8,8 +8,10 @@ import org.junit.Test;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 
+import static de.scrum_master.testing.TestHelper.isClassLoaded;
 import static net.bytebuddy.matcher.ElementMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * This test checks features which do not involve bootloader classes.
@@ -28,6 +30,12 @@ public class StaticInitialiserIT {
 
   @Test
   public void staticInitialiser() throws IOException {
+    assertFalse(
+      "This test needs to run in its own JVM, otherwise the static initialiser " +
+        "for the class under test could have run before already",
+      isClassLoaded("de.scrum_master.app.UnderTest")
+    );
+
     // Create weaver, directly registering a target class in the constructor
     weaver = new Weaver(
       INSTRUMENTATION,
@@ -43,12 +51,7 @@ public class StaticInitialiserIT {
     );
 
     // Registered class is affected by aspect
-    assertEquals(
-      "This test needs to run in its own JVM, otherwise the static initialiser " +
-        "for the class under test could have run before already",
-      "aspect override",
-      UnderTest.staticText
-    );
+    assertEquals("aspect override", UnderTest.staticText);
   }
 
 }
