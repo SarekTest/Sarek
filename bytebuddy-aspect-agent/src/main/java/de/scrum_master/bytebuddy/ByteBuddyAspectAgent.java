@@ -10,22 +10,32 @@ import java.util.jar.JarFile;
 
 public class ByteBuddyAspectAgent {
   private static boolean active;
+  private static boolean removeFinalActive;
   private static Instrumentation instrumentation;
 
-  public static void agentmain(String options, Instrumentation instr)
-    throws IOException, URISyntaxException {
+  public static void agentmain(String options, Instrumentation instr) throws Exception {
     premain(options, instr);
   }
 
-  public static void premain(String options, Instrumentation instr)
-    throws IOException, URISyntaxException {
-    instr.appendToBootstrapClassLoaderSearch(findJarFile("de/scrum_master/bytebuddy/aspect/Aspect.class"));
+  public static void premain(String options, Instrumentation instr) throws Exception {
+    instr.appendToBootstrapClassLoaderSearch(findJarFile("de/scrum_master/bytebuddy/aspect/Weaver.class"));
     instr.appendToBootstrapClassLoaderSearch(findJarFile("net/bytebuddy/agent/builder/AgentBuilder.class"));
+
+    // TODO: Why is this this necessary in order to avoid a ClassCircularityError in ByteBuddy?
+    ClassLoader
+      .getSystemClassLoader()
+      .getParent()
+      .loadClass("java.lang.reflect.InvocationTargetException");
+
     instrumentation = instr;
     active = true;
+    // TODO: document how to use '-javaagent:my.jar=removeFinal' -> Javadoc, read-me
+    removeFinalActive = options != null && options.trim().toLowerCase().contains("removefinal");
+    attachRemoveFinalTransformer();
   }
 
   // TODO: optionally pack both JARs into agent JAR, unpack and attach if not found in file system or on classpath
+
   private static JarFile findJarFile(String ressourcePath) throws IOException, URISyntaxException {
     String resourceURL = ClassLoader
       .getSystemResource(ressourcePath)
@@ -54,11 +64,23 @@ public class ByteBuddyAspectAgent {
     return new JarFile(file);
   }
 
+  private static void attachRemoveFinalTransformer() throws ReflectiveOperationException {
+    Class
+      .forName("de.scrum_master.bytebuddy.RemoveFinalTransformer")
+      .getDeclaredMethod("install", Instrumentation.class)
+      .invoke(null, instrumentation);
+  }
+
   public static boolean isActive() {
     return active;
+  }
+
+  public static boolean isRemoveFinalActive() {
+    return removeFinalActive;
   }
 
   public static Instrumentation getInstrumentation() {
     return instrumentation;
   }
+
 }
