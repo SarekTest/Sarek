@@ -5,8 +5,11 @@ import de.scrum_master.bytebuddy.ByteBuddyAspectAgent;
 import org.junit.After;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.UUID;
 
 import static de.scrum_master.testing.TestHelper.isClassLoaded;
@@ -178,6 +181,44 @@ public class CommandLineAgentIT {
         return returnValue;
       }
     );
+  }
+
+  @Test
+  public void createFile() throws IOException, URISyntaxException {
+    final ThreadLocal<Integer> callCount = ThreadLocal.withInitial(() -> 0);
+
+    // Before registering the transformer, the class is unaffected by the aspect
+    assertEquals("foo", new File("foo").getName());
+    assertEquals(0, (int) callCount.get());
+
+    // Count all File constructor calls, modify first argument if it is a String
+    weaver = new Weaver(
+      INSTRUMENTATION,
+      is(File.class),
+      any(),
+      new ConstructorAroundAdvice(
+        (constructor, args) -> {
+          if (args[0] instanceof String)
+            args[0] = "ADVISED";
+          callCount.set(callCount.get() + 1);
+        },
+        null
+      ),
+      File.class
+    );
+
+    // First argument is a String -> the aspect modifies it + increments the call counter
+    assertEquals("ADVISED", new File("foo").getName());
+    assertEquals("ADVISED", new File("bar").getName());
+    assertEquals("ADVISED", new File("parent", "child").getParent());
+    // First argument is not a String -> the aspect only increments the call counter
+    assertEquals("bar", new File(new URI("file:///foo/bar")).getName());
+    assertEquals(4, (int) callCount.get());
+
+    // After unregistering the transformer, the class is unaffected by the aspect
+    weaver.unregisterTransformer();
+    assertEquals("foo", new File("foo").getName());
+    assertEquals(4, (int) callCount.get());
   }
 
 }
