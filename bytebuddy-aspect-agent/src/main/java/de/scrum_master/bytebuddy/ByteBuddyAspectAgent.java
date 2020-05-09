@@ -31,7 +31,8 @@ public class ByteBuddyAspectAgent {
     active = true;
     // TODO: document how to use '-javaagent:my.jar=removeFinal' -> Javadoc, read-me
     removeFinalActive = options != null && options.trim().toLowerCase().contains("removefinal");
-    attachRemoveFinalTransformer();
+    if (removeFinalActive)
+      attachRemoveFinalTransformer();
   }
 
   // TODO: optionally pack both JARs into agent JAR, unpack and attach if not found in file system or on classpath
