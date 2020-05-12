@@ -25,7 +25,7 @@ import static org.junit.Assert.*;
  * Furthermore, make sure add this to the Maven Failsafe condiguration:
  * <argLine>-javaagent:target/bytebuddy-aspect-agent-1.0-SNAPSHOT.jar</argLine>
  * Otherwise you will see a NoClassDefFoundError when running the tests for the bootstrap JRE classes because
- * boot classloader injection for the Java agent does not work as expected.
+ * boot class loader injection for the Java agent does not work as expected.
  */
 public class CommandLineAgentIT {
   private static final Instrumentation INSTRUMENTATION = ByteBuddyAspectAgent.getInstrumentation();
@@ -42,30 +42,33 @@ public class CommandLineAgentIT {
   public void weaveLoadedApplicationClass() throws IOException {
     final String CLASS_NAME = "de.scrum_master.app.UnderTest";
 
-    // Load application class
-    assertFalse(isClassLoaded(CLASS_NAME));
-    UnderTest calculator = new UnderTest();
+    // Create application class instance
+    UnderTest underTest = new UnderTest();
     assertTrue(isClassLoaded(CLASS_NAME));
 
     // Create weaver, directly registering a target in the constructor
     weaver = new Weaver(
       INSTRUMENTATION,
       named(CLASS_NAME),
-      isMethod(),
+      isMethod().and(not(named("greet"))),
       new MethodAroundAdvice(
         null,
         (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
       ),
-      calculator
+      underTest
     );
 
     // Registered target is affected by aspect, unregistered one is not
-    assertEquals(55, calculator.add(2, 3));
+    assertEquals(55, underTest.add(2, 3));
     assertNotEquals(55, new UnderTest().add(2, 3));
+
+    // Matcher too broad (all methods of target class) + sloppy advice implementation
+    // (assuming specific parameter types) -> runtime exception
+    assertThrows(ClassCastException.class, underTest::getName);
 
     // After unregistering the transformer, the target is unaffected by the aspect
     weaver.unregisterTransformer();
-    assertEquals(15, calculator.add(7, 8));
+    assertEquals(15, underTest.add(7, 8));
   }
 
   @Test

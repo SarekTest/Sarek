@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
  * So we do not need a Java agent here.
  * <p>
  * TODO: multiple advices on same object
- * TODO: inject ByteBuddy + aspect framework into boot classloader in order to use non-loaded JRE classes
+ * TODO: inject ByteBuddy + aspect framework into boot class loader in order to use non-loaded JRE classes
  */
 public class NoAgentIT {
   private static final Instrumentation INSTRUMENTATION = ByteBuddyAgent.install();
@@ -84,8 +84,8 @@ public class NoAgentIT {
 
     // Even though no target instance has been registered on the weaver, the aspect runs in order to check
     // if the advice should fire. But in order to do that, the aspect classes need to exist in the target
-    // class' classloader, which in this case they do not because the test runs without the Java agent
-    // injecting them into the boot classloader.
+    // class' class loader, which in this case they do not because the test runs without the Java agent
+    // injecting them into the boot class loader.
     assertThrows(NoClassDefFoundError.class, uuid::toString);
   }
 
@@ -108,8 +108,8 @@ public class NoAgentIT {
 
     // Even though no target instance has been registered on the weaver, the aspect runs in order to check
     // if the advice should fire. But in order to do that, the aspect classes need to exist in the target
-    // class' classloader, which in this case they do not because the test runs without the Java agent
-    // injecting them into the boot classloader.
+    // class' class loader, which in this case they do not because the test runs without the Java agent
+    // injecting them into the boot class loader.
     assertThrows(NoClassDefFoundError.class, () -> "uuid".replaceAll("foo", "bar"));
   }
 

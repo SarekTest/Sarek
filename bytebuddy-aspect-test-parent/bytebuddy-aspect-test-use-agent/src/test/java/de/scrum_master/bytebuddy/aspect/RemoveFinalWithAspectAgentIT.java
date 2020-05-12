@@ -20,7 +20,7 @@ import static org.junit.Assert.assertFalse;
  * Furthermore, make sure add this to the Maven Failsafe condiguration:
  * <argLine>-javaagent:target/bytebuddy-aspect-agent-1.0-SNAPSHOT.jar</argLine>
  * Otherwise you will see a NoClassDefFoundError when running the tests for the bootstrap JRE classes because
- * boot classloader injection for the Java agent does not work as expected.
+ * boot class loader injection for the Java agent does not work as expected.
  */
 public class RemoveFinalWithAspectAgentIT {
   private static final Instrumentation INSTRUMENTATION = ByteBuddyAspectAgent.getInstrumentation();

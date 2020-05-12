@@ -11,7 +11,10 @@ import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAM
 
 public abstract class ConstructorAspect {
 
-  // TODO: What happens if more than one transformer matches the same instance or class?
+  // TODO: What happens if more than one transformer matches the same class?
+  //       Idea: enable class to register Constructor objects as keys in adviceRegistry.
+  //       This would allow to register multiple ConstructorAroundAdvices per class and
+  //       make a per-constructor mocking/stubbing scheme easy to implement.
   // TODO: Try @Advice.Local for transferring additional state between before/after advices if necessary
   public static final Map<Object, ConstructorAroundAdvice> adviceRegistry = Collections.synchronizedMap(new HashMap<>());
 
@@ -22,6 +25,7 @@ public abstract class ConstructorAspect {
     @AllArguments(readOnly = false, typing = DYNAMIC) Object[] args
   ) {
     // Get advice for target object instance or target class
+    // TODO: use @Advice.Local in order to communicate advice to 'after' method instead of a 2nd lookup
     ConstructorAroundAdvice advice = getAroundAdvice(constructor);
 
     // If no advice is registered, proceed to target method normally
@@ -32,6 +36,9 @@ public abstract class ConstructorAspect {
     // See also https://github.com/raphw/byte-buddy/issues/850#issuecomment-621387855.
     // The only way to make it back here for argument changes applied to the array in the delegate advice
     // called by advice.before() is to pass it a copy and then re-assign that copy back to 'args'.
+    // TODO: https://github.com/raphw/byte-buddy/issues/850 has been fixed, so replace this by
+    //       Object[] argsCopy = Arrays.copyOf(args, args.length);
+    //       after ByteBuddy 1.10.11 has been released
     Object[] argsCopy = new Object[args.length];
     System.arraycopy(args, 0, argsCopy, 0, args.length);
 
@@ -63,11 +70,11 @@ public abstract class ConstructorAspect {
   /**
    * Keep this method public because it must be callable from advice code woven into other classes
    *
-   * @param method
+   * @param constructor
    * @return
    */
-  public static ConstructorAroundAdvice getAroundAdvice(Constructor method) {
-    return adviceRegistry.get(method.getDeclaringClass());
+  public static ConstructorAroundAdvice getAroundAdvice(Constructor constructor) {
+    return adviceRegistry.get(constructor.getDeclaringClass());
   }
 
 }

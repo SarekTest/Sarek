@@ -41,6 +41,7 @@ public abstract class StaticInitialiserAspect {
   ) throws ClassNotFoundException {
     // Get advice for target class
     Class<?> targetClass = toClass(staticInitialiserClassName);
+    // TODO: use @Advice.Local in order to communicate advice to 'after' method instead of a 2nd lookup
     StaticInitialiserAroundAdvice advice = getAroundAdvice(targetClass);
 
     // If no advice is registered, just pass through result
