@@ -18,8 +18,10 @@ public class ByteBuddyAspectAgent {
   }
 
   public static void premain(String options, Instrumentation instr) throws Exception {
-    instr.appendToBootstrapClassLoaderSearch(findJarFile("de/scrum_master/bytebuddy/aspect/Weaver.class"));
-    instr.appendToBootstrapClassLoaderSearch(findJarFile("net/bytebuddy/agent/builder/AgentBuilder.class"));
+    File transformerJar = findJarFile("de/scrum_master/bytebuddy/aspect/Weaver.class");
+    File bytebuddyJar = findJarFile("net/bytebuddy/agent/builder/AgentBuilder.class");
+    instr.appendToBootstrapClassLoaderSearch(new JarFile(transformerJar));
+    instr.appendToBootstrapClassLoaderSearch(new JarFile(bytebuddyJar));
 
     // TODO: Why is this this necessary in order to avoid a ClassCircularityError in ByteBuddy?
     ClassLoader
@@ -32,12 +34,12 @@ public class ByteBuddyAspectAgent {
     // TODO: document how to use '-javaagent:my.jar=removeFinal' -> Javadoc, read-me
     removeFinalActive = options != null && options.trim().toLowerCase().contains("removefinal");
     if (removeFinalActive)
-      attachRemoveFinalTransformer();
+      attachRemoveFinalTransformer(transformerJar, bytebuddyJar);
   }
 
   // TODO: optionally pack both JARs into agent JAR, unpack and attach if not found in file system or on classpath
 
-  private static JarFile findJarFile(String ressourcePath) throws IOException, URISyntaxException {
+  private static File findJarFile(String ressourcePath) throws IOException, URISyntaxException {
     String resourceURL = ClassLoader
       .getSystemResource(ressourcePath)
       .getPath()
@@ -62,14 +64,14 @@ public class ByteBuddyAspectAgent {
       file = new File(new URL(resourceURL).toURI());
     }
 //    System.out.println("Found resource JAR file: " + file);
-    return new JarFile(file);
+    return file;
   }
 
-  private static void attachRemoveFinalTransformer() throws ReflectiveOperationException {
+  private static void attachRemoveFinalTransformer(File... jarPaths) throws ReflectiveOperationException {
     Class
       .forName("de.scrum_master.bytebuddy.RemoveFinalTransformer")
-      .getDeclaredMethod("install", Instrumentation.class)
-      .invoke(null, instrumentation);
+      .getDeclaredMethod("install", Instrumentation.class, File[].class)
+      .invoke(null, instrumentation, jarPaths);
   }
 
   public static boolean isActive() {
