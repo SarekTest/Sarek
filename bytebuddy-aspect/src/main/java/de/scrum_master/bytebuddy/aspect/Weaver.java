@@ -1,5 +1,6 @@
 package de.scrum_master.bytebuddy.aspect;
 
+import de.scrum_master.bytebuddy.util.TransformedClassFileWriter;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
 import net.bytebuddy.asm.Advice;
@@ -176,6 +177,8 @@ public class Weaver {
       .with(AgentBuilder.RedefinitionStrategy.Listener.StreamWriting.toSystemError())
       .with(AgentBuilder.Listener.StreamWriting.toSystemError().withTransformationsOnly())
       .with(AgentBuilder.InstallationListener.StreamWriting.toSystemError())
+      // Dump all transformed class files into a directory
+      // .with(new TransformedClassFileWriter("transformed-aspect"))
       // Match type + method, then bind to advice
       .type(typeMatcher)
       .transform((builder, typeDescription, classLoader, module) ->

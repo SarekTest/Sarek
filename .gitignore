@@ -9,3 +9,6 @@
 
 # Maven
 target/
+
+# Class files dumped by TransformedClassFileWriter
+*.class
