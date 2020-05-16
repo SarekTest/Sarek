@@ -281,9 +281,22 @@ public class NoAgentWeaverIT {
       INSTRUMENTATION,
       is(UnderTest.class),
       named("greet"),
-      new MethodAroundAdvice(null, (target, method, args, proceedMode, returnValue, throwable) -> "Hi world!"),
+      new MethodAroundAdvice(null, (target, method, args, proceedMode, returnValue, throwable) -> {
+        System.out.println("### greet1");
+        return "Hi world!";
+      }),
       UnderTest.class
     );
+//    new Weaver(
+//      INSTRUMENTATION,
+//      is(UnderTest.class),
+//      named("greet"),
+//      new MethodAroundAdvice(null, (target, method, args, proceedMode, returnValue, throwable) -> {
+//        System.out.println("### greet2");
+//        return returnValue + "x";
+//      }),
+//      UnderTest.class
+//    );
 
     // Both weavers are active because the second one targets a static method and thus is registered under the class
     assertEquals(55, underTest.add(2, 3));

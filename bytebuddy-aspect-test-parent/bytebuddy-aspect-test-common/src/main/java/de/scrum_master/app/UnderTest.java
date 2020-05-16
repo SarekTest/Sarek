@@ -6,8 +6,8 @@ public class UnderTest {
   private String name;
 
   static {
-    System.out.println("static initialiser");
-    staticText = "static initialiser";
+    staticText = "type initialiser";
+    System.out.println(staticText);
   }
 
   public UnderTest() {

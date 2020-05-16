@@ -17,7 +17,7 @@ import static org.junit.Assert.assertFalse;
  * This test checks features which do not involve bootloader classes.
  * So we do not need a Java agent here.
  */
-public class StaticInitialiserIT {
+public class TypeInitialiserIT {
   private static final Instrumentation INSTRUMENTATION = ByteBuddyAgent.install();
 
   private Weaver weaver;
@@ -31,7 +31,7 @@ public class StaticInitialiserIT {
   @Test
   public void staticInitialiser() throws IOException {
     assertFalse(
-      "This test needs to run in its own JVM, otherwise the static initialiser " +
+      "This test needs to run in its own JVM, otherwise the type initialiser (static block) " +
         "for the class under test could have run before already",
       isClassLoaded("de.scrum_master.app.UnderTest")
     );
@@ -40,11 +40,11 @@ public class StaticInitialiserIT {
     weaver = new Weaver(
       INSTRUMENTATION,
       is(UnderTest.class),
-      new StaticInitialiserAroundAdvice(
-        // false = suppress static initialiser
+      new TypeInitialiserAroundAdvice(
+        // false = suppress type initialiser
         // true = initialiser runs, sets static property and prints something on the console
         clazz -> false,
-        // Set static property to a value different from the one set by the static initialiser
+        // Set static property to a value different from the one set by the type initialiser
         (clazz, proceedMode, throwable) -> UnderTest.staticText = "aspect override"
       ),
       UnderTest.class

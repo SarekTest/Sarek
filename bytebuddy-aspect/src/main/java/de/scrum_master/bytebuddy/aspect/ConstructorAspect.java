@@ -9,7 +9,7 @@ import java.util.Map;
 
 import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAMIC;
 
-public abstract class ConstructorAspect {
+public abstract class ConstructorAspect extends Aspect<Constructor<?>> {
 
   // TODO: What happens if more than one transformer matches the same class?
   //       Idea: enable class to register Constructor objects as keys in adviceRegistry.
@@ -74,7 +74,12 @@ public abstract class ConstructorAspect {
    * @return
    */
   public static ConstructorAroundAdvice getAroundAdvice(Constructor constructor) {
-    return adviceRegistry.get(constructor.getDeclaringClass());
+    // (1) Search for constructor advice
+    ConstructorAroundAdvice advice = adviceRegistry.get(constructor);
+    // (2) No constructor advice? -> search for class advice
+    if (advice == null)
+      advice = adviceRegistry.get(constructor.getDeclaringClass());
+    return advice;
   }
 
 }

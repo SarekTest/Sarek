@@ -3,24 +3,62 @@ package de.scrum_master.bytebuddy.aspect;
 import de.scrum_master.bytebuddy.util.TransformedClassFileWriter;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
-import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
 
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import static de.scrum_master.bytebuddy.aspect.Aspect.AdviceType.*;
 import static net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy.RETRANSFORMATION;
-import static net.bytebuddy.matcher.ElementMatchers.*;
+import static net.bytebuddy.matcher.ElementMatchers.any;
+import static net.bytebuddy.matcher.ElementMatchers.none;
 
 public class Weaver {
-  private static final ClassFileLocator CLASS_FILE_LOCATOR = ClassFileLocator.ForClassLoader.ofSystemLoader();
+  private static final WovenMethodRegistry wovenMethodRegistry = new WovenMethodRegistry();
+
+  /**
+   * TODO: make thread-safe
+   */
+  public static class WovenMethodRegistry {
+    private Map<MethodDescription, Set<Weaver>> registry = new HashMap<>();
+
+    public boolean isWoven(MethodDescription methodDescription) {
+//      System.out.println("### isWoven " + methodDescription);
+      Set<Weaver> weavers = registry.get(methodDescription);
+//      System.out.println("### isWoven " + weavers);
+      if (weavers == null)
+        return false;
+      return weavers.size() > 0;
+    }
+
+    public WovenMethodRegistry add(MethodDescription methodDescription, Weaver weaver) {
+      registry
+        .computeIfAbsent(methodDescription, methDesc -> new HashSet<>())
+        .add(weaver);
+      return this;
+    }
+
+    public WovenMethodRegistry remove(MethodDescription methodDescription, Weaver weaver) {
+      Set<Weaver> weavers = registry.get(methodDescription);
+      if (weavers != null)
+        weavers.remove(weaver);
+      return this;
+    }
+
+    public WovenMethodRegistry removeAll(Weaver weaver) {
+      for (MethodDescription methodDescription : registry.keySet())
+        remove(methodDescription, weaver);
+      return this;
+    }
+
+    public WovenMethodRegistry clear() {
+      registry.clear();
+      return this;
+    }
+  }
 
   // Do not use ByteBuddyAgent.install() in this class but get an Instrumentation instance injected.
   // Otherwise bytebuddy-agent.jar would have to be on the boot classpath. To put bytebuddy.jar there
@@ -30,40 +68,9 @@ public class Weaver {
   private final Junction<MethodDescription> methodMatcher;
   private final ResettableClassFileTransformer transformer;
   private final AroundAdvice<?> advice;
-  private final AdviceType adviceType;
+  private final Aspect.AdviceType adviceType;
   // TODO: maybe replace by a Set<WeakReference>
   private final Set<Object> targets = Collections.synchronizedSet(new HashSet<>());
-
-  public enum AdviceType {
-    METHOD(
-      Advice.to(MethodAspect.class, CLASS_FILE_LOCATOR),
-      isMethod()
-    ),
-    CONSTRUCTOR(
-      Advice.to(ConstructorAspect.class, CLASS_FILE_LOCATOR),
-      isConstructor()
-    ),
-    STATIC_INITIALISER(
-      Advice.to(StaticInitialiserAspect.class, CLASS_FILE_LOCATOR),
-      isTypeInitializer()
-    );
-
-    private final Advice advice;
-    private final Junction<MethodDescription> methodType;
-
-    AdviceType(Advice advice, Junction<MethodDescription> methodType) {
-      this.advice = advice;
-      this.methodType = methodType;
-    }
-
-    public Advice getAdvice() {
-      return advice;
-    }
-
-    public Junction<MethodDescription> getMethodType() {
-      return methodType;
-    }
-  }
 
   public Weaver(
     Instrumentation instrumentation,
@@ -72,7 +79,7 @@ public class Weaver {
     MethodAroundAdvice advice,
     Object... targets
   ) throws IllegalArgumentException, IOException {
-    this(instrumentation, typeMatcher, methodMatcher, AdviceType.METHOD, advice, targets);
+    this(instrumentation, typeMatcher, methodMatcher, METHOD_ADVICE, advice, targets);
   }
 
   public Weaver(
@@ -82,26 +89,27 @@ public class Weaver {
     ConstructorAroundAdvice advice,
     Object... targets
   ) throws IllegalArgumentException, IOException {
-    this(instrumentation, typeMatcher, methodMatcher, AdviceType.CONSTRUCTOR, advice, targets);
+    this(instrumentation, typeMatcher, methodMatcher, CONSTRUCTOR_ADVICE, advice, targets);
   }
 
   public Weaver(
     Instrumentation instrumentation,
     Junction<TypeDescription> typeMatcher,
-    StaticInitialiserAroundAdvice advice,
+    TypeInitialiserAroundAdvice advice,
     Object... targets
   ) throws IllegalArgumentException, IOException {
-    this(instrumentation, typeMatcher, any(), AdviceType.STATIC_INITIALISER, advice, targets);
+    this(instrumentation, typeMatcher, any(), TYPE_INITIALISER_ADVICE, advice, targets);
   }
 
   protected Weaver(
     Instrumentation instrumentation,
     Junction<TypeDescription> typeMatcher,
     Junction<MethodDescription> methodMatcher,
-    AdviceType adviceType,
+    Aspect.AdviceType adviceType,
     AroundAdvice<?> advice,
     Object... targets
   ) throws IllegalArgumentException, IOException {
+    System.out.println("Creating new weaver " + this);
     if (instrumentation == null)
       throw new IllegalArgumentException("instrumentation must not be null");
     this.instrumentation = instrumentation;
@@ -111,6 +119,12 @@ public class Weaver {
     if (advice == null)
       throw new IllegalArgumentException("advice must not be null");
     this.advice = advice;
+    // TODO: exception during target registration -> dangling targets in advice registry -> FIXME via:
+    //   (a) memorise + clean up (argh!) or
+    //   (b) don't allow target registration in constructor or
+    //   (c) reverse order: register transformer first, then after target registration error
+    //       unregister transformer again, which also removes targets already added for that transformer
+    //   (a) difficult + inefficient, (b) easy to implement, (c) also fairly easy, better usability
     for (Object target : targets)
       addTarget(target);
     // Register transformer last so as not to have a dangling active transformer if an exception occurs
@@ -140,10 +154,10 @@ public class Weaver {
 
   protected Map<Object, ? extends AroundAdvice<?>> getAdviceRegistry() {
     switch (adviceType) {
-      case CONSTRUCTOR:
+      case CONSTRUCTOR_ADVICE:
         return ConstructorAspect.adviceRegistry;
-      case STATIC_INITIALISER:
-        return StaticInitialiserAspect.adviceRegistry;
+      case TYPE_INITIALISER_ADVICE:
+        return TypeInitialiserAspect.adviceRegistry;
       default:
         return MethodAspect.adviceRegistry;
     }
@@ -166,26 +180,73 @@ public class Weaver {
   }
 
   public void resetTransformer() {
-    transformer.reset(instrumentation, RETRANSFORMATION);
+//    System.out.println("Resetting transformer for weaver " + this);
+    // If transformation was reversed successfully (i.e. target classes are no longer woven),
+    // remove all associated methods for this weaver from the woven method registry
+    if (transformer.reset(instrumentation, RETRANSFORMATION))
+      wovenMethodRegistry.removeAll(this);
+//    System.out.println("Resetting transformer finished");
   }
 
   protected AgentBuilder createAgentBuilder() throws IOException {
     return new AgentBuilder.Default()
       .disableClassFormatChanges()
       .ignore(none())
-      .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+      .with(RETRANSFORMATION)
       .with(AgentBuilder.RedefinitionStrategy.Listener.StreamWriting.toSystemError())
       .with(AgentBuilder.Listener.StreamWriting.toSystemError().withTransformationsOnly())
       .with(AgentBuilder.InstallationListener.StreamWriting.toSystemError())
+      .with(new AgentBuilder.InstallationListener.Adapter() {
+        @Override
+        public void onBeforeInstall(Instrumentation instrumentation, ResettableClassFileTransformer classFileTransformer) {
+//          System.out.println("onBeforeInstall: instrumentation = " + instrumentation + ", classFileTransformer = " + classFileTransformer);
+          wovenMethodRegistry.clear();
+          super.onBeforeInstall(instrumentation, classFileTransformer);
+        }
+
+/*
+        @Override
+        public void onInstall(Instrumentation instrumentation, ResettableClassFileTransformer classFileTransformer) {
+          System.out.println("onInstall: instrumentation = " + instrumentation + ", classFileTransformer = " + classFileTransformer);
+          super.onInstall(instrumentation, classFileTransformer);
+        }
+
+        @Override
+        public Throwable onError(Instrumentation instrumentation, ResettableClassFileTransformer classFileTransformer, Throwable throwable) {
+          System.out.println("onError: instrumentation = " + instrumentation + ", classFileTransformer = " + classFileTransformer + ", throwable = " + throwable);
+          return super.onError(instrumentation, classFileTransformer, throwable);
+        }
+
+        @Override
+        public void onReset(Instrumentation instrumentation, ResettableClassFileTransformer classFileTransformer) {
+          System.out.println("onReset: instrumentation = " + instrumentation + ", classFileTransformer = " + classFileTransformer);
+          super.onReset(instrumentation, classFileTransformer);
+        }
+*/
+      })
       // Dump all transformed class files into a directory
-      // .with(new TransformedClassFileWriter("transformed-aspect"))
+      //.with(new TransformedClassFileWriter("transformed-aspect"))
       // Match type + method, then bind to advice
       .type(typeMatcher)
       .transform((builder, typeDescription, classLoader, module) ->
-        builder.visit(
-          adviceType.getAdvice()
-            .on(adviceType.getMethodType().and(methodMatcher))
-        )
+          builder.visit(
+            adviceType.getAdvice().on(
+              adviceType.getMethodType()
+                .and(methodMatcher)
+//              .and(methodDescription -> wovenMethods.add(methodDescription))
+                .and(methodDescription -> {
+                    boolean woven = wovenMethodRegistry.isWoven(methodDescription);
+                    System.out.println(
+                      (woven ? "Avoid double" : "Perform")
+                        + " aspect weaving for: " + methodDescription
+                      + " / weaver = " + this
+                    );
+                    wovenMethodRegistry.add(methodDescription, this);
+                    return !woven;
+                  }
+                )
+            )
+          )
       );
   }
 

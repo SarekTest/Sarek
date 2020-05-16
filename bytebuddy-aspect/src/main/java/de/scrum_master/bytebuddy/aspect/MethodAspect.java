@@ -9,7 +9,7 @@ import java.util.Map;
 
 import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAMIC;
 
-public abstract class MethodAspect {
+public abstract class MethodAspect extends Aspect<Method> {
 
   // TODO: What happens if more than one transformer matches the same instance?
   //       Idea: enable class to register Method objects as keys in adviceRegistry.
@@ -93,6 +93,28 @@ public abstract class MethodAspect {
       advice = adviceRegistry.get(method.getDeclaringClass());
     }
     return advice;
+
+/*
+    //    MethodAroundAdvice perInstance = adviceRegistry.get(target);
+//    MethodAroundAdvice perMethod = adviceRegistry.get(method);
+//    MethodAroundAdvice perClass = adviceRegistry.get(method.getDeclaringClass());
+    MethodAroundAdvice advice;
+    // (1) Search for method advice
+    if ((advice = adviceRegistry.get(method)) != null) {
+
+      // An instance must be registered for the exact same method advice
+      if (!advice.equals(adviceRegistry.get(target)))
+        return null;
+    }
+    // (2) No method advice found and non-static method? -> search for instance advice
+    if (advice == null && target != null)
+      advice = adviceRegistry.get(target);
+    // (3) Static method or no instance advice? -> search for class advice
+    if (advice == null)
+      advice = adviceRegistry.get(method.getDeclaringClass());
+    return advice;
+*/
+
   }
 
 }

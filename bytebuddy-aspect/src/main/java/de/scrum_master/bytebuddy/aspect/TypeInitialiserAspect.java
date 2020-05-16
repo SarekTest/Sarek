@@ -1,7 +1,9 @@
 package de.scrum_master.bytebuddy.aspect;
 
 import net.bytebuddy.asm.Advice;
-import net.bytebuddy.asm.Advice.*;
+import net.bytebuddy.asm.Advice.OnDefaultValue;
+import net.bytebuddy.asm.Advice.OnMethodEnter;
+import net.bytebuddy.asm.Advice.OnMethodExit;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,11 +11,11 @@ import java.util.Map;
 
 import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAMIC;
 
-public abstract class StaticInitialiserAspect {
+public abstract class TypeInitialiserAspect extends Aspect<Class<?>>{
 
   // TODO: What happens if more than one transformer matches the same instance or class?
   // TODO: Try @Advice.Local for transferring additional state between before/after advices if necessary
-  public static final Map<Object, StaticInitialiserAroundAdvice> adviceRegistry = Collections.synchronizedMap(new HashMap<>());
+  public static final Map<Object, TypeInitialiserAroundAdvice> adviceRegistry = Collections.synchronizedMap(new HashMap<>());
 
   @SuppressWarnings("UnusedAssignment")
   @OnMethodEnter(skipOn = OnDefaultValue.class)
@@ -22,13 +24,13 @@ public abstract class StaticInitialiserAspect {
   ) throws ClassNotFoundException {
     // Get advice for target class
     Class<?> targetClass = toClass(staticInitialiserClassName);
-    StaticInitialiserAroundAdvice advice = getAroundAdvice(targetClass);
+    TypeInitialiserAroundAdvice advice = getAroundAdvice(targetClass);
 
-    // If no advice is registered, proceed to target static initialiser normally
+    // If no advice is registered, proceed to target type initialiser normally
     if (advice == null)
       return true;
 
-    // Check if user-defined advice wants to proceed (true) to target static initialiser or not (false)
+    // Check if user-defined advice wants to proceed (true) to target type initialiser or not (false)
     return advice.before(targetClass);
   }
 
@@ -42,7 +44,7 @@ public abstract class StaticInitialiserAspect {
     // Get advice for target class
     Class<?> targetClass = toClass(staticInitialiserClassName);
     // TODO: use @Advice.Local in order to communicate advice to 'after' method instead of a 2nd lookup
-    StaticInitialiserAroundAdvice advice = getAroundAdvice(targetClass);
+    TypeInitialiserAroundAdvice advice = getAroundAdvice(targetClass);
 
     // If no advice is registered, just pass through result
     if (advice == null)
@@ -59,7 +61,7 @@ public abstract class StaticInitialiserAspect {
   /**
    * Keep this method public because it must be callable from advice code woven into other classes
    */
-  public static StaticInitialiserAroundAdvice getAroundAdvice(Class<?> clazz) {
+  public static TypeInitialiserAroundAdvice getAroundAdvice(Class<?> clazz) {
       return adviceRegistry.get(clazz);
   }
 
