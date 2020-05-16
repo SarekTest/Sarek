@@ -14,6 +14,7 @@ import java.util.List;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
+@Deprecated
 public class RemoveFinalTransformer {
   public static void install(Instrumentation instrumentation, File... jarFiles) {
     getDefaultAgentWithIgnoredTypes()
@@ -34,14 +35,18 @@ public class RemoveFinalTransformer {
     return new AgentBuilder.Default()
       // Include bootstrap classes that otherwise would be excluded by default
       .ignore(none())
-      // Exclude ByteBuddy and this transformer library
-      .ignore(nameStartsWith("net.bytebuddy."))
-      .ignore(nameStartsWith("de.scrum_master.bytebuddy."))
-      // Exclude JUnit, Hamcrest, IntelliJ IDEA
-      .ignore(nameStartsWith("org.junit."))
-      .ignore(nameStartsWith("junit."))
-      .ignore(nameStartsWith("org.hamcrest."))
-      .ignore(nameStartsWith("com.intellij."));
+      .ignore(anyOf(
+        // Exclude ByteBuddy and this transformer library
+        nameStartsWith("de.scrum_master.agent."),
+        nameStartsWith("de.scrum_master.bytebuddy."),
+        nameStartsWith("net.bytebuddy."),
+        // Exclude JUnit, Hamcrest, IntelliJ IDEA
+        nameStartsWith("org.junit."),
+        nameStartsWith("junit."),
+        nameStartsWith("org.hamcrest."),
+        nameStartsWith("com.intellij."),
+        nameStartsWith("org.spockframework.")
+      ));
   }
 
   private static AgentBuilder.LocationStrategy getLocationStrategyWithJars(File[] jarFiles) {
