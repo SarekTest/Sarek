@@ -39,6 +39,11 @@
     </dependency>
     <dependency>
       <groupId>de.scrum-master</groupId>
+      <artifactId>remove-final-agent</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>de.scrum-master</groupId>
       <artifactId>bytebuddy-aspect-test-common</artifactId>
     </dependency>
     <!-- In this module only used for ByteBuddyAgent.install() -->

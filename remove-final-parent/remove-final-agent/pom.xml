@@ -5,23 +5,35 @@
 
   <parent>
     <groupId>de.scrum-master</groupId>
-    <artifactId>bytebuddy-aspect-parent</artifactId>
+    <artifactId>remove-final-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>bytebuddy-aspect</artifactId>
+  <artifactId>remove-final-agent</artifactId>
   <version>1.0-SNAPSHOT</version>
-
-  <organization>
-    <name>Scrum-Master.de - Agile Project Management</name>
-    <url>https://scrum-master.de</url>
-  </organization>
 
   <build>
     <plugins>
 
-      <!-- Include dependencies, but minimise JAR -->
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Agent-Class>de.scrum_master.agent.RemoveFinalAgent</Agent-Class>
+              <Premain-Class>de.scrum_master.agent.RemoveFinalAgent</Premain-Class>
+              <Can-Redefine-Classes>true</Can-Redefine-Classes>
+              <Can-Retransform-Classes>true</Can-Retransform-Classes>
+              <Can-Set-Native-Method-Prefix>true</Can-Set-Native-Method-Prefix>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <!-- Include ASM files relocated to ByteBuddy name space, delete the rest via 'minimizeJar' -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
         <executions>
           <execution>
@@ -50,12 +62,6 @@
                     <!--<exclude>**/LICENSE</exclude>-->
                   </excludes>
                 </filter>
-                <filter>
-                  <artifact>de.scrum-master:remove-final-agent</artifact>
-                  <includes>
-                    <include>de/scrum_master/**</include>
-                  </includes>
-                </filter>
               </filters>
             </configuration>
           </execution>
@@ -64,17 +70,5 @@
 
     </plugins>
   </build>
-  <dependencies>
-
-    <dependency>
-      <groupId>net.bytebuddy</groupId>
-      <artifactId>byte-buddy</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>de.scrum-master</groupId>
-      <artifactId>remove-final-agent</artifactId>
-    </dependency>
-
-  </dependencies>
 
 </project>

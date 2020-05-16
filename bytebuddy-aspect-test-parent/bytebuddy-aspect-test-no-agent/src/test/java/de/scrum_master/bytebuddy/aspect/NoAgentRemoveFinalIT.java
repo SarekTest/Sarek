@@ -1,7 +1,7 @@
 package de.scrum_master.bytebuddy.aspect;
 
+import de.scrum_master.agent.RemoveFinalTransformer;
 import de.scrum_master.app.FinalClass;
-import de.scrum_master.bytebuddy.RemoveFinalTransformer;
 import net.bytebuddy.agent.ByteBuddyAgent;
 import org.junit.Test;
 
@@ -18,7 +18,7 @@ import static org.junit.Assert.assertTrue;
  * This test checks features which do not involve already loaded bootloader classes.
  * So we do not need a Java agent here.
  */
-public class RemoveFinalIT {
+public class NoAgentRemoveFinalIT {
   private static final Instrumentation INSTRUMENTATION = ByteBuddyAgent.install();
 
   @Test

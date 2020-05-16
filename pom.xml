@@ -61,6 +61,11 @@
           <version>3.1.2</version>
         </plugin>
 
+        <plugin>
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>3.2.3</version>
+        </plugin>
+
       </plugins>
     </pluginManagement>
   </build>
@@ -72,6 +77,11 @@
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy</artifactId>
         <version>${bytebuddy.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>de.scrum-master</groupId>
+        <artifactId>remove-final-agent</artifactId>
+        <version>1.0-SNAPSHOT</version>
       </dependency>
 
       <!-- Test dependencies -->
@@ -126,5 +136,6 @@
     <module>bytebuddy-aspect</module>
     <module>bytebuddy-aspect-agent</module>
     <module>bytebuddy-aspect-test-parent</module>
+    <module>remove-final-parent</module>
   </modules>
 </project>

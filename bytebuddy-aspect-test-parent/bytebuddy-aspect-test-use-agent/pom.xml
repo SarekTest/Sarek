@@ -19,7 +19,7 @@
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
           <argLine>
-            -javaagent:../../bytebuddy-aspect-agent/target/bytebuddy-aspect-agent-1.0-SNAPSHOT.jar=removeFinal
+            -javaagent:../../bytebuddy-aspect-agent/target/bytebuddy-aspect-agent-${project.version}.jar=removeFinal
           </argLine>
         </configuration>
       </plugin>
