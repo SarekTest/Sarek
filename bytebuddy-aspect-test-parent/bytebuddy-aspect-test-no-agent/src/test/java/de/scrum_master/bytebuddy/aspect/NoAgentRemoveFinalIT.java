@@ -28,7 +28,7 @@ public class NoAgentRemoveFinalIT {
     assertFalse(isClassLoaded("java.util.UUID"));
 
     // Activate definaliser
-    RemoveFinalTransformer.install(INSTRUMENTATION);
+    RemoveFinalTransformer.install(INSTRUMENTATION, true);
 
     // Final application class has been definalised
     assertFalse(Modifier.isFinal(FinalClass.class.getModifiers()));

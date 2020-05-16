@@ -22,6 +22,7 @@ import java.util.jar.JarFile;
 public class ByteBuddyAspectAgent {
   private static boolean active;
   private static boolean removeFinalActive;
+  private static boolean logRemoveFinal;
   private static Instrumentation instrumentation;
 
   public static void agentmain(String options, Instrumentation instr) throws Exception {
@@ -42,8 +43,10 @@ public class ByteBuddyAspectAgent {
     active = true;
     // TODO: document how to use '-javaagent:my.jar=removeFinal' -> Javadoc, read-me
     removeFinalActive = options != null && options.trim().toLowerCase().contains("removefinal");
+    // TODO: document how to use '-javaagent:my.jar=verbose' -> Javadoc, read-me
+    logRemoveFinal = options != null && options.trim().toLowerCase().contains("verbose");
     if (removeFinalActive)
-      attachRemoveFinalTransformer();
+      attachRemoveFinalTransformer(logRemoveFinal);
   }
 
   // TODO: optionally pack both JARs into agent JAR, unpack and attach if not found in file system or on classpath
@@ -76,11 +79,11 @@ public class ByteBuddyAspectAgent {
     return file;
   }
 
-  private static void attachRemoveFinalTransformer() throws ReflectiveOperationException {
+  private static void attachRemoveFinalTransformer(boolean logRemoveFinal) throws ReflectiveOperationException {
     Class
       .forName("de.scrum_master.agent.RemoveFinalTransformer")
-      .getDeclaredMethod("install", Instrumentation.class)
-      .invoke(null, instrumentation);
+      .getDeclaredMethod("install", Instrumentation.class, boolean.class)
+      .invoke(null, instrumentation, logRemoveFinal);
   }
 
   public static boolean isActive() {

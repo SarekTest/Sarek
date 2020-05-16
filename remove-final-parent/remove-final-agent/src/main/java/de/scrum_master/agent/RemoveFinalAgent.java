@@ -8,24 +8,27 @@ public class RemoveFinalAgent {
   /**
    * Attach agent dynamically after JVM start-up
    *
-   * @param configFile path to configuration properties file for class
+   * @param options path to configuration properties file for class
    *                   {@link RemoveFinalTransformer}. Add this parameter on the command line
    *                   after the Java agent path via <code>=/path/to/my-config.properties</code>.
    */
-  public static void agentmain(String configFile, Instrumentation instrumentation) {
-    premain(configFile, instrumentation);
+  public static void agentmain(String options, Instrumentation instrumentation) {
+    premain(options, instrumentation);
   }
 
   /**
-   * Start agent via <code>-javaagent:/path/to/my-agent.jar=<i>configFile</i></code> JVM parameter
+   * Start agent via <code>-javaagent:/path/to/my-agent.jar=<i>options</i></code> JVM parameter
    *
-   * @param configFile path to configuration properties file for class
+   * @param options path to configuration properties file for class
    *                   {@link RemoveFinalTransformer}. Add this parameter on the command line
    *                   after the Java agent path via <code>=/path/to/my-config.properties</code>.
    */
-  public static void premain(String configFile, Instrumentation instrumentation) {
+  public static void premain(String options, Instrumentation instrumentation) {
     active = true;
-    RemoveFinalTransformer.install(instrumentation);
+    // TODO: document how to use '-javaagent:my.jar=verbose' -> Javadoc, read-me
+    boolean logRemoveFinal = options != null && options.trim().toLowerCase().contains("verbose");
+
+    RemoveFinalTransformer.install(instrumentation, logRemoveFinal);
   }
 
   /**

@@ -25,12 +25,12 @@ public class RemoveFinalTransformer extends ClassVisitor {
 
   private String className;
 
-  public static void install(Instrumentation instrumentation) {
+  public static void install(Instrumentation instrumentation, boolean logRemoveFinal) {
     instrumentation.addTransformer(
       (loader, className, classBeingRedefined, protectionDomain, classfileBuffer) -> {
         ClassReader classReader = new ClassReader(classfileBuffer);
         ClassWriter classWriter = new ClassWriter(classReader, PARSING_FLAGS);
-        classReader.accept(new RemoveFinalTransformer(classWriter, false), PARSING_FLAGS);
+        classReader.accept(new RemoveFinalTransformer(classWriter, logRemoveFinal), PARSING_FLAGS);
         return classWriter.toByteArray();
       }
     );
@@ -76,7 +76,18 @@ public class RemoveFinalTransformer extends ClassVisitor {
       && !className.startsWith("junit.")
       && !className.startsWith("org.hamcrest.")
       && !className.startsWith("com.intellij.")
-      && !className.startsWith("org.spockframework.");
+      && !className.startsWith("groovyjarjarasm.asm.")
+      && !className.startsWith("javassist.")
+      && !className.startsWith("mockit.")
+      && !className.startsWith("org.powermock.")
+      && !className.startsWith("org.objenesis.")
+      && !className.startsWith("org.apache.maven.")
+      && !className.startsWith("org.easymock.")
+      && !className.startsWith("org.mockito.")
+      && !className.startsWith("org.spockframework.")
+      && !className.startsWith("spock.")
+      && !className.contains("$$EnhancerByCGLIB$$")
+      ;
   }
 
   private void log(String message) {
