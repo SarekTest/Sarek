@@ -30,7 +30,8 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-              <minimizeJar>true</minimizeJar>
+              <!-- TODO: reactivate after relocating package names-->
+<!--              <minimizeJar>true</minimizeJar>-->
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <shadedArtifactAttached>false</shadedArtifactAttached>
               <filters>
