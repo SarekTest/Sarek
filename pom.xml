@@ -32,19 +32,25 @@
 
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.22.2</version>
+          <!-- TODO: Switch to next milestone or stable release as soon as available on Maven Central -->
+          <version>3.0.0-RC1</version>
           <configuration>
             <!-- Do not reuse forked VMs because of potentially unexpected instrumentation bleed-over -->
             <reuseForks>false</reuseForks>
+            <!-- Fix for "[WARNING] Corrupted STDOUT by directly writing to native stream in forked JVM" -->
+            <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>
           </configuration>
         </plugin>
 
         <plugin>
           <artifactId>maven-failsafe-plugin</artifactId>
-          <version>2.22.2</version>
+          <!-- TODO: Switch to next milestone or stable release as soon as available on Maven Central -->
+          <version>3.0.0-RC1</version>
           <configuration>
             <!-- Do not reuse forked VMs because of potentially unexpected instrumentation bleed-over -->
             <reuseForks>false</reuseForks>
+            <!-- Fix for "[WARNING] Corrupted STDOUT by directly writing to native stream in forked JVM" -->
+            <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>
           </configuration>
           <executions>
             <execution>
@@ -94,15 +100,15 @@
       </dependency>
       <!-- For agent ad hoc attachment, e.g. via ByteBuddyAgent.install() -->
       <!-- TODO: Figure out how to do it in JDK 9+ and how to make it (auto-)configurable -->
-<!--
-      <dependency>
-        <groupId>oracle.jdk</groupId>
-        <artifactId>tools</artifactId>
-        <version>8</version>
-        <scope>system</scope>
-        <systemPath>${java.home}/../lib/tools.jar</systemPath>
-      </dependency>
--->
+      <!--
+            <dependency>
+              <groupId>oracle.jdk</groupId>
+              <artifactId>tools</artifactId>
+              <version>8</version>
+              <scope>system</scope>
+              <systemPath>${java.home}/../lib/tools.jar</systemPath>
+            </dependency>
+      -->
       <dependency>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy-agent</artifactId>
@@ -131,6 +137,24 @@
 
     </dependencies>
   </dependencyManagement>
+
+  <pluginRepositories>
+    <!-- TODO: As soon as the next Surefire milestone is available on Maven Central, get rid of this repository -->
+    <pluginRepository>
+      <id>maven-1575</id>
+      <url>https://repository.apache.org/content/repositories/maven-1575/</url>
+    </pluginRepository>
+    <!--
+    <pluginRepository>
+      <id>apache-snapshots</id>
+      <url>https://repository.apache.org/content/groups/snapshots</url>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>daily</updatePolicy>
+      </snapshots>
+    </pluginRepository>
+    -->
+  </pluginRepositories>
 
   <modules>
     <module>bytebuddy-aspect</module>
