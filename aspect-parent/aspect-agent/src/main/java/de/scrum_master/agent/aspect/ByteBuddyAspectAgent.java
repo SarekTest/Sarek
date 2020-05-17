@@ -31,8 +31,7 @@ public class ByteBuddyAspectAgent {
 
   public static void premain(String options, Instrumentation instr) throws Exception {
     // TODO: remove after re-testing fix of https://issues.apache.org/jira/browse/SUREFIRE-1788
-    System.out.println("ByteBuddyAspectAgent premain - options = " + options);
-    System.err.println("ByteBuddyAspectAgent premain - dummy error log");
+    System.out.println("[Aspect Agent] premain - options = " + options);
 
     File transformerJar = findJarFile("de/scrum_master/agent/aspect/Weaver.class");
     instr.appendToBootstrapClassLoaderSearch(new JarFile(transformerJar));
@@ -79,7 +78,7 @@ public class ByteBuddyAspectAgent {
     else {
       file = new File(new URL(resourceURL).toURI());
     }
-//    System.out.println("Found resource JAR file: " + file);
+//    System.out.println("[Aspect Agent] Found resource JAR file: " + file);
     return file;
   }
 

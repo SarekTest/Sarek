@@ -25,9 +25,7 @@ public class Weaver {
     private Map<MethodDescription, Set<Weaver>> registry = new HashMap<>();
 
     public boolean isWoven(MethodDescription methodDescription) {
-//      System.out.println("### isWoven " + methodDescription);
       Set<Weaver> weavers = registry.get(methodDescription);
-//      System.out.println("### isWoven " + weavers);
       if (weavers == null)
         return false;
       return weavers.size() > 0;
@@ -179,12 +177,12 @@ public class Weaver {
   }
 
   public void resetTransformer() {
-//    System.out.println("Resetting transformer for weaver " + this);
+//    System.out.println("[Aspect Agent] Resetting transformer for weaver " + this);
     // If transformation was reversed successfully (i.e. target classes are no longer woven),
     // remove all associated methods for this weaver from the woven method registry
     if (transformer.reset(instrumentation, RETRANSFORMATION))
       wovenMethodRegistry.removeAll(this);
-//    System.out.println("Resetting transformer finished");
+//    System.out.println("[Aspect Agent] Resetting transformer for weaver " + this + " finished");
   }
 
   protected AgentBuilder createAgentBuilder() throws IOException {
@@ -198,7 +196,7 @@ public class Weaver {
       .with(new AgentBuilder.InstallationListener.Adapter() {
         @Override
         public void onBeforeInstall(Instrumentation instrumentation, ResettableClassFileTransformer classFileTransformer) {
-//          System.out.println("onBeforeInstall: instrumentation = " + instrumentation + ", classFileTransformer = " + classFileTransformer);
+//          System.out.println("[Aspect Agent] onBeforeInstall: instrumentation = " + instrumentation + ", classFileTransformer = " + classFileTransformer);
           wovenMethodRegistry.clear();
           super.onBeforeInstall(instrumentation, classFileTransformer);
         }
@@ -206,19 +204,19 @@ public class Weaver {
 /*
         @Override
         public void onInstall(Instrumentation instrumentation, ResettableClassFileTransformer classFileTransformer) {
-          System.out.println("onInstall: instrumentation = " + instrumentation + ", classFileTransformer = " + classFileTransformer);
+          System.out.println("[Aspect Agent] onInstall: instrumentation = " + instrumentation + ", classFileTransformer = " + classFileTransformer);
           super.onInstall(instrumentation, classFileTransformer);
         }
 
         @Override
         public Throwable onError(Instrumentation instrumentation, ResettableClassFileTransformer classFileTransformer, Throwable throwable) {
-          System.out.println("onError: instrumentation = " + instrumentation + ", classFileTransformer = " + classFileTransformer + ", throwable = " + throwable);
+          System.out.println("[Aspect Agent] onError: instrumentation = " + instrumentation + ", classFileTransformer = " + classFileTransformer + ", throwable = " + throwable);
           return super.onError(instrumentation, classFileTransformer, throwable);
         }
 
         @Override
         public void onReset(Instrumentation instrumentation, ResettableClassFileTransformer classFileTransformer) {
-          System.out.println("onReset: instrumentation = " + instrumentation + ", classFileTransformer = " + classFileTransformer);
+          System.out.println("[Aspect Agent] onReset: instrumentation = " + instrumentation + ", classFileTransformer = " + classFileTransformer);
           super.onReset(instrumentation, classFileTransformer);
         }
 */

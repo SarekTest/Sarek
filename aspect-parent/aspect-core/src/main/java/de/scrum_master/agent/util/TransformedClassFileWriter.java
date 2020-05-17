@@ -25,7 +25,7 @@ public class TransformedClassFileWriter extends AgentBuilder.Listener.Adapter {
     try {
       Path path = new File(rootDirectory + "/" + typeDescription.getInternalName() + ".class").toPath();
       Files.createDirectories(path.getParent());
-//      System.out.println(path);
+//      System.out.println("[Aspect Agent] onTransformation: path = " + path);
       Files.write(path, dynamicType.getBytes());
     } catch (IOException e) {
       e.printStackTrace();
