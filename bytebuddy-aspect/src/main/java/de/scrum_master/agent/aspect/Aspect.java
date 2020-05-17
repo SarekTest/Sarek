@@ -1,4 +1,4 @@
-package de.scrum_master.bytebuddy.aspect;
+package de.scrum_master.agent.aspect;
 
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
@@ -7,7 +7,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 
 import java.util.*;
 
-import static de.scrum_master.bytebuddy.aspect.Aspect.TargetType.*;
+import static de.scrum_master.agent.aspect.Aspect.TargetType.*;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public abstract class Aspect<T> {

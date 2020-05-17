@@ -1,4 +1,4 @@
-package de.scrum_master.bytebuddy;
+package de.scrum_master.agent.aspect;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,7 +34,7 @@ public class ByteBuddyAspectAgent {
     System.out.println("ByteBuddyAspectAgent premain - options = " + options);
     System.err.println("ByteBuddyAspectAgent premain - dummy error log");
 
-    File transformerJar = findJarFile("de/scrum_master/bytebuddy/aspect/Weaver.class");
+    File transformerJar = findJarFile("de/scrum_master/agent/aspect/Weaver.class");
     instr.appendToBootstrapClassLoaderSearch(new JarFile(transformerJar));
 
     // TODO: Why is this this necessary in order to avoid a ClassCircularityError in ByteBuddy?
@@ -85,7 +85,7 @@ public class ByteBuddyAspectAgent {
 
   private static void attachRemoveFinalTransformer(boolean logRemoveFinal) throws ReflectiveOperationException {
     Class
-      .forName("de.scrum_master.agent.RemoveFinalTransformer")
+      .forName("de.scrum_master.agent.remove_final.RemoveFinalTransformer")
       .getDeclaredMethod("install", Instrumentation.class, boolean.class)
       .invoke(null, instrumentation, logRemoveFinal);
   }

@@ -21,8 +21,8 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <Agent-Class>de.scrum_master.agent.RemoveFinalAgent</Agent-Class>
-              <Premain-Class>de.scrum_master.agent.RemoveFinalAgent</Premain-Class>
+              <Agent-Class>de.scrum_master.agent.remove_final.RemoveFinalAgent</Agent-Class>
+              <Premain-Class>de.scrum_master.agent.remove_final.RemoveFinalAgent</Premain-Class>
               <Can-Redefine-Classes>true</Can-Redefine-Classes>
               <Can-Retransform-Classes>true</Can-Retransform-Classes>
               <Can-Set-Native-Method-Prefix>true</Can-Set-Native-Method-Prefix>
@@ -45,6 +45,12 @@
               <minimizeJar>true</minimizeJar>
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <shadedArtifactAttached>false</shadedArtifactAttached>
+<!--              <relocations>-->
+<!--                <relocation>-->
+<!--                  <pattern>net.bytebuddy</pattern>-->
+<!--                  <shadedPattern>de.scrum_master.jar.bytebuddy</shadedPattern>-->
+<!--                </relocation>-->
+<!--              </relocations>-->
               <filters>
                 <filter>
                   <artifact>net.bytebuddy:*</artifact>

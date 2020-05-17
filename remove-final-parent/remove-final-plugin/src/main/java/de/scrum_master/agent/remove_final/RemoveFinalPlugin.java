@@ -1,4 +1,4 @@
-package de.scrum_master.agent;
+package de.scrum_master.agent.remove_final;
 
 import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.build.Plugin;
@@ -14,7 +14,7 @@ import net.bytebuddy.pool.TypePool;
 
 import java.io.IOException;
 
-import static de.scrum_master.agent.RemoveFinalTransformer.PARSING_FLAGS;
+import static de.scrum_master.agent.remove_final.RemoveFinalTransformer.PARSING_FLAGS;
 
 public class RemoveFinalPlugin implements Plugin {
   @Override

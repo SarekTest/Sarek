@@ -1,4 +1,4 @@
-package de.scrum_master.agent;
+package de.scrum_master.agent.remove_final;
 
 import java.lang.instrument.Instrumentation;
 

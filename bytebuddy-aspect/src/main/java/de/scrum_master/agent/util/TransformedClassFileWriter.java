@@ -1,4 +1,4 @@
-package de.scrum_master.bytebuddy.util;
+package de.scrum_master.agent.util;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;

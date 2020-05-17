@@ -1,4 +1,4 @@
-package de.scrum_master.bytebuddy.aspect;
+package de.scrum_master.agent.aspect;
 
 import de.scrum_master.app.StringWrapper;
 import de.scrum_master.app.UnderTest;

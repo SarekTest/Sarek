@@ -1,7 +1,6 @@
-package de.scrum_master.bytebuddy.aspect;
+package de.scrum_master.agent.aspect;
 
 import de.scrum_master.app.FinalClass;
-import de.scrum_master.bytebuddy.ByteBuddyAspectAgent;
 import org.junit.Test;
 
 import java.io.ObjectOutputStream;

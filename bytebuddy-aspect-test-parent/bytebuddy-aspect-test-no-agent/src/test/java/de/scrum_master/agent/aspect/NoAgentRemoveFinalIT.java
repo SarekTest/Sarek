@@ -1,6 +1,6 @@
-package de.scrum_master.bytebuddy.aspect;
+package de.scrum_master.agent.aspect;
 
-import de.scrum_master.agent.RemoveFinalTransformer;
+import de.scrum_master.agent.remove_final.RemoveFinalTransformer;
 import de.scrum_master.app.FinalClass;
 import net.bytebuddy.agent.ByteBuddyAgent;
 import org.junit.Test;

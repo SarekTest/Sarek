@@ -1,6 +1,5 @@
-package de.scrum_master.bytebuddy.aspect;
+package de.scrum_master.agent.aspect;
 
-import de.scrum_master.bytebuddy.util.TransformedClassFileWriter;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
 import net.bytebuddy.description.method.MethodDescription;
@@ -11,7 +10,7 @@ import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.util.*;
 
-import static de.scrum_master.bytebuddy.aspect.Aspect.AdviceType.*;
+import static de.scrum_master.agent.aspect.Aspect.AdviceType.*;
 import static net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy.RETRANSFORMATION;
 import static net.bytebuddy.matcher.ElementMatchers.any;
 import static net.bytebuddy.matcher.ElementMatchers.none;

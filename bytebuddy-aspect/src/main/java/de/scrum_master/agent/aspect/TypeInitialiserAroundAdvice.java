@@ -1,4 +1,4 @@
-package de.scrum_master.bytebuddy.aspect;
+package de.scrum_master.agent.aspect;
 
 public class TypeInitialiserAroundAdvice extends AroundAdvice<Class<?>> {
   private final Before before;

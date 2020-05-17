@@ -30,11 +30,24 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-              <!-- TODO: reactivate after relocating package names-->
-<!--              <minimizeJar>true</minimizeJar>-->
+              <!-- TODO: reactivate after relocating package names
+              <minimizeJar>true</minimizeJar>
+              -->
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <shadedArtifactAttached>false</shadedArtifactAttached>
+<!--              <relocations>-->
+<!--                <relocation>-->
+<!--                  <pattern>net.bytebuddy</pattern>-->
+<!--                  <shadedPattern>de.scrum_master.jar.bytebuddy</shadedPattern>-->
+<!--                </relocation>-->
+<!--              </relocations>-->
               <filters>
+                <filter>
+                  <artifact>de.scrum-master:remove-final-agent</artifact>
+                  <includes>
+                    <include>de/scrum_master/agent/**</include>
+                  </includes>
+                </filter>
                 <filter>
                   <artifact>net.bytebuddy:*</artifact>
                   <excludes>
@@ -50,12 +63,6 @@
                     -->
                     <!--<exclude>**/LICENSE</exclude>-->
                   </excludes>
-                </filter>
-                <filter>
-                  <artifact>de.scrum-master:remove-final-agent</artifact>
-                  <includes>
-                    <include>de/scrum_master/**</include>
-                  </includes>
                 </filter>
               </filters>
             </configuration>

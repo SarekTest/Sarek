@@ -1,4 +1,4 @@
-package de.scrum_master.agent;
+package de.scrum_master.agent.remove_final;
 
 import net.bytebuddy.jar.asm.ClassReader;
 import net.bytebuddy.jar.asm.ClassVisitor;
@@ -70,7 +70,6 @@ public class RemoveFinalTransformer extends ClassVisitor {
   public boolean shouldTransform() {
     // Some sample packages to always exclude from transformation
     return !className.startsWith("de.scrum_master.agent.")
-      && !className.startsWith("de.scrum_master.bytebuddy.")
       && !className.startsWith("net.bytebuddy.")
       && !className.startsWith("org.junit.")
       && !className.startsWith("junit.")
