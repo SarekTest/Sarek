@@ -85,9 +85,39 @@
         <version>${bytebuddy.version}</version>
       </dependency>
       <dependency>
+        <groupId>net.bytebuddy</groupId>
+        <artifactId>byte-buddy-dep</artifactId>
+        <version>${bytebuddy.version}</version>
+      </dependency>
+      <dependency>
         <groupId>de.scrum-master</groupId>
         <artifactId>remove-final-agent</artifactId>
         <version>1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>de.scrum-master</groupId>
+        <artifactId>remove-final-agent-no-dep</artifactId>
+        <version>1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>de.scrum-master</groupId>
+        <artifactId>aspect-core</artifactId>
+        <version>1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>de.scrum-master</groupId>
+        <artifactId>aspect-core-no-dep</artifactId>
+        <version>1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>de.scrum-master</groupId>
+        <artifactId>aspect-agent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>net.bytebuddy</groupId>
+        <artifactId>byte-buddy-agent</artifactId>
+        <version>${bytebuddy.version}</version>
       </dependency>
 
       <!-- Test dependencies -->
@@ -96,6 +126,12 @@
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>4.13</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>de.scrum-master</groupId>
+        <artifactId>agent-test-common</artifactId>
+        <version>1.0-SNAPSHOT</version>
         <scope>test</scope>
       </dependency>
       <!-- For agent ad hoc attachment, e.g. via ByteBuddyAgent.install() -->
@@ -109,31 +145,6 @@
               <systemPath>${java.home}/../lib/tools.jar</systemPath>
             </dependency>
       -->
-      <dependency>
-        <groupId>net.bytebuddy</groupId>
-        <artifactId>byte-buddy-agent</artifactId>
-        <version>${bytebuddy.version}</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>de.scrum-master</groupId>
-        <artifactId>aspect-core</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>de.scrum-master</groupId>
-        <artifactId>aspect-agent</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>de.scrum-master</groupId>
-        <artifactId>agent-test-common</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <scope>test</scope>
-      </dependency>
 
     </dependencies>
   </dependencyManagement>

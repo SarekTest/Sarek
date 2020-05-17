@@ -15,6 +15,7 @@
 
   <modules>
     <module>aspect-core</module>
+    <module>aspect-core-no-dep</module>
     <module>aspect-agent</module>
   </modules>
 

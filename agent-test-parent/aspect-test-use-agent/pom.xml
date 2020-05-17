@@ -39,18 +39,22 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>de.scrum-master</groupId>
       <artifactId>aspect-core</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>de.scrum-master</groupId>
       <artifactId>aspect-agent</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>de.scrum-master</groupId>
       <artifactId>agent-test-common</artifactId>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>

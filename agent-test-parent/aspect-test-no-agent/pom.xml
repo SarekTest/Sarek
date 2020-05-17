@@ -32,32 +32,29 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>de.scrum-master</groupId>
+      <artifactId>agent-test-common</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>de.scrum-master</groupId>
       <artifactId>aspect-core</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>de.scrum-master</groupId>
       <artifactId>remove-final-agent</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>de.scrum-master</groupId>
-      <artifactId>agent-test-common</artifactId>
-    </dependency>
     <!-- In this module only used for ByteBuddyAgent.install() -->
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy-agent</artifactId>
+      <scope>test</scope>
     </dependency>
-    <!-- For agent ad hoc attachment, e.g. via ByteBuddyAgent.install() -->
-    <!--
-        <dependency>
-          <groupId>oracle.jdk</groupId>
-          <artifactId>tools</artifactId>
-        </dependency>
-    -->
 
   </dependencies>
 

@@ -45,12 +45,6 @@
               <minimizeJar>true</minimizeJar>
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <shadedArtifactAttached>false</shadedArtifactAttached>
-<!--              <relocations>-->
-<!--                <relocation>-->
-<!--                  <pattern>net.bytebuddy</pattern>-->
-<!--                  <shadedPattern>de.scrum_master.jar.bytebuddy</shadedPattern>-->
-<!--                </relocation>-->
-<!--              </relocations>-->
               <filters>
                 <filter>
                   <artifact>net.bytebuddy:*</artifact>
@@ -76,5 +70,12 @@
 
     </plugins>
   </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>net.bytebuddy</groupId>
+      <artifactId>byte-buddy</artifactId>
+    </dependency>
+  </dependencies>
 
 </project>

@@ -17,6 +17,11 @@
       <groupId>de.scrum-master</groupId>
       <artifactId>remove-final-agent</artifactId>
     </dependency>
+    <dependency>
+      <groupId>net.bytebuddy</groupId>
+      <artifactId>byte-buddy</artifactId>
+    </dependency>
   </dependencies>
+
 
 </project>
