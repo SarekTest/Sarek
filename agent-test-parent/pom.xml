@@ -5,11 +5,18 @@
 
   <parent>
     <groupId>de.scrum-master</groupId>
-    <artifactId>bytebuddy-aspect-test-parent</artifactId>
+    <artifactId>agent-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>bytebuddy-aspect-test-common</artifactId>
+  <artifactId>agent-test-parent</artifactId>
   <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>agent-test-common</module>
+    <module>aspect-test-use-agent</module>
+    <module>aspect-test-no-agent</module>
+  </modules>
 
 </project>

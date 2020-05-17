@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>de.scrum-master</groupId>
-  <artifactId>bytebuddy-aspect-parent</artifactId>
+  <artifactId>agent-parent</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
@@ -118,19 +118,19 @@
 
       <dependency>
         <groupId>de.scrum-master</groupId>
-        <artifactId>bytebuddy-aspect</artifactId>
+        <artifactId>aspect-core</artifactId>
         <version>1.0-SNAPSHOT</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>de.scrum-master</groupId>
-        <artifactId>bytebuddy-aspect-agent</artifactId>
+        <artifactId>aspect-agent</artifactId>
         <version>1.0-SNAPSHOT</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>de.scrum-master</groupId>
-        <artifactId>bytebuddy-aspect-test-common</artifactId>
+        <artifactId>agent-test-common</artifactId>
         <version>1.0-SNAPSHOT</version>
         <scope>test</scope>
       </dependency>
@@ -157,9 +157,9 @@
   </pluginRepositories>
 
   <modules>
-    <module>bytebuddy-aspect</module>
-    <module>bytebuddy-aspect-agent</module>
-    <module>bytebuddy-aspect-test-parent</module>
+    <module>agent-test-parent</module>
+    <module>aspect-parent</module>
     <module>remove-final-parent</module>
   </modules>
+
 </project>

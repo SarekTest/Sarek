@@ -5,18 +5,25 @@
 
   <parent>
     <groupId>de.scrum-master</groupId>
-    <artifactId>bytebuddy-aspect-test-parent</artifactId>
+    <artifactId>agent-test-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>bytebuddy-aspect-test-no-agent</artifactId>
+  <artifactId>aspect-test-use-agent</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <build>
     <plugins>
+
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <argLine>
+            -javaagent:../../aspect-parent/aspect-agent/target/aspect-agent-${project.version}.jar=removeFinal
+          </argLine>
+        </configuration>
       </plugin>
+
     </plugins>
   </build>
 
@@ -35,29 +42,16 @@
     </dependency>
     <dependency>
       <groupId>de.scrum-master</groupId>
-      <artifactId>bytebuddy-aspect</artifactId>
+      <artifactId>aspect-core</artifactId>
     </dependency>
     <dependency>
       <groupId>de.scrum-master</groupId>
-      <artifactId>remove-final-agent</artifactId>
-      <scope>test</scope>
+      <artifactId>aspect-agent</artifactId>
     </dependency>
     <dependency>
       <groupId>de.scrum-master</groupId>
-      <artifactId>bytebuddy-aspect-test-common</artifactId>
+      <artifactId>agent-test-common</artifactId>
     </dependency>
-    <!-- In this module only used for ByteBuddyAgent.install() -->
-    <dependency>
-      <groupId>net.bytebuddy</groupId>
-      <artifactId>byte-buddy-agent</artifactId>
-    </dependency>
-    <!-- For agent ad hoc attachment, e.g. via ByteBuddyAgent.install() -->
-    <!--
-        <dependency>
-          <groupId>oracle.jdk</groupId>
-          <artifactId>tools</artifactId>
-        </dependency>
-    -->
 
   </dependencies>
 

@@ -17,7 +17,7 @@ import static org.junit.Assert.assertFalse;
  * select "run Maven goal" and then add goal 'package'.
  * <p>
  * Furthermore, make sure add this to the Maven Failsafe condiguration:
- * <argLine>-javaagent:target/bytebuddy-aspect-agent-1.0-SNAPSHOT.jar</argLine>
+ * <argLine>-javaagent:target/aspect-agent-1.0-SNAPSHOT.jar</argLine>
  * Otherwise you will see a NoClassDefFoundError when running the tests for the bootstrap JRE classes because
  * boot class loader injection for the Java agent does not work as expected.
  */

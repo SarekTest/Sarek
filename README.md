@@ -1,5 +1,10 @@
 # Simple AOP framework for aspects with around advice via ByteBuddy
 
+### TODO & disclaimer
+
+***This file is outdated and needs to be completely rewritten because dependency names have changed after a refactoring.
+So have class names and features. stay tuned for an update.***
+  
 ## How to use
 
 Build via `mvn install` in order to deploy the artifact to your local Maven repository. This is necessary because the
@@ -41,13 +46,13 @@ classpath):
       <reuseForks>false</reuseForks>
       <!-- Java agent must be on command line in order to weave bootstrap classes. -->
       <argLine>
-        -javaagent:../../bytebuddy-aspect-agent/target/bytebuddy-aspect-agent-1.0-SNAPSHOT.jar
+        -javaagent:../../aspect-agent/target/aspect-agent-1.0-SNAPSHOT.jar
       </argLine>
     </configuration>
   </plugin>
   ```
 
-You can take a look at [`NoAgentIT`](https://github.com/kriegaex/ByteBuddyAspect/blob/master/bytebuddy-aspect-test-parent/bytebuddy-aspect-test-no-agent/src/test/java/de/scrum_master/bytebuddy/aspect/NoAgentIT.java)
+You can take a look at [`NoAgentIT`](https://github.com/kriegaex/ByteBuddyAspect/blob/master/bytebuddy-agent-test-parent/bytebuddy-aspect-test-no-agent/src/test/java/de/scrum_master/bytebuddy/aspect/NoAgentIT.java)
 if you want to get an idea how to use the aspect framework with your application classes.
 
 ### Weave bootstrap JRE/JDK classes too
@@ -87,13 +92,13 @@ this:
       <reuseForks>false</reuseForks>
       <!-- Java agent must be on command line in order to weave bootstrap classes. -->
       <argLine>
-        -javaagent:../../bytebuddy-aspect-agent/target/bytebuddy-aspect-agent-1.0-SNAPSHOT.jar
+        -javaagent:../../aspect-agent/target/aspect-agent-1.0-SNAPSHOT.jar
       </argLine>
     </configuration>
   </plugin>
   ```
 
-You can take a look at [`CommandLineAgentIT`](https://github.com/kriegaex/ByteBuddyAspect/blob/master/bytebuddy-aspect-test-parent/bytebuddy-aspect-test-use-agent/src/test/java/de/scrum_master/bytebuddy/aspect/CommandLineAgentIT.java)
+You can take a look at [`CommandLineAgentIT`](https://github.com/kriegaex/ByteBuddyAspect/blob/master/bytebuddy-agent-test-parent/bytebuddy-aspect-test-use-agent/src/test/java/de/scrum_master/bytebuddy/aspect/CommandLineAgentIT.java)
 if you want to get an idea how to use the aspect framework with bootstrap classes, i.e. usually JRE/JDK classes which
 might even have been loaded already (or not, it does not really make a difference in this case) and usually are
 unreachable for instrumentation with normal test frameworks.
