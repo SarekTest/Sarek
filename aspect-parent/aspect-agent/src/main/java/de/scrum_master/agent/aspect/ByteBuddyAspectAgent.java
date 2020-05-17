@@ -36,12 +36,6 @@ public class ByteBuddyAspectAgent {
     File transformerJar = findJarFile("de/scrum_master/agent/aspect/Weaver.class");
     instr.appendToBootstrapClassLoaderSearch(new JarFile(transformerJar));
 
-    // TODO: Why is this this necessary in order to avoid a ClassCircularityError in ByteBuddy?
-    ClassLoader
-      .getSystemClassLoader()
-      .getParent()
-      .loadClass("java.lang.reflect.InvocationTargetException");
-
     instrumentation = instr;
     active = true;
     // TODO: document how to use '-javaagent:my.jar=removeFinal' -> Javadoc, read-me
@@ -53,7 +47,6 @@ public class ByteBuddyAspectAgent {
   }
 
   // TODO: optionally pack both JARs into agent JAR, unpack and attach if not found in file system or on classpath
-
   private static File findJarFile(String ressourcePath) throws IOException, URISyntaxException {
     String resourceURL = ClassLoader
       .getSystemResource(ressourcePath)
