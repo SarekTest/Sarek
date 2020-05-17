@@ -31,7 +31,13 @@ public class RemoveFinalTransformer extends ClassVisitor {
     instrumentation.addTransformer(
       new ClassFileTransformer() {
         @Override
-        public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
+        public byte[] transform(
+          ClassLoader loader,
+          String className,
+          Class<?> classBeingRedefined,
+          ProtectionDomain protectionDomain,
+          byte[] classfileBuffer
+        ) {
           ClassReader classReader = new ClassReader(classfileBuffer);
           ClassWriter classWriter = new ClassWriter(classReader, PARSING_FLAGS);
           classReader.accept(new RemoveFinalTransformer(classWriter, logRemoveFinal), PARSING_FLAGS);
@@ -73,24 +79,30 @@ public class RemoveFinalTransformer extends ClassVisitor {
    */
 //  @Override
   public boolean shouldTransform() {
-    // Some sample packages to always exclude from transformation
+    // Default exclude list for transformation
     return !className.startsWith("de.scrum_master.agent.")
+      // Byte code engineering
       && !className.startsWith("net.bytebuddy.")
+      && !className.startsWith("org.objectweb.asm.")
+      && !className.startsWith("groovyjarjarasm.asm.")
+      && !className.startsWith("javassist.")
+      && !className.startsWith("org.objenesis.")
+      && !className.contains("$$EnhancerByCGLIB$$")
+      // Testing
       && !className.startsWith("org.junit.")
       && !className.startsWith("junit.")
       && !className.startsWith("org.hamcrest.")
-      && !className.startsWith("com.intellij.")
-      && !className.startsWith("groovyjarjarasm.asm.")
-      && !className.startsWith("javassist.")
-      && !className.startsWith("mockit.")
-      && !className.startsWith("org.powermock.")
-      && !className.startsWith("org.objenesis.")
-      && !className.startsWith("org.apache.maven.")
-      && !className.startsWith("org.easymock.")
-      && !className.startsWith("org.mockito.")
       && !className.startsWith("org.spockframework.")
       && !className.startsWith("spock.")
-      && !className.contains("$$EnhancerByCGLIB$$")
+      // Mocking
+      && !className.startsWith("org.mockito.")
+      && !className.startsWith("mockit.")
+      && !className.startsWith("org.powermock.")
+      && !className.startsWith("org.easymock.")
+      // Build
+      && !className.startsWith("org.apache.maven.")
+      // IDE
+      && !className.startsWith("com.intellij.")
       ;
   }
 
