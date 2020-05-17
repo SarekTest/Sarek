@@ -5,8 +5,10 @@ import net.bytebuddy.jar.asm.ClassVisitor;
 import net.bytebuddy.jar.asm.ClassWriter;
 import net.bytebuddy.jar.asm.MethodVisitor;
 
+import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Modifier;
+import java.security.ProtectionDomain;
 
 import static net.bytebuddy.jar.asm.ClassReader.SKIP_DEBUG;
 import static net.bytebuddy.jar.asm.ClassReader.SKIP_FRAMES;
@@ -27,11 +29,14 @@ public class RemoveFinalTransformer extends ClassVisitor {
 
   public static void install(Instrumentation instrumentation, boolean logRemoveFinal) {
     instrumentation.addTransformer(
-      (loader, className, classBeingRedefined, protectionDomain, classfileBuffer) -> {
-        ClassReader classReader = new ClassReader(classfileBuffer);
-        ClassWriter classWriter = new ClassWriter(classReader, PARSING_FLAGS);
-        classReader.accept(new RemoveFinalTransformer(classWriter, logRemoveFinal), PARSING_FLAGS);
-        return classWriter.toByteArray();
+      new ClassFileTransformer() {
+        @Override
+        public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
+          ClassReader classReader = new ClassReader(classfileBuffer);
+          ClassWriter classWriter = new ClassWriter(classReader, PARSING_FLAGS);
+          classReader.accept(new RemoveFinalTransformer(classWriter, logRemoveFinal), PARSING_FLAGS);
+          return classWriter.toByteArray();
+        }
       }
     );
   }
