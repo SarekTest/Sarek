@@ -60,7 +60,8 @@ public class ByteBuddyAspectAgent {
       // instead of to the JAR in the local Maven repository or in the module's 'target' directory.
       File targetDir = new File(resourceURL.replaceFirst("(/target)/classes/.*", "$1"));
       File[] candidateJars = targetDir.listFiles((dir, name) ->
-        name.endsWith(".jar") && !name.endsWith("-javadoc.jar") && !name.endsWith("-sources.jar")
+        // TODO: "-all" or "all-special" -> how to decide?
+        name.endsWith("-all.jar") && !name.endsWith("-javadoc.jar") && !name.endsWith("-sources.jar")
       );
       if (candidateJars == null || candidateJars.length == 0)
         throw new FileNotFoundException(

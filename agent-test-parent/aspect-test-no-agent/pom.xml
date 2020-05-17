@@ -42,6 +42,8 @@
     <dependency>
       <groupId>de.scrum-master</groupId>
       <artifactId>aspect-core</artifactId>
+      <classifier>all</classifier>
+      <version>1.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>

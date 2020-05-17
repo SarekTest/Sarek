@@ -25,22 +25,16 @@
         <artifactId>maven-shade-plugin</artifactId>
         <executions>
           <execution>
+            <id>shade</id>
             <phase>package</phase>
             <goals>
               <goal>shade</goal>
             </goals>
             <configuration>
-              <!-- TODO: reactivate after relocating package names
-              <minimizeJar>true</minimizeJar>
-              -->
+              <minimizeJar>false</minimizeJar>
               <createDependencyReducedPom>false</createDependencyReducedPom>
-              <shadedArtifactAttached>false</shadedArtifactAttached>
-<!--              <relocations>-->
-<!--                <relocation>-->
-<!--                  <pattern>net.bytebuddy</pattern>-->
-<!--                  <shadedPattern>de.scrum_master.jar.bytebuddy</shadedPattern>-->
-<!--                </relocation>-->
-<!--              </relocations>-->
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>all</shadedClassifierName>
               <filters>
                 <filter>
                   <artifact>de.scrum-master:remove-final-agent</artifact>
@@ -65,6 +59,53 @@
                   </excludes>
                 </filter>
               </filters>
+            </configuration>
+          </execution>
+          <execution>
+            <id>shade-relocate</id>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <minimizeJar>false</minimizeJar>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>all-special</shadedClassifierName>
+              <filters>
+                <filter>
+                  <artifact>de.scrum-master:remove-final-agent</artifact>
+                  <includes>
+                    <include>de/scrum_master/agent/**</include>
+                  </includes>
+                </filter>
+                <filter>
+                  <artifact>net.bytebuddy:*</artifact>
+                  <excludes>
+                    <exclude>**/maven/net.bytebuddy/**</exclude>
+                    <exclude>**/module-info.class</exclude>
+                    <exclude>**/NOTICE</exclude>
+                    <exclude>**/MANIFEST.MF</exclude>
+                    <!--
+                      Just retain ByteBuddy Apache 2.0 licence mentioning ASM because for now all files we include
+                      in this minimised JAR are ASM classes relocated into ByteBuddy name space anyway. If in the
+                      future this agent needs real ByteBuddy classes, consider to add an own licence file and move
+                      the ByteBuddy licence to META-INF/licenses/ByteBuddy.
+                    -->
+                    <!--<exclude>**/LICENSE</exclude>-->
+                  </excludes>
+                </filter>
+              </filters>
+              <relocations>
+                <relocation>
+                  <pattern>net.bytebuddy.jar.asm</pattern>
+                  <shadedPattern>de.scrum_master.jar.asm</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>net.bytebuddy</pattern>
+                  <shadedPattern>de.scrum_master.jar.bytebuddy</shadedPattern>
+                </relocation>
+              </relocations>
             </configuration>
           </execution>
         </executions>

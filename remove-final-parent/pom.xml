@@ -15,7 +15,6 @@
 
   <modules>
     <module>remove-final-agent</module>
-    <module>remove-final-agent-no-dep</module>
     <module>remove-final-plugin</module>
   </modules>
 
