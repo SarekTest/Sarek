@@ -210,6 +210,9 @@
         </executions>
         <configuration>
           <warnOnMissingOutputDirectory>true</warnOnMissingOutputDirectory>
+          <initialization>
+            <entryPoint>DECORATE</entryPoint>
+          </initialization>
           <transformations>
             <transformation>
               <plugin>de.scrum_master.agent.remove_final.RemoveFinalPlugin</plugin>
