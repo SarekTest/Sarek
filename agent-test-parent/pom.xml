@@ -15,8 +15,30 @@
 
   <modules>
     <module>agent-test-common</module>
+    <module>agent-test-instrument-jre</module>
     <module>aspect-test-use-agent</module>
     <module>aspect-test-no-agent</module>
   </modules>
+
+  <!--
+    Caveat: Automatic, JDK-based profile activation can *not* be inherited by child POMs defining
+    the same profiles. Thus, we have to repeat activation conditions there.
+
+    Note: We can check if automatic profile activation works via mvn help:active-profiles.
+  -->
+  <profiles>
+    <profile>
+      <id>jdk-8</id>
+      <activation>
+        <jdk>[1.8,1.9)</jdk>
+      </activation>
+    </profile>
+    <profile>
+      <id>jdk-9</id>
+      <activation>
+        <jdk>[1.9,)</jdk>
+      </activation>
+    </profile>
+  </profiles>
 
 </project>
