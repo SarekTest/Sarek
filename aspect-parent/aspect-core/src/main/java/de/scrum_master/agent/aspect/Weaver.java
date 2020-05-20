@@ -236,7 +236,7 @@ public class Weaver {
                     System.out.println(
                       (woven ? "Avoid double" : "Perform")
                         + " aspect weaving for: " + methodDescription
-                      + " / weaver = " + this
+                        + " / weaver = " + this
                     );
                     wovenMethodRegistry.add(methodDescription, this);
                     return !woven;

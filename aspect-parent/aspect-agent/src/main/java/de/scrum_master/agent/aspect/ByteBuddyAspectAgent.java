@@ -46,7 +46,8 @@ public class ByteBuddyAspectAgent {
       attachRemoveFinalTransformer(logRemoveFinal);
   }
 
-  // TODO: optionally pack both JARs into agent JAR, unpack and attach if not found in file system or on classpath
+  // TODO: optionally pack shaded JARs (all vs. all-special) into agent JAR, unpack and attach
+  //       if not found in file system or on classpath
   private static File findJarFile(String ressourcePath) throws IOException, URISyntaxException {
     String resourceURL = ClassLoader
       .getSystemResource(ressourcePath)
