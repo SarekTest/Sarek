@@ -44,7 +44,6 @@ public class RemoveFinalPlugin implements Plugin {
 
   @Override
   public boolean matches(TypeDescription target) {
-    // TODO: use matcher from RemoveFinalTransformer or make configurable
-    return true;
+    return RemoveFinalTransformer.shouldTransform(target.getName());
   }
 }

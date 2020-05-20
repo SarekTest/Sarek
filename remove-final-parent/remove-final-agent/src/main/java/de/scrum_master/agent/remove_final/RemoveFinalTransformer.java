@@ -79,8 +79,14 @@ public class RemoveFinalTransformer extends ClassVisitor {
    */
 //  @Override
   public boolean shouldTransform() {
+    return shouldTransform(className);
+  }
+
+  public static boolean shouldTransform(String className) {
     // Default exclude list for transformation
-    return !className.startsWith("de.scrum_master.agent.")
+    return
+      // Our own agent-related stuff
+      !className.startsWith("de.scrum_master.agent.")
       // The JVM does not tolerate definalisation ob class Object but says:
       //   Error occurred during initialization of VM
       //   Incompatible definition of java.lang.Object
