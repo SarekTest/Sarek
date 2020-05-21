@@ -87,7 +87,7 @@ public class RemoveFinalTransformer extends ClassVisitor {
     return
       // Our own agent-related stuff
       !className.startsWith("de.scrum_master.agent.")
-        // The JVM does not tolerate definalisation ob class Object but says:
+        // The JVM does not tolerate definalisation of Object methods but says:
         //   Error occurred during initialization of VM
         //   Incompatible definition of java.lang.Object
         && !className.equals("java.lang.Object")

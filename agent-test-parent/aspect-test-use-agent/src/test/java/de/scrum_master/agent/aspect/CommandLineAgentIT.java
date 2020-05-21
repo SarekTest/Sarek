@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
  * boot class loader injection for the Java agent does not work as expected.
  */
 public class CommandLineAgentIT {
-  private static final Instrumentation INSTRUMENTATION = ByteBuddyAspectAgent.getInstrumentation();
+  private static final Instrumentation INSTRUMENTATION = AspectAgent.getInstrumentation();
 
   private Weaver weaver;
 

@@ -19,7 +19,7 @@ import java.util.jar.JarFile;
  *     detection more reliable and also relieve the user from having to add the
  *     aspect framework to her class path.
  */
-public class ByteBuddyAspectAgent {
+public class AspectAgent {
   private static boolean active;
   private static boolean removeFinalActive;
   private static boolean logRemoveFinal;
@@ -57,7 +57,7 @@ public class ByteBuddyAspectAgent {
     File file;
     if (resourceURL.contains("/target/classes/")) {
       // Try to fix the phenomenon that in IntelliJ IDEA when running the test via run configuration,
-      // the runner insists on referring to the 'bytebuddy-aspect' module locally via 'target/classes'
+      // the runner insists on referring to the 'aspect-core' module locally via 'target/classes'
       // instead of to the JAR in the local Maven repository or in the module's 'target' directory.
       File targetDir = new File(resourceURL.replaceFirst("(/target)/classes/.*", "$1"));
       File[] candidateJars = targetDir.listFiles((dir, name) ->

@@ -28,7 +28,7 @@ import static org.junit.Assert.assertFalse;
  * boot class loader injection for the Java agent does not work as expected.
  */
 public class RemoveFinalWithAspectAgentIT {
-  private static final Instrumentation INSTRUMENTATION = ByteBuddyAspectAgent.getInstrumentation();
+  private static final Instrumentation INSTRUMENTATION = AspectAgent.getInstrumentation();
 
   @Test
   public void checkDefinaliser() throws NoSuchMethodException {
