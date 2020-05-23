@@ -23,7 +23,7 @@ public class RemoveFinalPlugin implements Plugin {
       .visit(new AsmVisitorWrapper() {
         @Override
         public int mergeWriter(int flags) {
-          return PARSING_FLAGS;
+          return 0;
         }
 
         @Override

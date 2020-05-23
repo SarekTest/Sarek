@@ -39,7 +39,7 @@ public class RemoveFinalTransformer extends ClassVisitor {
           byte[] classfileBuffer
         ) {
           ClassReader classReader = new ClassReader(classfileBuffer);
-          ClassWriter classWriter = new ClassWriter(classReader, PARSING_FLAGS);
+          ClassWriter classWriter = new ClassWriter(classReader, 0);
           classReader.accept(new RemoveFinalTransformer(classWriter, logRemoveFinal), PARSING_FLAGS);
           return classWriter.toByteArray();
         }
