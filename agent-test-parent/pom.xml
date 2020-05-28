@@ -16,8 +16,8 @@
   <modules>
     <module>agent-test-common</module>
     <module>agent-test-instrument-jre</module>
-    <module>aspect-test-use-agent</module>
-    <module>aspect-test-no-agent</module>
+    <module>agent-test-use-agent</module>
+    <module>agent-test-no-agent</module>
   </modules>
 
   <!--

@@ -5,18 +5,16 @@
 
   <parent>
     <groupId>de.scrum-master</groupId>
-    <artifactId>agent-test-parent</artifactId>
+    <artifactId>agent-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>agent-test-common</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <artifactId>global-mock-parent</artifactId>
+  <packaging>pom</packaging>
 
-  <dependencies>
-    <dependency>
-      <groupId>net.bytebuddy</groupId>
-      <artifactId>byte-buddy</artifactId>
-    </dependency>
-  </dependencies>
+  <modules>
+    <module>global-mock-agent</module>
+    <module>global-mock-plugin</module>
+  </modules>
 
 </project>

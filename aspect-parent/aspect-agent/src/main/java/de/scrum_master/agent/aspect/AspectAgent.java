@@ -3,6 +3,7 @@ package de.scrum_master.agent.aspect;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -23,6 +24,7 @@ public class AspectAgent {
   private static boolean active;
   private static boolean removeFinalActive;
   private static boolean logRemoveFinal;
+  private static boolean globalMockActive;
   private static Instrumentation instrumentation;
 
   public static void agentmain(String options, Instrumentation instr) throws Exception {
@@ -35,15 +37,24 @@ public class AspectAgent {
 
     File transformerJar = findJarFile("de/scrum_master/agent/aspect/Weaver.class");
     instr.appendToBootstrapClassLoaderSearch(new JarFile(transformerJar));
+    // TODO: make more generic
+    instr.appendToBootstrapClassLoaderSearch(new JarFile("C:/Users/alexa/.m2/repository/de/scrum-master/global-mock-agent/1.0-SNAPSHOT/global-mock-agent-1.0-SNAPSHOT-all.jar"));
 
     instrumentation = instr;
     active = true;
+
     // TODO: document how to use '-javaagent:my.jar=removeFinal' -> Javadoc, read-me
     removeFinalActive = options != null && options.trim().toLowerCase().contains("removefinal");
     // TODO: document how to use '-javaagent:my.jar=verbose' -> Javadoc, read-me
     logRemoveFinal = options != null && options.trim().toLowerCase().contains("verbose");
     if (removeFinalActive)
       attachRemoveFinalTransformer(logRemoveFinal);
+
+    // TODO: document how to use '-javaagent:my.jar=removeFinal' -> Javadoc, read-me
+    globalMockActive = options != null && options.trim().toLowerCase().contains("globalmock");
+    if (globalMockActive)
+      attachGlobalMockTransformer(logRemoveFinal);  // TODO: separate setting 'logGlobalMock'
+
   }
 
   // TODO: optionally pack shaded JARs (all vs. all-special) into agent JAR, unpack and attach
@@ -82,6 +93,16 @@ public class AspectAgent {
       .forName("de.scrum_master.agent.remove_final.RemoveFinalTransformer")
       .getDeclaredMethod("install", Instrumentation.class, boolean.class)
       .invoke(null, instrumentation, logRemoveFinal);
+  }
+
+  private static void attachGlobalMockTransformer(boolean logGlobalMock) throws ReflectiveOperationException {
+    instrumentation.addTransformer(
+      (ClassFileTransformer) Class
+        .forName("de.scrum_master.agent.global_mock.GlobalMockTransformer")
+        .getDeclaredConstructor(String.class)
+        .newInstance(""), // TODO: pass through 'logGlobalMock'
+      true
+    );
   }
 
   public static boolean isActive() {

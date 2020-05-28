@@ -52,7 +52,7 @@ classpath):
   </plugin>
   ```
 
-You can take a look at [`NoAgentIT`](https://github.com/kriegaex/ByteBuddyAspect/blob/master/bytebuddy-agent-test-parent/bytebuddy-aspect-test-no-agent/src/test/java/de/scrum_master/bytebuddy/aspect/NoAgentIT.java)
+You can take a look at [`NoAgentIT`](https://github.com/kriegaex/ByteBuddyAspect/blob/master/bytebuddy-agent-test-parent/bytebuddy-agent-test-no-agent/src/test/java/de/scrum_master/bytebuddy/aspect/NoAgentIT.java)
 if you want to get an idea how to use the aspect framework with your application classes.
 
 ### Weave bootstrap JRE/JDK classes too
@@ -98,7 +98,7 @@ this:
   </plugin>
   ```
 
-You can take a look at [`CommandLineAgentIT`](https://github.com/kriegaex/ByteBuddyAspect/blob/master/bytebuddy-agent-test-parent/bytebuddy-aspect-test-use-agent/src/test/java/de/scrum_master/bytebuddy/aspect/CommandLineAgentIT.java)
+You can take a look at [`CommandLineAgentIT`](https://github.com/kriegaex/ByteBuddyAspect/blob/master/bytebuddy-agent-test-parent/bytebuddy-agent-test-use-agent/src/test/java/de/scrum_master/bytebuddy/aspect/CommandLineAgentIT.java)
 if you want to get an idea how to use the aspect framework with bootstrap classes, i.e. usually JRE/JDK classes which
 might even have been loaded already (or not, it does not really make a difference in this case) and usually are
 unreachable for instrumentation with normal test frameworks.

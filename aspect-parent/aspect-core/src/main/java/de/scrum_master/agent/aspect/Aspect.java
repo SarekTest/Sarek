@@ -23,29 +23,29 @@ public abstract class Aspect<T> {
     /**
      * Apply advice globally. I.e whatever the class and method matchers of the defined aspect match, however broadly
      * they are defined, the advice will be applied, unless a less global scope is registered on the weaver.
-     * <p>
+     * de.icongmbh.oss.maven.plugin.javassist.ClassTransformer
      * <i>Not implemented yet.</i>
      */
     GLOBAL,
     /**
      * Limit advice application to anything matched within a specific Java module.
-     * <p>
+     * de.icongmbh.oss.maven.plugin.javassist.ClassTransformer
      * <i>Not implemented yet.</i>
      */
     MODULE,
     /**
      * Limit advice application to anything matched within a specific package and its subpackages.
-     * <p>
+     * de.icongmbh.oss.maven.plugin.javassist.ClassTransformer
      * <i>Not implemented yet.</i>
-     * <p>
+     * de.icongmbh.oss.maven.plugin.javassist.ClassTransformer
      * TODO: Modules and packages can intersect. How do we handle this?
      */
     PACKAGE,
     /**
      * Limit advice application to anything matched within a specific class.
-     * <p>
+     * de.icongmbh.oss.maven.plugin.javassist.ClassTransformer
      * <i>Not implemented yet.</i>
-     * <p>
+     * de.icongmbh.oss.maven.plugin.javassist.ClassTransformer
      * TODO: What about subclasses? Probably we shall not support them. Why recreate Aspect? This framework is mostly
      *       targeted to people looking for a mocking tool which can also be applied to already loaded classes, even
      *       JRE bootstrap classes.
@@ -54,15 +54,15 @@ public abstract class Aspect<T> {
     /**
      * Limit advice application to anything matching a specific method or constructor with a unique signature, i.e.
      * explicitly do not match multiple overloaded methods of the same name.
-     * <p>
+     * de.icongmbh.oss.maven.plugin.javassist.ClassTransformer
      * <i>Not implemented yet.</i>
      */
     METHOD,
     /**
      * Limit advice application to a specific instance registered on the weaver.
-     * <p>
+     * de.icongmbh.oss.maven.plugin.javassist.ClassTransformer
      * <i>Not implemented yet.</i>
-     * <p>
+     * de.icongmbh.oss.maven.plugin.javassist.ClassTransformer
      * TODO: Instance scope intersecs with all other scopes. How do we handle preference?
      */
     INSTANCE

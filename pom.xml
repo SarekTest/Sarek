@@ -19,6 +19,10 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <bytebuddy.version>1.10.10</bytebuddy.version>
+    <javassist.version>3.27.0-GA</javassist.version>
+    <javassist-maven-plugin.version>2.0.0</javassist-maven-plugin.version>
+    <global-mock-agent.version>1.0-SNAPSHOT</global-mock-agent.version>
+    <remove-final-agent.version>1.0-SNAPSHOT</remove-final-agent.version>
   </properties>
 
   <build>
@@ -32,25 +36,49 @@
 
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
-          <!-- TODO: Switch to next milestone or stable release as soon as available on Maven Central -->
-          <version>3.0.0-RC1</version>
+          <!--
+            TODO:
+              - Switch to next milestone or stable release as soon as available on Maven Central
+              - Attention: 3.0.0-RC1 is changing + unstable, e.g. freezes when running ITs with active agents
+          -->
+          <!--          <version>3.0.0-RC1</version>-->
+          <version>3.0.0-M4</version>
           <configuration>
             <!-- Do not reuse forked VMs because of potentially unexpected instrumentation bleed-over -->
             <reuseForks>false</reuseForks>
             <!-- Fix for "[WARNING] Corrupted STDOUT by directly writing to native stream in forked JVM" -->
-            <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>
+            <!--            <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>-->
+            <systemPropertyVariables>
+              <aspect-agent.jar>
+                ${project.basedir}/aspect-agent/target/aspect-agent-${project.version}.jar
+              </aspect-agent.jar>
+              <javassist.jar>
+                ${settings.localRepository}/org/javassist/javassist/${javassist.version}/javassist-${javassist.version}.jar
+              </javassist.jar>
+              <global-mock-agent.jar>
+                ${settings.localRepository}/de/scrum-master/global-mock-agent/${global-mock-agent.version}/global-mock-agent-${global-mock-agent.version}.jar
+              </global-mock-agent.jar>
+              <remove-final-agent.jar>
+                ${project.basedir}/remove-final-parent/remove-final-agent/target/remove-final-agent-${project.version}-all.jar
+              </remove-final-agent.jar>
+            </systemPropertyVariables>
           </configuration>
         </plugin>
 
         <plugin>
           <artifactId>maven-failsafe-plugin</artifactId>
-          <!-- TODO: Switch to next milestone or stable release as soon as available on Maven Central -->
-          <version>3.0.0-RC1</version>
+          <!--
+            TODO:
+              - Switch to next milestone or stable release as soon as available on Maven Central
+              - Attention: 3.0.0-RC1 is changing + unstable, e.g. freezes when running ITs with active agents
+          -->
+          <!--          <version>3.0.0-RC1</version>-->
+          <version>3.0.0-M4</version>
           <configuration>
             <!-- Do not reuse forked VMs because of potentially unexpected instrumentation bleed-over -->
             <reuseForks>false</reuseForks>
             <!-- Fix for "[WARNING] Corrupted STDOUT by directly writing to native stream in forked JVM" -->
-            <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>
+            <!--            <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>-->
           </configuration>
           <executions>
             <execution>
@@ -99,7 +127,6 @@
           <version>3.1.0</version>
         </plugin>
 
-
         <plugin>
           <artifactId>maven-resources-plugin</artifactId>
           <version>3.1.0</version>
@@ -108,6 +135,37 @@
         <plugin>
           <artifactId>maven-antrun-plugin</artifactId>
           <version>3.0.0</version>
+        </plugin>
+
+        <plugin>
+          <groupId>de.icongmbh.oss.maven.plugins</groupId>
+          <artifactId>javassist-maven-plugin</artifactId>
+          <version>2.0.0</version>
+          <configuration>
+            <includeTestClasses>false</includeTestClasses>
+            <!-- TODO: create demo test module weaving global mock code into JRE bootstrap classes -->
+            <!--
+            <transformerClasses>
+              <transformerClass>
+                <className>de.scrum_master.agent.global_mock.GlobalMockPluginTransformer</className>
+                <properties>
+                  <property>
+                    <name>append.value</name>
+                    <value>and ToStringTransformer</value>
+                  </property>
+                </properties>
+              </transformerClass>
+            </transformerClasses>
+            -->
+          </configuration>
+          <executions>
+            <execution>
+              <phase>process-classes</phase>
+              <goals>
+                <goal>javassist</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
 
       </plugins>
@@ -124,6 +182,7 @@
   <dependencyManagement>
     <dependencies>
 
+      <!-- ByteBuddy -->
       <dependency>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy</artifactId>
@@ -131,9 +190,34 @@
       </dependency>
       <dependency>
         <groupId>net.bytebuddy</groupId>
+        <artifactId>byte-buddy-agent</artifactId>
+        <version>${bytebuddy.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy-dep</artifactId>
         <version>${bytebuddy.version}</version>
       </dependency>
+
+      <!-- Javassist -->
+      <dependency>
+        <groupId>org.javassist</groupId>
+        <artifactId>javassist</artifactId>
+        <version>${javassist.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>de.icongmbh.oss.maven.plugins</groupId>
+        <artifactId>javassist-maven-plugin</artifactId>
+        <version>${javassist-maven-plugin.version}</version>
+      </dependency>
+      <!-- Resolve version conflict inside javassist-maven-plugin -->
+      <dependency>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-utils</artifactId>
+        <version>3.2.0</version>
+      </dependency>
+
+      <!-- Internal dependencies -->
       <dependency>
         <groupId>de.scrum-master</groupId>
         <artifactId>remove-final-agent</artifactId>
@@ -155,13 +239,12 @@
         <version>1.0-SNAPSHOT</version>
       </dependency>
       <dependency>
-        <groupId>net.bytebuddy</groupId>
-        <artifactId>byte-buddy-agent</artifactId>
-        <version>${bytebuddy.version}</version>
+        <groupId>de.scrum-master</groupId>
+        <artifactId>global-mock-agent</artifactId>
+        <version>1.0-SNAPSHOT</version>
       </dependency>
 
       <!-- Test dependencies -->
-
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
@@ -203,9 +286,10 @@
   </pluginRepositories>
 
   <modules>
-    <module>agent-test-parent</module>
     <module>aspect-parent</module>
     <module>remove-final-parent</module>
+    <module>global-mock-parent</module>
+    <module>agent-test-parent</module>
   </modules>
 
 </project>

@@ -1,16 +1,17 @@
 package de.scrum_master.app;
 
-public class AnotherSub extends Base{
-  private final String name;
+public class AnotherSub extends Base {
+  protected final String name;
 
   public AnotherSub(int id, String name) {
     super(id);
-    System.out.println("Constructing AnotherSub -> " + this);
     this.name = name;
+    System.out.println("Constructing AnotherSub -> " + this);
   }
 
   public AnotherSub(String name) {
     this(1234, name);
+    System.out.println("Constructing AnotherSub -> " + this);
   }
 
   public String getName() {
