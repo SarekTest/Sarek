@@ -146,6 +146,8 @@ public class GlobalMockTransformer implements ClassFileTransformer {
             return "0.0f";
           case "double":
             return "0.0d";
+          case "char":
+            return "(char) 0";
           case "boolean":
             return "false";
           default:
