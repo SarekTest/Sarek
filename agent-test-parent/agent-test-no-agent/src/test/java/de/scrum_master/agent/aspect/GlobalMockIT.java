@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
  * This test runs without a Java agent set via command line. It attaches it dynamically after adding it to the
  * bootstrap class loader's search path. The latter is only necessary if we want to globally mock classes which are
  * either bootstrap classes themselves or have bootstrap classes in their ancestry (direct or indirect parent classes).
- * de.icongmbh.oss.maven.plugin.javassist.ClassTransformer
+ *
  * Furthermore, the test demonstrates how to retransform an already loaded class (in this case also a bootstrap class)
  * in order to add global mock functionality to it. This proves that the global mock transformation does not change the
  * class structure but only instruments constructor bodies. I.e. that this is more flexible than e.g. removing 'final'
@@ -35,7 +35,7 @@ import static org.junit.Assert.*;
  */
 public class GlobalMockIT {
   private static final Instrumentation INSTRUMENTATION = ByteBuddyAgent.install();
-  private GlobalMockTransformer transformer;
+  private GlobalMockTransformer globalMockTransformer;
 
   @BeforeClass
   public static void beforeClass() throws IOException {
@@ -53,15 +53,15 @@ public class GlobalMockIT {
 
   @Before
   public void beforeTest() {
-    transformer = new GlobalMockTransformer();
+    globalMockTransformer = new GlobalMockTransformer();
     // Important: set 'canRetransform' parameter to true
-    INSTRUMENTATION.addTransformer(transformer, true);
+    INSTRUMENTATION.addTransformer(globalMockTransformer, true);
   }
 
   @After
   public void afterTest() {
-    INSTRUMENTATION.removeTransformer(transformer);
-    transformer = null;
+    INSTRUMENTATION.removeTransformer(globalMockTransformer);
+    globalMockTransformer = null;
   }
 
   Base base;

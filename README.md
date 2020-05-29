@@ -4,7 +4,7 @@
 
 ***This file is outdated and needs to be completely rewritten because dependency names have changed after a refactoring.
 So have class names and features. stay tuned for an update.***
-  
+
 ## How to use
 
 Build via `mvn install` in order to deploy the artifact to your local Maven repository. This is necessary because the
