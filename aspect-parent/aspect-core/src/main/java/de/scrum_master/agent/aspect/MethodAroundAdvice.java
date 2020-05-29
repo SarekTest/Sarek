@@ -17,23 +17,8 @@ public class MethodAroundAdvice extends AroundAdvice<Method> {
   public static final MethodAroundAdvice MOCK = new MethodAroundAdvice(
     // Skip target method (do not proceed)
     (target, method, args) -> false,
-    (target, method, args, proceedMode, returnValue, throwable) ->
-    {
-      Class<?> returnType = method.getReturnType();
-      if (!returnType.isPrimitive())
-        return null;
-      if (returnType.equals(long.class))
-        return 0L;
-      if (returnType.equals(float.class))
-        return 0.0f;
-      if (returnType.equals(double.class))
-        return 0.0d;
-      if (returnType.equals(char.class))
-        return '\0';
-      if (returnType.equals(boolean.class))
-        return false;
-      return 0;
-    }
+    // Just return original value (which in this case should be the @StubValue)
+    (target, method, args, proceedMode, returnValue, throwable) -> returnValue
   );
 
   public MethodAroundAdvice(Before before, After after) {

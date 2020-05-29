@@ -62,6 +62,7 @@ public abstract class MethodAspect extends Aspect<Method> {
     @AllArguments(readOnly = false, typing = DYNAMIC) Object[] args,
     @Enter boolean proceedMode,
     @Return(readOnly = false, typing = DYNAMIC) Object returnValue,
+    @StubValue Object stubReturnValue,
     @Thrown(readOnly = false, typing = DYNAMIC) Throwable throwable
   ) {
     // Get advice for target object instance or target class
@@ -71,10 +72,15 @@ public abstract class MethodAspect extends Aspect<Method> {
     if (advice == null)
       return;
 
+    // If target method was not executed, initialise return value with default value for that type, i.e null, 0, false
+    if (!proceedMode)
+      returnValue = stubReturnValue;
+
     try {
       returnValue = advice.after(target, method, args, proceedMode, returnValue, throwable);
       throwable = null;
-    } catch (Throwable e) {
+    }
+    catch (Throwable e) {
       throwable = e;
       returnValue = null;
     }
