@@ -40,7 +40,8 @@ public class GlobalMockIT {
   @BeforeClass
   public static void beforeClass() throws IOException {
     useBootstrapClassBeforeInstrumentation();
-    // Property is set in Maven in order to tell us the path
+    // This property is usually set in Maven in order to tell us the path to the global mock agent.
+    // Important: The JAR needs to contain Javassist too, so it should be the '-all' or '-all-special' artifact.
     JarFile globalMockAgentJar = new JarFile(System.getProperty("global-mock-agent.jar"));
     // Inject global mock agent JAR into bootstrap classloader
     INSTRUMENTATION.appendToBootstrapClassLoaderSearch(globalMockAgentJar);

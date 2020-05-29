@@ -19,10 +19,9 @@
         <configuration>
           <systemPropertyVariables>
             <global-mock-agent.jar>
-              ${settings.localRepository}/de/scrum-master/global-mock-agent/${global-mock-agent.version}/global-mock-agent-${global-mock-agent.version}.jar
+              ${settings.localRepository}/de/scrum-master/global-mock-agent/${global-mock-agent.version}/global-mock-agent-${global-mock-agent.version}-all.jar
             </global-mock-agent.jar>
           </systemPropertyVariables>
-
         </configuration>
       </plugin>
     </plugins>
