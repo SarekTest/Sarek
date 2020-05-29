@@ -15,7 +15,8 @@ public class MethodAroundAdvice extends AroundAdvice<Method> {
   };
 
   public static final MethodAroundAdvice MOCK = new MethodAroundAdvice(
-    null,
+    // Skip target method (do not proceed)
+    (target, method, args) -> false,
     (target, method, args, proceedMode, returnValue, throwable) ->
     {
       Class<?> returnType = method.getReturnType();
