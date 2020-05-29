@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 public class GlobalMockTransformer implements ClassFileTransformer {
 
   // TODO: make log level configurable
-  private static final boolean LOG_GLOBAL_MOCK = true;
+  public static boolean LOG_GLOBAL_MOCK = false;
 
   private final String LOG_PREFIX = GlobalMockAgent.isActive()
     ? "[Global Mock Agent] "
