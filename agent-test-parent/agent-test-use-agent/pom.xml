@@ -12,20 +12,6 @@
   <artifactId>agent-test-use-agent</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <properties>
-    <instrumented-jre.jar>
-      ../agent-test-instrument-jre/target/agent-test-instrument-jre-${project.version}.jar
-    </instrumented-jre.jar>
-    <aspect-agent.jar>
-      ../../aspect-parent/aspect-agent/target/aspect-agent-${project.version}.jar
-    </aspect-agent.jar>
-    <global-mock-agent.version>1.0-SNAPSHOT</global-mock-agent.version>
-    <global-mock-agent.jar>
-      C:/Users/alexa/.m2/repository/de/scrum-master/global-mock-agent/${global-mock-agent.version}/global-mock-agent-${global-mock-agent.version}.jar
-    </global-mock-agent.jar>
-    <javassist.version>3.27.0-GA</javassist.version>
-  </properties>
-
   <!--
   Caveat: Automatic, JDK-based profile activation can *not* be inherited from a parent POM
   if we define the same profiles again. Thus, we have to repeat activation conditions there.

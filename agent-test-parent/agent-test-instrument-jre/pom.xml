@@ -11,12 +11,6 @@
 
   <artifactId>agent-test-instrument-jre</artifactId>
 
-  <properties>
-    <instrumented-jre.jar>
-      ${project.build.directory}/${project.build.finalName}.${project.packaging}
-    </instrumented-jre.jar>
-  </properties>
-
   <!--
     Caveat: Automatic, JDK-based profile activation can *not* be inherited from a parent POM
     if we define the same profiles again. Thus, we have to repeat activation conditions there.
