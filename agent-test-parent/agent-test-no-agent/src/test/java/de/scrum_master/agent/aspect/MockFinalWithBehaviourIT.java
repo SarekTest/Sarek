@@ -46,6 +46,8 @@ public class MockFinalWithBehaviourIT {
 
     // This property is usually set in Maven in order to tell us the path to the aspect agent.
     // Important: The JAR needs to contain ByteBuddy too, so it should be the '-all' or '-all-special' artifact.
+    // For now this test expects '-all'. With '-all-special' the ByteBuddy packages would be relocated to
+    // 'de.scrum_master.jar.bytebuddy' and e.g. the ElementMatcher imports would need to be changed.
     JarFile aspectAgentJar = new JarFile(System.getProperty("aspect-agent.jar"));
     // Inject aspect agent JAR into bootstrap classloader
     INSTRUMENTATION.appendToBootstrapClassLoaderSearch(aspectAgentJar);
