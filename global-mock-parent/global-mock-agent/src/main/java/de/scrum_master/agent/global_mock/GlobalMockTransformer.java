@@ -35,7 +35,7 @@ public class GlobalMockTransformer implements ClassFileTransformer {
   // TODO: make log level configurable
   public static boolean LOG_GLOBAL_MOCK = false;
   // TODO: make class file dumping configurable
-  public static boolean DUMP_CLASS_FILES = true;
+  public static boolean DUMP_CLASS_FILES = false;
   public static String DUMP_CLASS_BASE_DIR = "global-mock-transform";
 
   private final String LOG_PREFIX = GlobalMockAgent.isActive()
