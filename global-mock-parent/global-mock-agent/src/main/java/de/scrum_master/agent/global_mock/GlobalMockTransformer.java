@@ -3,8 +3,11 @@ package de.scrum_master.agent.global_mock;
 import javassist.*;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.ProtectionDomain;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -31,6 +34,9 @@ public class GlobalMockTransformer implements ClassFileTransformer {
 
   // TODO: make log level configurable
   public static boolean LOG_GLOBAL_MOCK = false;
+  // TODO: make class file dumping configurable
+  public static boolean DUMP_CLASS_FILES = true;
+  public static String DUMP_CLASS_BASE_DIR = "global-mock-transform";
 
   private final String LOG_PREFIX = GlobalMockAgent.isActive()
     ? "[Global Mock Agent] "
@@ -73,13 +79,28 @@ public class GlobalMockTransformer implements ClassFileTransformer {
     if (!shouldTransform(ctClass))
       return null;
     applyTransformations(ctClass);
+    byte[] transformedBytecode;
     try {
-      return ctClass.toBytecode();
+      transformedBytecode = ctClass.toBytecode();
     }
-    catch (Exception e) {
-      System.out.println(e);
+    catch (IOException | CannotCompileException e) {
+      log("ERROR: Cannot get byte code for transformed class " + className);
+      e.printStackTrace();
       return null;
     }
+    if (DUMP_CLASS_FILES) {
+      Path path = new File(DUMP_CLASS_BASE_DIR + "/" + className + ".class").toPath();
+      try {
+        Files.createDirectories(path.getParent());
+        log("Dumping transformed class file " + path.toAbsolutePath());
+        Files.write(path, transformedBytecode);
+      }
+      catch (IOException e) {
+        log("ERROR: Cannot write class file to " + path.toAbsolutePath());
+        e.printStackTrace();
+      }
+    }
+    return transformedBytecode;
   }
 
   // TODO: This only works if all classes are being transformed via class-loading. Implement recursive manual mode which
