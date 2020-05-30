@@ -2,10 +2,7 @@ package de.scrum_master.agent.aspect;
 
 import de.scrum_master.agent.global_mock.GlobalMockRegistry;
 import de.scrum_master.agent.global_mock.GlobalMockTransformer;
-import de.scrum_master.app.AnotherSub;
-import de.scrum_master.app.Base;
-import de.scrum_master.app.ExtendsSub;
-import de.scrum_master.app.Sub;
+import de.scrum_master.app.*;
 import net.bytebuddy.agent.ByteBuddyAgent;
 import org.junit.After;
 import org.junit.Before;
@@ -26,7 +23,7 @@ import static org.junit.Assert.*;
  * This test runs without a Java agent set via command line. It attaches it dynamically after adding it to the
  * bootstrap class loader's search path. The latter is only necessary if we want to globally mock classes which are
  * either bootstrap classes themselves or have bootstrap classes in their ancestry (direct or indirect parent classes).
- *
+ * <p>
  * Furthermore, the test demonstrates how to retransform an already loaded class (in this case also a bootstrap class)
  * in order to add global mock functionality to it. This proves that the global mock transformation does not change the
  * class structure but only instruments constructor bodies. I.e. that this is more flexible than e.g. removing 'final'
@@ -157,5 +154,29 @@ public class GlobalMockIT {
     GlobalMockRegistry.deactivate(UUID.class.getName());
     assertFalse(GlobalMockRegistry.isMock(UUID.class.getName()));
     assertEquals("00000000-0000-abba-0000-00000000cafe", new UUID(0xABBA, 0xCAFE).toString());
+  }
+
+  /**
+   * This test serves the purpose of checking if the transformation is working for constructor arguments of
+   * - all primitive types,
+   * - a reference type and
+   * - an array (technically also a reference type).
+   */
+  @Test
+  public void globalMockComplexConstructor() {
+    String className = SubWithComplexConstructor.class.getName();
+    GlobalMockRegistry.activate(className);
+    assertTrue(
+      new SubWithComplexConstructor(
+        (byte) 123, '@', 123.45, 67.89f,
+        123, 123, (short) 123, true,
+        "foo", new int[][] { { 12, 34 }, { 56, 78 } }
+      ).toString().contains(
+        "aByte=0, aChar=\0, aDouble=0.0, aFloat=0.0, " +
+          "anInt=0, aLong=0, aShort=0, aBoolean=false, " +
+          "string='null', ints=null"
+      )
+    );
+    GlobalMockRegistry.deactivate(className);
   }
 }

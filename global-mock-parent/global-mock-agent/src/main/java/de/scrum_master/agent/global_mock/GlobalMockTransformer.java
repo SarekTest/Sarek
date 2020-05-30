@@ -156,9 +156,9 @@ public class GlobalMockTransformer implements ClassFileTransformer {
       .map(parameterType -> {
         switch (parameterType.getName()) {
           case "byte":
-            return "0";
+            return "(byte) 0";
           case "short":
-            return "0";
+            return "(short) 0";
           case "int":
             return "0";
           case "long":
