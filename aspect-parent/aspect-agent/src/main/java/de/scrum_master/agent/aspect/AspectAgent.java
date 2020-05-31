@@ -24,7 +24,7 @@ public class AspectAgent {
   private static boolean active;
   private static boolean removeFinalActive;
   private static boolean logRemoveFinal;
-  private static boolean globalMockActive;
+  private static boolean constructorMockActive;
   private static Instrumentation instrumentation;
 
   public static void agentmain(String options, Instrumentation instr) throws Exception {
@@ -38,7 +38,7 @@ public class AspectAgent {
     File transformerJar = findJarFile("de/scrum_master/agent/aspect/Weaver.class");
     instr.appendToBootstrapClassLoaderSearch(new JarFile(transformerJar));
     // TODO: make more generic
-    instr.appendToBootstrapClassLoaderSearch(new JarFile("C:/Users/alexa/.m2/repository/de/scrum-master/global-mock-agent/1.0-SNAPSHOT/global-mock-agent-1.0-SNAPSHOT-all.jar"));
+    instr.appendToBootstrapClassLoaderSearch(new JarFile("C:/Users/alexa/.m2/repository/de/scrum-master/constructor-mock-agent/1.0-SNAPSHOT/constructor-mock-agent-1.0-SNAPSHOT-all.jar"));
 
     instrumentation = instr;
     active = true;
@@ -51,9 +51,9 @@ public class AspectAgent {
       attachRemoveFinalTransformer(logRemoveFinal);
 
     // TODO: document how to use '-javaagent:my.jar=removeFinal' -> Javadoc, read-me
-    globalMockActive = options != null && options.trim().toLowerCase().contains("globalmock");
-    if (globalMockActive)
-      attachGlobalMockTransformer(logRemoveFinal);  // TODO: separate setting 'logGlobalMock'
+    constructorMockActive = options != null && options.trim().toLowerCase().contains("constructormock");
+    if (constructorMockActive)
+      attachConstructorMockTransformer(logRemoveFinal);  // TODO: separate setting 'logConstructorMock'
 
   }
 
@@ -95,12 +95,12 @@ public class AspectAgent {
       .invoke(null, instrumentation, logRemoveFinal);
   }
 
-  private static void attachGlobalMockTransformer(boolean logGlobalMock) throws ReflectiveOperationException {
+  private static void attachConstructorMockTransformer(boolean logConstructorMock) throws ReflectiveOperationException {
     instrumentation.addTransformer(
       (ClassFileTransformer) Class
-        .forName("de.scrum_master.agent.global_mock.GlobalMockTransformer")
-        .getDeclaredConstructor(String.class)
-        .newInstance(""), // TODO: pass through 'logGlobalMock'
+        .forName("de.scrum_master.agent.constructor_mock.ConstructorMockTransformer")
+        .getDeclaredConstructor()
+        .newInstance(), // TODO: pass through 'logConstructorMock'
       true
     );
   }

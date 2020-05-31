@@ -1,9 +1,9 @@
-package de.scrum_master.agent.global_mock;
+package de.scrum_master.agent.constructor_mock;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class GlobalMockRegistry {
+public class ConstructorMockRegistry {
   private static Set<String> mockClasses = new HashSet<>();
 
   public static boolean isMock(String className) {
@@ -19,7 +19,7 @@ public class GlobalMockRegistry {
   }
 
   public static boolean isObjectInConstructionMock() {
-    // TODO: This is slow and assumes that global mocks should be mocked on all class loaders.
+    // TODO: This is slow and assumes that constructor mocks should be mocked on all class loaders.
     //       Consider Björn Kautler's ThreadLocal idea or an alternative approach?
     // This is said to be faster than Thread.currentThread().getStackTrace()
     StackTraceElement[] stackTrace = new Throwable().getStackTrace();

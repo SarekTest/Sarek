@@ -59,7 +59,7 @@
     </dependency>
     <dependency>
       <groupId>de.scrum-master</groupId>
-      <artifactId>global-mock-agent</artifactId>
+      <artifactId>constructor-mock-agent</artifactId>
       <scope>test</scope>
     </dependency>
 

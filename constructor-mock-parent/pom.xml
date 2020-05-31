@@ -9,12 +9,12 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>global-mock-parent</artifactId>
+  <artifactId>constructor-mock-parent</artifactId>
   <packaging>pom</packaging>
 
   <modules>
-    <module>global-mock-agent</module>
-    <module>global-mock-plugin</module>
+    <module>constructor-mock-agent</module>
+    <module>constructor-mock-plugin</module>
   </modules>
 
 </project>

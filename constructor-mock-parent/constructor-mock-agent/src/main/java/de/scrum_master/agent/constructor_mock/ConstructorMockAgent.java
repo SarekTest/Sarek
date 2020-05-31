@@ -1,17 +1,17 @@
-package de.scrum_master.agent.global_mock;
+package de.scrum_master.agent.constructor_mock;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.util.jar.JarFile;
 
-public class GlobalMockAgent {
+public class ConstructorMockAgent {
   private static boolean active;// = true;  // TODO: remove default value ###
 
   /**
    * Start agent via <code>-javaagent:/path/to/my-agent.jar=<i>configFile</i></code> JVM parameter
    *
    * @param configFile path to configuration properties file for class
-   *                   {@link GlobalMockTransformer}. Add this parameter on the command line
+   *                   {@link ConstructorMockTransformer}. Add this parameter on the command line
    *                   after the Java agent path via <code>=/path/to/my-config.properties</code>.
    */
   public static void premain(String configFile, Instrumentation inst) throws Exception {
@@ -22,7 +22,7 @@ public class GlobalMockAgent {
    * Attach agent dynamically after JVM start-up
    *
    * @param configFile path to configuration properties file for class
-   *                   {@link GlobalMockTransformer}
+   *                   {@link ConstructorMockTransformer}
    */
   public static void agentmain(String configFile, Instrumentation inst) throws Exception {
     transform(configFile, inst);
@@ -32,14 +32,14 @@ public class GlobalMockAgent {
     instrumentation.appendToBootstrapClassLoaderSearch(
       // TODO: make more generic
       // TODO: decide which artifact to use (normal, all, all-special)
-      new JarFile("C:/Users/alexa/.m2/repository/de/scrum-master/global-mock-agent-javassist/1.0-SNAPSHOT/global-mock-agent-javassist-1.0-SNAPSHOT-all.jar")
+      new JarFile("C:/Users/alexa/.m2/repository/de/scrum-master/constructor-mock-agent-javassist/1.0-SNAPSHOT/constructor-mock-agent-javassist-1.0-SNAPSHOT-all.jar")
     );
     active = true;
-    System.out.println("[Global Mock Agent] Installing GlobalMockTransformer");
+    System.out.println("[Constructor Mock Agent] Installing ConstructorMockTransformer");
     instrumentation.addTransformer(
-//      new GlobalMockTransformer(configFile)
+//      new ConstructorMockTransformer(configFile)
       (ClassFileTransformer) Class
-        .forName("de.scrum_master.agent.global_mock.GlobalMockTransformer")
+        .forName("de.scrum_master.agent.constructor_mock.ConstructorMockTransformer")
         .getDeclaredConstructor(String.class)
         .newInstance(configFile),
       true

@@ -34,8 +34,8 @@
         -->
         <maven-failsafe.argLine>
           -Xbootclasspath/p:${instrumented-jre.jar}
-          -javaagent:${aspect-agent.jar}=removeFinal,globalMock,verbose
-<!--          -javaagent:${global-mock-agent.jar}-->
+          -javaagent:${aspect-agent.jar}=removeFinal,constructorMock,verbose
+<!--          -javaagent:${constructor-mock-agent.jar}-->
         </maven-failsafe.argLine>
       </properties>
 
@@ -57,8 +57,8 @@
         -->
         <maven-failsafe.argLine>
           --patch-module java.base=${instrumented-jre.jar}
-          -javaagent:${aspect-agent.jar}=removeFinal,globalMock,verbose
-<!--          -javaagent:${global-mock-agent.jar}-->
+          -javaagent:${aspect-agent.jar}=removeFinal,constructorMock,verbose
+<!--          -javaagent:${constructor-mock-agent.jar}-->
           <!-- Needed for hot-attaching agents (e.g. PowerMock) on Java 9+ -->
           -Djdk.attach.allowAttachSelf=true
         </maven-failsafe.argLine>
@@ -127,7 +127,7 @@
     </dependency>
     <dependency>
       <groupId>de.scrum-master</groupId>
-      <artifactId>global-mock-agent</artifactId>
+      <artifactId>constructor-mock-agent</artifactId>
       <scope>test</scope>
     </dependency>
 

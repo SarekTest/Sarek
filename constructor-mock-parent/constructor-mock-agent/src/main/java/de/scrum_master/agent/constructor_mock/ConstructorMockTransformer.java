@@ -1,4 +1,4 @@
-package de.scrum_master.agent.global_mock;
+package de.scrum_master.agent.constructor_mock;
 
 import javassist.*;
 
@@ -9,14 +9,16 @@ import java.lang.instrument.ClassFileTransformer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.ProtectionDomain;
+import java.util.Arrays;
 import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * This class transformer injects code into constructors, optionally stopping the original code  from being executed
  * and thus avoiding any unwanted (and possibly expensive) side effects such as resource allocation. The result of
- * calling a constructor for a class which has been added to the {@link GlobalMockRegistry} will be an uninitialised
+ * calling a constructor for a class which has been added to the {@link ConstructorMockRegistry} will be an uninitialised
  * object, i.e. all its instance fields have default values such as <code>null</code>, <code>0</code>,
  * <code>false</code>. Such an object can then be used as the basis for a mock by stubbing its methods by another byte
  * code instrumentation stage.
@@ -30,17 +32,17 @@ import java.util.stream.Stream;
  * <p></p>
  * TODO: implement configurability
  */
-public class GlobalMockTransformer implements ClassFileTransformer {
+public class ConstructorMockTransformer implements ClassFileTransformer {
 
   // TODO: make log level configurable
-  public static boolean LOG_GLOBAL_MOCK = false;
+  public static boolean LOG_CONSTRUCTOR_MOCK = false;
   // TODO: make class file dumping configurable
   public static boolean DUMP_CLASS_FILES = false;
-  public static String DUMP_CLASS_BASE_DIR = "global-mock-transform";
+  public static String DUMP_CLASS_BASE_DIR = "constructor-mock-transform";
 
-  private final String LOG_PREFIX = GlobalMockAgent.isActive()
-    ? "[Global Mock Agent] "
-    : "[Global Mock Transformer] ";
+  private final String LOG_PREFIX = ConstructorMockAgent.isActive()
+    ? "[Constructor Mock Agent] "
+    : "[Constructor Mock Transformer] ";
 
   private ClassPool classPool = ClassPool.getDefault();
   private String configFile;
@@ -50,7 +52,7 @@ public class GlobalMockTransformer implements ClassFileTransformer {
    * {@link #configure(Properties)}
    */
   @SuppressWarnings("unused")
-  public GlobalMockTransformer() {
+  public ConstructorMockTransformer() {
     this(null);
   }
 
@@ -58,7 +60,7 @@ public class GlobalMockTransformer implements ClassFileTransformer {
    * Constructor used by agent transformer which injects its configuration via
    * configuration properties file
    */
-  public GlobalMockTransformer(String configFile) {
+  public ConstructorMockTransformer(String configFile) {
     this.configFile = configFile;
 //    URL url = getClass().getClassLoader().getResource(configFile);
 //    new File()
@@ -84,7 +86,7 @@ public class GlobalMockTransformer implements ClassFileTransformer {
       transformedBytecode = ctClass.toBytecode();
     }
     catch (IOException | CannotCompileException e) {
-      log("ERROR: Cannot get byte code for transformed class " + className);
+      log("ERROR: Cannot get byte code for transformed class " + canonicalClassName);
       e.printStackTrace();
       return null;
     }
@@ -107,16 +109,16 @@ public class GlobalMockTransformer implements ClassFileTransformer {
   //       does not require the user to retransform parent classes by himself. For that purpose but also generally, it
   //       would be good to also have a registry of already transformed classes (per classloader?) so as to avoid
   //       multiple transformations of the same constructor.
-  private void makeGloballyMockable(CtClass ctClass) throws NotFoundException, CannotCompileException {
     if (LOG_GLOBAL_MOCK)
       log("Adding global mock capability to class " + ctClass.getName());
+  private void makeConstructorMockable(CtClass ctClass) throws NotFoundException, CannotCompileException {
     String superCall = getSuperCall(ctClass);
     for (CtConstructor ctConstructor : ctClass.getDeclaredConstructors()) {
-      if (LOG_GLOBAL_MOCK)
-        log("Adding global mock capability to constructor " + ctConstructor.getLongName());
+      if (LOG_CONSTRUCTOR_MOCK)
+        log("Adding constructor mock capability to constructor " + ctConstructor.getLongName());
       ctConstructor.insertBefore(
         String.join("\n",
-          "if (de.scrum_master.agent.global_mock.GlobalMockRegistry.isObjectInConstructionMock()) {",
+          "if (de.scrum_master.agent.constructor_mock.ConstructorMockRegistry.isObjectInConstructionMock()) {",
           "  " + superCall,
           "  return;",
           "}"
@@ -124,18 +126,18 @@ public class GlobalMockTransformer implements ClassFileTransformer {
       );
       // Alternative idea by Björn Kautler without stack trace generation + parsing:
 /*
-      if (GlobalMockRegistry.isCurrentlyInitializingMockThreadLocal()) {
+      if (ConstructorMockRegistry.isCurrentlyInitializingMockThreadLocal()) {
         super(null, 0, false);
         return;
       }
-      if (GlobalMockRegistry.isMock(Super.class)) {
-        GlobalMockRegistry.setCurrentlyInitializingMockThreadLocal(true);
+      if (ConstructorMockRegistry.isMock(Super.class)) {
+        ConstructorMockRegistry.setCurrentlyInitializingMockThreadLocal(true);
         try {
           super(null, 0, false);
           return;
         }
         finally {
-          GlobalMockRegistry.setCurrentlyInitializingMockThreadLocal(false);
+          ConstructorMockRegistry.setCurrentlyInitializingMockThreadLocal(false);
         }
       }
 */
@@ -239,7 +241,7 @@ public class GlobalMockTransformer implements ClassFileTransformer {
   public void applyTransformations(CtClass classToTransform) {
     classToTransform.defrost();
     try {
-      makeGloballyMockable(classToTransform);
+      makeConstructorMockable(classToTransform);
     }
     catch (NotFoundException | CannotCompileException e) {
       e.printStackTrace();
