@@ -47,11 +47,11 @@ classpath):
   <properties>
     <bytebuddy.version>1.10.9</bytebuddy.version>
     <bytebuddy-aspect.version>1.0-SNAPSHOT</bytebuddy-aspect.version>
-    <bytebuddy-aspect-agent.jar>${settings.localRepository}/de/scrum-master/bytebuddy-aspect-agent/${bytebuddy-aspect.version}/bytebuddy-aspect-agent-${bytebuddy-aspect.version}.jar</bytebuddy-aspect-agent.jar>
+    <bytebuddy-aspect-agent.jar>${settings.localRepository}/dev/sarek/bytebuddy-aspect-agent/${bytebuddy-aspect.version}/bytebuddy-aspect-agent-${bytebuddy-aspect.version}.jar</bytebuddy-aspect-agent.jar>
   </properties>
 
   <dependency>
-    <groupId>de.scrum-master</groupId>
+    <groupId>dev.sarek</groupId>
     <artifactId>bytebuddy-aspect</artifactId>
     <version>${bytebuddy-aspect.version}</version>
   </dependency>
@@ -80,7 +80,7 @@ classpath):
   </plugin>
   ```
 
-You can take a look at [`NoAgentIT`](https://github.com/kriegaex/ByteBuddyAspect/blob/master/bytebuddy-agent-test-parent/bytebuddy-agent-test-no-agent/src/test/java/de/scrum_master/bytebuddy/aspect/NoAgentIT.java)
+You can take a look at [`NoAgentIT`](https://github.com/kriegaex/ByteBuddyAspect/blob/master/bytebuddy-agent-test-parent/bytebuddy-agent-test-no-agent/src/test/java/dev/sarek/bytebuddy/aspect/NoAgentIT.java)
 if you want to get an idea how to use the aspect framework with your application classes.
 
 ### Weave bootstrap JRE/JDK classes too
@@ -93,16 +93,16 @@ this:
   <properties>
     <bytebuddy.version>1.10.9</bytebuddy.version>
     <bytebuddy-aspect.version>1.0-SNAPSHOT</bytebuddy-aspect.version>
-    <bytebuddy-aspect-agent.jar>${settings.localRepository}/de/scrum-master/bytebuddy-aspect-agent/${bytebuddy-aspect.version}/bytebuddy-aspect-agent-${bytebuddy-aspect.version}.jar</bytebuddy-aspect-agent.jar>
+    <bytebuddy-aspect-agent.jar>${settings.localRepository}/dev/sarek/bytebuddy-aspect-agent/${bytebuddy-aspect.version}/bytebuddy-aspect-agent-${bytebuddy-aspect.version}.jar</bytebuddy-aspect-agent.jar>
   </properties>
 
   <dependency>
-    <groupId>de.scrum-master</groupId>
+    <groupId>dev.sarek</groupId>
     <artifactId>bytebuddy-aspect-agent</artifactId>
     <version>${bytebuddy-aspect.version}</version>
   </dependency>
   <dependency>
-    <groupId>de.scrum-master</groupId>
+    <groupId>dev.sarek</groupId>
     <artifactId>bytebuddy-aspect</artifactId>
     <version>${bytebuddy-aspect.version}</version>
   </dependency>
@@ -126,7 +126,7 @@ this:
   </plugin>
   ```
 
-You can take a look at [`CommandLineAgentIT`](https://github.com/kriegaex/ByteBuddyAspect/blob/master/bytebuddy-agent-test-parent/bytebuddy-agent-test-use-agent/src/test/java/de/scrum_master/bytebuddy/aspect/CommandLineAgentIT.java)
+You can take a look at [`CommandLineAgentIT`](https://github.com/kriegaex/ByteBuddyAspect/blob/master/bytebuddy-agent-test-parent/bytebuddy-agent-test-use-agent/src/test/java/dev/sarek/bytebuddy/aspect/CommandLineAgentIT.java)
 if you want to get an idea how to use the aspect framework with bootstrap classes, i.e. usually JRE/JDK classes which
 might even have been loaded already (or not, it does not really make a difference in this case) and usually are
 unreachable for instrumentation with normal test frameworks.

@@ -3,8 +3,8 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>de.scrum-master</groupId>
-  <artifactId>agent-parent</artifactId>
+  <groupId>dev.sarek</groupId>
+  <artifactId>sarek-parent</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
@@ -165,7 +165,7 @@
             <!--
             <transformerClasses>
               <transformerClass>
-                <className>de.scrum_master.agent.constructor_mock.ConstructorMockPluginTransformer</className>
+                <className>ConstructorMockPluginTransformer</className>
                 <properties>
                   <property>
                     <name>append.value</name>
@@ -237,32 +237,32 @@
 
       <!-- Internal dependencies -->
       <dependency>
-        <groupId>de.scrum-master</groupId>
+        <groupId>dev.sarek</groupId>
         <artifactId>remove-final-agent</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>de.scrum-master</groupId>
+        <groupId>dev.sarek</groupId>
         <artifactId>remove-final-plugin</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>de.scrum-master</groupId>
+        <groupId>dev.sarek</groupId>
         <artifactId>aspect-core</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>de.scrum-master</groupId>
+        <groupId>dev.sarek</groupId>
         <artifactId>aspect-agent</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>de.scrum-master</groupId>
+        <groupId>dev.sarek</groupId>
         <artifactId>constructor-mock-agent</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>de.scrum-master</groupId>
+        <groupId>dev.sarek</groupId>
         <artifactId>mock</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -275,13 +275,13 @@
         <scope>test</scope>
       </dependency>
       <dependency>
-        <groupId>de.scrum-master</groupId>
+        <groupId>dev.sarek</groupId>
         <artifactId>agent-test-common</artifactId>
         <version>${project.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
-        <groupId>de.scrum-master</groupId>
+        <groupId>dev.sarek</groupId>
         <artifactId>agent-test-instrument-jre</artifactId>
         <version>${project.version}</version>
         <scope>test</scope>
@@ -314,6 +314,12 @@
     <module>constructor-mock-parent</module>
     <module>agent-test-parent</module>
     <module>mock</module>
+
+    <module>sarek-constructor-mock-parent</module>
+    <module>sarek-aspect-parent</module>
+    <module>sarek-unfinal-parent</module>
+    <module>sarek-agent-common</module>
+    <module>sarek</module>
   </modules>
 
 </project>

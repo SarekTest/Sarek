@@ -4,17 +4,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>de.scrum-master</groupId>
+    <groupId>dev.sarek</groupId>
     <artifactId>aspect-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>aspect-core</artifactId>
-
-  <organization>
-    <name>Scrum-Master.de - Agile Project Management</name>
-    <url>https://scrum-master.de</url>
-  </organization>
 
   <build>
     <plugins>
@@ -36,9 +31,9 @@
               <shadedClassifierName>all</shadedClassifierName>
               <filters>
                 <filter>
-                  <artifact>de.scrum-master:remove-final-agent</artifact>
+                  <artifact>dev.sarek:remove-final-agent</artifact>
                   <includes>
-                    <include>de/scrum_master/agent/**</include>
+                    <include>dev/sarek/agent/**</include>
                   </includes>
                 </filter>
                 <filter>
@@ -73,9 +68,9 @@
               <shadedClassifierName>all-special</shadedClassifierName>
               <filters>
                 <filter>
-                  <artifact>de.scrum-master:remove-final-agent</artifact>
+                  <artifact>dev.sarek:remove-final-agent</artifact>
                   <includes>
-                    <include>de/scrum_master/agent/**</include>
+                    <include>dev/sarek/agent/**</include>
                   </includes>
                 </filter>
                 <filter>
@@ -98,11 +93,11 @@
               <relocations>
                 <relocation>
                   <pattern>net.bytebuddy.jar.asm</pattern>
-                  <shadedPattern>de.scrum_master.jar.asm</shadedPattern>
+                  <shadedPattern>dev.sarek.jar.asm</shadedPattern>
                 </relocation>
                 <relocation>
                   <pattern>net.bytebuddy</pattern>
-                  <shadedPattern>de.scrum_master.jar.bytebuddy</shadedPattern>
+                  <shadedPattern>dev.sarek.jar.bytebuddy</shadedPattern>
                 </relocation>
               </relocations>
             </configuration>
@@ -119,7 +114,7 @@
       <artifactId>byte-buddy</artifactId>
     </dependency>
     <dependency>
-      <groupId>de.scrum-master</groupId>
+      <groupId>dev.sarek</groupId>
       <artifactId>remove-final-agent</artifactId>
     </dependency>
 

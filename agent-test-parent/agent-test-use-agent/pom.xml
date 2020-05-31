@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>de.scrum-master</groupId>
+    <groupId>dev.sarek</groupId>
     <artifactId>agent-test-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
@@ -56,7 +56,7 @@
         -->
         <maven-failsafe.argLine>
           --patch-module java.base=${instrumented-jre.jar}
-          -javaagent:${aspect-agent.jar}=removeFinal,constructorMock,verbose
+          -javaagent:${aspect-agent.jar}=removeFinal,constructorMock,verXXXbose
 <!--          -javaagent:${constructor-mock-agent.jar}-->
           <!-- Needed for hot-attaching agents (e.g. PowerMock) on Java 9+ -->
           -Djdk.attach.allowAttachSelf=true
@@ -95,26 +95,26 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>de.scrum-master</groupId>
+      <groupId>dev.sarek</groupId>
       <artifactId>aspect-core</artifactId>
       <classifier>all</classifier>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>de.scrum-master</groupId>
+      <groupId>dev.sarek</groupId>
       <artifactId>agent-test-common</artifactId>
       <scope>test</scope>
     </dependency>
     <!-- Needed on the bootstrap class path in Maven Surefire/Failsafe -->
     <dependency>
-      <groupId>de.scrum-master</groupId>
+      <groupId>dev.sarek</groupId>
       <artifactId>agent-test-instrument-jre</artifactId>
       <scope>test</scope>
     </dependency>
     <!-- Needed on the command line for '-javaagent:...' -->
     <dependency>
-      <groupId>de.scrum-master</groupId>
+      <groupId>dev.sarek</groupId>
       <artifactId>aspect-agent</artifactId>
       <scope>test</scope>
     </dependency>
@@ -125,7 +125,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>de.scrum-master</groupId>
+      <groupId>dev.sarek</groupId>
       <artifactId>constructor-mock-agent</artifactId>
       <version>${project.version}</version>
       <classifier>all</classifier>

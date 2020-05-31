@@ -4,8 +4,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>de.scrum-master</groupId>
-    <artifactId>agent-parent</artifactId>
+    <groupId>dev.sarek</groupId>
+    <artifactId>sarek-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
@@ -23,11 +23,11 @@
   <dependencies>
 
     <dependency>
-      <groupId>de.scrum-master</groupId>
+      <groupId>dev.sarek</groupId>
       <artifactId>constructor-mock-agent</artifactId>
     </dependency>
     <dependency>
-      <groupId>de.scrum-master</groupId>
+      <groupId>dev.sarek</groupId>
       <artifactId>aspect-core</artifactId>
     </dependency>
     <dependency>
@@ -43,7 +43,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>de.scrum-master</groupId>
+      <groupId>dev.sarek</groupId>
       <artifactId>agent-test-common</artifactId>
       <scope>test</scope>
     </dependency>

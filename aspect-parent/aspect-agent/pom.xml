@@ -4,17 +4,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>de.scrum-master</groupId>
+    <groupId>dev.sarek</groupId>
     <artifactId>aspect-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>aspect-agent</artifactId>
-
-  <organization>
-    <name>Scrum-Master.de - Agile Project Management</name>
-    <url>https://scrum-master.de</url>
-  </organization>
 
   <build>
     <plugins>
@@ -24,8 +19,8 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <Agent-Class>de.scrum_master.agent.aspect.AspectAgent</Agent-Class>
-              <Premain-Class>de.scrum_master.agent.aspect.AspectAgent</Premain-Class>
+              <Agent-Class>dev.sarek.agent.aspect.AspectAgent</Agent-Class>
+              <Premain-Class>dev.sarek.agent.aspect.AspectAgent</Premain-Class>
               <Can-Redefine-Classes>true</Can-Redefine-Classes>
               <Can-Retransform-Classes>true</Can-Retransform-Classes>
               <Can-Set-Native-Method-Prefix>true</Can-Set-Native-Method-Prefix>
