@@ -133,7 +133,7 @@ public class Weaver {
     Map<Object, AroundAdvice<?>> adviceRegistry = (Map<Object, AroundAdvice<?>>) getAdviceRegistry();
     synchronized (adviceRegistry) {
       if (adviceRegistry.get(target) != null)
-        throw new IllegalArgumentException("target is already registered");
+        throw new IllegalArgumentException("target " + target + " is already registered");
       adviceRegistry.put(target, advice);
       targets.add(target);
     }
