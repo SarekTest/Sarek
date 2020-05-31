@@ -23,14 +23,6 @@
     <javassist.version>3.27.0-GA</javassist.version>
     <javassist-maven-plugin.version>2.0.0</javassist-maven-plugin.version>
 
-    <!--
-      TODO/FIXME: IntelliJ IDEA double click Maven builds in sub-modules set this property to the sub-module path,
-                  i.e. those builds fail when relying on agent JAR paths.
-    -->
-    <!-- TODO: remove 'suppress' tag after https://youtrack.jetbrains.com/issue/IDEA-190202 fix -->
-    <!--suppress UnresolvedMavenProperty -->
-    <projectRootDir>${maven.multiModuleProjectDirectory}</projectRootDir>
-
     <aspect-agent.jar>
       ${projectRootDir}/aspect-parent/aspect-agent/target/aspect-agent-${project.version}.jar
     </aspect-agent.jar>
