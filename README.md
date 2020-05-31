@@ -1,6 +1,26 @@
 # Simple AOP framework for aspects with around advice via ByteBuddy
 
-### TODO & disclaimer
+# Sarek
+
+Sarek is a Spock-friendly mock framework adding features missing in Spock. It can also be used outside of Spock, e.g.
+from JUnit. Some key features are:
+  * Unfinal classes while they are being loaded. This makes them mockable by conventional means from Spock or other
+    mock frameworks using dynamic proxy technology (JRE, CGLIB, ByteBuddy).
+  * Simple aspect framework enabling the user to modify method, constructor or type initialiser (aka "static block")
+    behaviour before/after or instead of execution.
+  * Mock constructors, i.e. executing them but bypassing their original code, making them free from side effects and
+    returning uninitialised objects, not unlike what Objenesis creates, but using a different approach. This also works
+    globally, i.e. for objects created beyond user control. This problem cannot be solved via dependency injection
+    without refactoring, which usually is not an option when dealing with third party libraries.
+  * Mocking constructors and stubbing methods also works for final classes and methods.
+  * Given proper JVM configuration, all of these features also work for bootstrap classes (usually JRE/JDK classes),
+    some even for classes which have already been loaded by retransforming them by means of Java instrumentation.
+  * For super hard cases there is even an option to transform (e.g. unfinal) classes during build time and then
+    prepending them to the Java bootstrap class path, which works for legacy Java 8 as well as for Java 9+. This way,
+    even classes loaded very early in the JVM start-up phase become mockable, e.g. final class `String` is no longer
+    final, can thus be extended, which also means it can be mocked by conventional means.
+
+## --- TODO & disclaimer ---
 
 ***This file is outdated and needs to be completely rewritten because dependency names have changed after a refactoring.
 So have class names and features. stay tuned for an update.***
