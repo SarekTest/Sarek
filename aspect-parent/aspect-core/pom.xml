@@ -10,7 +10,6 @@
   </parent>
 
   <artifactId>aspect-core</artifactId>
-  <version>1.0-SNAPSHOT</version>
 
   <organization>
     <name>Scrum-Master.de - Agile Project Management</name>

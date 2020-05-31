@@ -247,32 +247,32 @@
       <dependency>
         <groupId>de.scrum-master</groupId>
         <artifactId>remove-final-agent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>de.scrum-master</groupId>
         <artifactId>remove-final-plugin</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>de.scrum-master</groupId>
         <artifactId>aspect-core</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>de.scrum-master</groupId>
         <artifactId>aspect-agent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>de.scrum-master</groupId>
         <artifactId>constructor-mock-agent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>de.scrum-master</groupId>
         <artifactId>mock</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>${project.version}</version>
       </dependency>
 
       <!-- Test dependencies -->
@@ -285,13 +285,13 @@
       <dependency>
         <groupId>de.scrum-master</groupId>
         <artifactId>agent-test-common</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>${project.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>de.scrum-master</groupId>
         <artifactId>agent-test-instrument-jre</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>${project.version}</version>
         <scope>test</scope>
       </dependency>
 
