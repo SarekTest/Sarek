@@ -127,6 +127,8 @@
     <dependency>
       <groupId>de.scrum-master</groupId>
       <artifactId>constructor-mock-agent</artifactId>
+      <version>${project.version}</version>
+      <classifier>all</classifier>
       <scope>test</scope>
     </dependency>
 
