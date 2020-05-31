@@ -35,10 +35,13 @@ public class AspectAgent {
     // TODO: remove after re-testing fix of https://issues.apache.org/jira/browse/SUREFIRE-1788
     System.out.println("[Aspect Agent] premain - options = " + options);
 
-    File transformerJar = findJarFile("de/scrum_master/agent/aspect/Weaver.class");
-    instr.appendToBootstrapClassLoaderSearch(new JarFile(transformerJar));
+    File aspectJar = findJarFile("de/scrum_master/agent/aspect/Weaver.class");
+    instr.appendToBootstrapClassLoaderSearch(new JarFile(aspectJar));
+    File constructorMockJar = findJarFile("de/scrum_master/agent/constructor_mock/ConstructorMockTransformer.class");
+    System.out.println("Constructor mock JAR: " + constructorMockJar);
+    instr.appendToBootstrapClassLoaderSearch(new JarFile(constructorMockJar));
     // TODO: make more generic
-    instr.appendToBootstrapClassLoaderSearch(new JarFile("C:/Users/alexa/.m2/repository/de/scrum-master/constructor-mock-agent/1.0-SNAPSHOT/constructor-mock-agent-1.0-SNAPSHOT-all.jar"));
+//    instr.appendToBootstrapClassLoaderSearch(new JarFile("C:/Users/alexa/Documents/java-src/TestHelperAgents/constructor-mock-parent/constructor-mock-agent/target/constructor-mock-agent-1.0-SNAPSHOT-all.jar"));
 
     instrumentation = instr;
     active = true;
@@ -50,11 +53,10 @@ public class AspectAgent {
     if (removeFinalActive)
       attachRemoveFinalTransformer(logRemoveFinal);
 
-    // TODO: document how to use '-javaagent:my.jar=removeFinal' -> Javadoc, read-me
+    // TODO: document how to use '-javaagent:my.jar=constructorMock' -> Javadoc, read-me
     constructorMockActive = options != null && options.trim().toLowerCase().contains("constructormock");
     if (constructorMockActive)
       attachConstructorMockTransformer(logRemoveFinal);  // TODO: separate setting 'logConstructorMock'
-
   }
 
   // TODO: optionally pack shaded JARs (all vs. all-special) into agent JAR, unpack and attach
