@@ -45,7 +45,8 @@ public class ConstructorMockTransformer implements ClassFileTransformer {
     : "[Constructor Mock Transformer] ";
 
   private ClassPool classPool = ClassPool.getDefault();
-  private String configFile;
+  private File configFile;
+  private final Set<String> classWhiteList;
 
   /**
    * Default constructor used by static transformer which injects its configuration via
@@ -53,33 +54,55 @@ public class ConstructorMockTransformer implements ClassFileTransformer {
    */
   @SuppressWarnings("unused")
   public ConstructorMockTransformer() {
-    this(null);
+    this((File) null);
+  }
+
+  public ConstructorMockTransformer(String... classWhiteList) {
+    this.classWhiteList = Arrays
+      .stream(classWhiteList)
+      .collect(Collectors.toSet());
+  }
+
+  public ConstructorMockTransformer(Class<?>... classWhiteList) {
+    this.classWhiteList = Arrays
+      .stream(classWhiteList)
+      .map(Class::getName)
+      .collect(Collectors.toSet());
   }
 
   /**
    * Constructor used by agent transformer which injects its configuration via
    * configuration properties file
    */
-  public ConstructorMockTransformer(String configFile) {
+  public ConstructorMockTransformer(File configFile) {
+    this.classWhiteList = null;
     this.configFile = configFile;
 //    URL url = getClass().getClassLoader().getResource(configFile);
 //    new File()
 //    new Properties().
   }
 
+  public boolean hasClassWhiteList() {
+    return classWhiteList != null;
+  }
+
   @Override
   public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
+    String canonicalClassName = className.replace('/', '.');
+    if (!shouldTransform(canonicalClassName))
+      return null;
+
     CtClass ctClass;
     try {
-      // Caveat: Do not just use 'classPool.get(className.replaceAll("/", "."))' because we would miss
-      // previous transformations. It is necessary to really parse 'classfileBuffer'.
+      // Caveat: Do not just use 'classPool.get(className)' because we would miss previous transformations.
+      // It is necessary to really parse 'classfileBuffer'.
       ctClass = classPool.makeClass(new ByteArrayInputStream(classfileBuffer));
     }
-    catch (IOException e) {
+    catch (IOException | RuntimeException e) {
+      log("ERROR: Cannot parse bytes for input class " + canonicalClassName);
+      e.printStackTrace();
       return null;
     }
-    if (!shouldTransform(ctClass))
-      return null;
     applyTransformations(ctClass);
     byte[] transformedBytecode;
     try {
@@ -109,8 +132,6 @@ public class ConstructorMockTransformer implements ClassFileTransformer {
   //       does not require the user to retransform parent classes by himself. For that purpose but also generally, it
   //       would be good to also have a registry of already transformed classes (per classloader?) so as to avoid
   //       multiple transformations of the same constructor.
-    if (LOG_GLOBAL_MOCK)
-      log("Adding global mock capability to class " + ctClass.getName());
   private void makeConstructorMockable(CtClass ctClass) throws NotFoundException, CannotCompileException {
     String superCall = getSuperCall(ctClass);
     for (CtConstructor ctConstructor : ctClass.getDeclaredConstructors()) {
@@ -195,11 +216,25 @@ public class ConstructorMockTransformer implements ClassFileTransformer {
    * This method is meant to be delegated to from a subclass of
    * {@link de.icongmbh.oss.maven.plugin.javassist.ClassTransformer} in order to enable build time bytecode
    * instrumentation.
-   * <p></p>
-   * TODO: make black/white list of class and package names configurable
    */
   public boolean shouldTransform(final CtClass candidateClass) {
-    String className = candidateClass.getName();
+    return shouldTransform(candidateClass.getName());
+  }
+
+  /**
+   * TODO: make black/white list of class and package names configurable
+   */
+  public boolean shouldTransform(String className) {
+
+    // TODO: Which white-listing method is better? A gives more power to the user, but is also more dangerous.
+
+    // (A) If there is a white list, ignore the global black list
+    // if (hasClassWhiteList())
+    //   return classNames.contains(className);
+
+    // (B) If there is a white list and a class is on it, still exclude it if it is on the black list too
+    if (hasClassWhiteList() && !classWhiteList.contains(className))
+      return false;
 
     // Default exclude list for transformation
     return
