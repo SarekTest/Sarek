@@ -99,7 +99,7 @@ public class MockFinalWithBehaviourIT {
     weaver = new Weaver(
       INSTRUMENTATION,
       is(FinalClass.class),
-      any(),
+      not(nameEndsWith("InstanceCounter")),
       MethodAroundAdvice.MOCK,
       FinalClass.class
     );
