@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAMIC;
 
@@ -89,15 +90,14 @@ public abstract class MethodAspect extends Aspect<Method> {
   /**
    * Keep this method public because it must be callable from advice code woven into other classes
    */
-  public static MethodAroundAdvice getAroundAdvice(Object target, Method method) {
+  public static synchronized MethodAroundAdvice getAroundAdvice(Object target, Method method) {
     MethodAroundAdvice advice = null;
     // Non-static method? -> search for instance advice
     if (target != null)
-      advice = adviceRegistry.get(target);
+      advice = doGetAdvice(target);
     // Static method or no instance advice? -> search for class advice
-    if (advice == null) {
-      advice = adviceRegistry.get(method.getDeclaringClass());
-    }
+    if (advice == null)
+      advice = doGetAdvice(method.getDeclaringClass());
     return advice;
 
 /*
@@ -121,6 +121,28 @@ public abstract class MethodAspect extends Aspect<Method> {
     return advice;
 */
 
+  }
+
+  private final static Stack<Object> targets = new Stack<>();
+
+  private static MethodAroundAdvice doGetAdvice(Object target) {
+    // Detect endless (direct) recursion leading to stack overflow, such as (schematically simplified):
+    // getAroundAdvice(target) → adviceRegistry.get(target) → target.hashCode() → getAroundAdvice(target)
+    if (!targets.empty() && targets.peek() == target) {
+      // CAVEAT: Do not print 'target' here, it would lead to another endless recursion via:
+      // target.toString() -> getAroundAdvice(target) → adviceRegistry.get(target) → target.toString()
+      // This recursion would get detected but still run away because after detection it would be printed again etc.
+      // It is actually best to not call *any* target methods while just trying to access and call an around advice.
+      System.out.println("Recursion detected - origin: " + new Exception().getStackTrace()[2]);
+      return null;
+    }
+    targets.push(target);
+    try {
+      return adviceRegistry.get(target);
+    }
+    finally {
+      targets.pop();
+    }
   }
 
 }
