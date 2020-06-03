@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.util.UUID;
 
-import static dev.sarek.testing.TestHelper.isClassLoaded;
+import static dev.sarek.agent.test.TestHelper.isClassLoaded;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 import static org.junit.Assert.*;
 
@@ -71,11 +71,9 @@ public class NoAgentWeaverIT {
   }
 
   @Test
-  public void cannotWeaveNotLoadedJREBootstrapClass() throws IOException {
+  public void cannotWeaveJREUtilityBootstrapClass() throws IOException {
     final String CLASS_NAME = "java.util.UUID";
 
-    // Create weaver *before* bootstrap class is loaded (should not make a difference, but check anyway)
-    assertFalse(isClassLoaded(CLASS_NAME));
     weaver = new Weaver(
       INSTRUMENTATION,
       named(CLASS_NAME),
@@ -87,7 +85,7 @@ public class NoAgentWeaverIT {
       )
     );
 
-    // Load bootstrap class by instantiating it
+    // Load bootstrap class by instantiating it, if it was not loaded yet (should not make any difference)
     UUID uuid = UUID.randomUUID();
     assertTrue(isClassLoaded(CLASS_NAME));
 
@@ -100,7 +98,7 @@ public class NoAgentWeaverIT {
   }
 
   @Test
-  public void cannotWeaveLoadedJREBootstrapClass() throws IOException {
+  public void cannotWeaveJRECoreBootstrapClass() throws IOException {
     final String CLASS_NAME = "java.lang.String";
 
     // Create weaver *after* bootstrap class is loaded (should not make a difference, but check anyway)

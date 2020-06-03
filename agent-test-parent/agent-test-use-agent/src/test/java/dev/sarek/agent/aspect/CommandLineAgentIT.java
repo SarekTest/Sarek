@@ -11,7 +11,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
-import static dev.sarek.testing.TestHelper.isClassLoaded;
+import static dev.sarek.agent.test.TestHelper.isClassLoaded;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 import static org.junit.Assert.*;
 
@@ -72,12 +72,10 @@ public class CommandLineAgentIT {
   }
 
   @Test
-  public void weaveNotLoadedJREBootstrapClass() throws IOException {
+  public void weaveJREUtilityBootstrapClass() throws IOException {
     final String CLASS_NAME = "java.util.UUID";
     final String UUID_TEXT_STUB = "111-222-333-444";
 
-    // Create weaver *before* bootstrap class is loaded (should not make a difference, but check anyway)
-    assertFalse(isClassLoaded(CLASS_NAME));
     weaver = new Weaver(
       INSTRUMENTATION,
       named(CLASS_NAME),
@@ -89,7 +87,7 @@ public class CommandLineAgentIT {
       )
     );
 
-    // Load bootstrap class by instantiating it
+    // Load bootstrap class by instantiating it, if it was not loaded yet (should not make any difference)
     UUID uuid = UUID.randomUUID();
     assertTrue(isClassLoaded(CLASS_NAME));
 
@@ -117,7 +115,7 @@ public class CommandLineAgentIT {
   }
 
   @Test
-  public void weaveLoadedJREBootstrapClass() throws IOException {
+  public void weaveJRECoreBootstrapClass() throws IOException {
     final String CLASS_NAME = "java.lang.String";
     final String TEXT = "To be, or not to be, that is the question";
 

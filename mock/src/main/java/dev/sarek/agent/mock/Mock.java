@@ -12,8 +12,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static net.bytebuddy.matcher.ElementMatchers.any;
-import static net.bytebuddy.matcher.ElementMatchers.anyOf;
+import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public class Mock implements AutoCloseable {
   public static Instrumentation INSTRUMENTATION = ByteBuddyAgent.install();
@@ -24,10 +23,10 @@ public class Mock implements AutoCloseable {
 
   public Mock(Class<?>... classes) throws IOException {
     constructorMockTransformer = new ConstructorMockTransformer(classes);
+    INSTRUMENTATION.addTransformer(constructorMockTransformer, true);
     this.classes = Arrays
       .stream(classes)
       .collect(Collectors.toSet());
-    INSTRUMENTATION.addTransformer(constructorMockTransformer, true);
     this.classes
       .stream()
       .map(Class::getName)
@@ -57,5 +56,6 @@ public class Mock implements AutoCloseable {
     weaver.unregisterTransformer();
     // INSTRUMENTATION.retransformClasses(classes);
     weaver = null;
+    System.out.println("Mock closed");
   }
 }

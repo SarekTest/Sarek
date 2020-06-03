@@ -100,6 +100,7 @@ public class AspectAgent {
 
   private static void attachConstructorMockTransformer(boolean logConstructorMock) throws ReflectiveOperationException {
     instrumentation.addTransformer(
+      // new ConstructorMockTransformer(configFile)
       (ClassFileTransformer) Class
         .forName("dev.sarek.agent.constructor_mock.ConstructorMockTransformer")
         .getDeclaredConstructor()

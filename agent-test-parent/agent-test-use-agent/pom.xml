@@ -33,7 +33,7 @@
         -->
         <maven-failsafe.argLine>
           -Xbootclasspath/p:${instrumented-jre.jar}
-          -javaagent:${aspect-agent.jar}=removeFinal,constructorMock,verbose
+          -javaagent:${aspect-agent.jar}=removeFinal,constructorMock,verXXXbose
 <!--          -javaagent:${constructor-mock-agent.jar}-->
         </maven-failsafe.argLine>
       </properties>
@@ -89,11 +89,6 @@
 
     <!-- Test dependencies -->
 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>dev.sarek</groupId>
       <artifactId>aspect-core</artifactId>

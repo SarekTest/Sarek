@@ -238,11 +238,6 @@
     <!-- Test dependencies -->
 
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>dev.sarek</groupId>
       <artifactId>agent-test-common</artifactId>
       <scope>test</scope>

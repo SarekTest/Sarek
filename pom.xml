@@ -60,8 +60,6 @@
           <!--          <version>3.0.0-RC1</version>-->
           <version>3.0.0-M4</version>
           <configuration>
-            <!-- Do not reuse forked VMs because of potentially unexpected instrumentation bleed-over -->
-            <reuseForks>false</reuseForks>
             <!-- Fix for "[WARNING] Corrupted STDOUT by directly writing to native stream in forked JVM" -->
             <!--            <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>-->
             <systemPropertyVariables>
@@ -71,6 +69,36 @@
               <remove-final-agent.jar>${remove-final-agent.jar}</remove-final-agent.jar>
             </systemPropertyVariables>
           </configuration>
+          <executions>
+            <execution>
+              <id>reuse-jvm</id>
+              <goals>
+                <goal>test</goal>
+              </goals>
+              <configuration>
+                <!-- One JVM for multiple test classes -->
+                <reuseForks>true</reuseForks>
+                <excludedGroups>dev.sarek.agent.test.SeparateJVM</excludedGroups>
+              </configuration>
+            </execution>
+            <execution>
+              <id>separate-jvm</id>
+              <goals>
+                <goal>test</goal>
+              </goals>
+              <configuration>
+                <!-- One JVM per test class (per method is not possible) -->
+                <reuseForks>false</reuseForks>
+                <groups>dev.sarek.agent.test.SeparateJVM</groups>
+              </configuration>
+            </execution>
+            <!-- We have two other, mutually exclusive text executions already and do not need this one -->
+            <execution>
+              <!-- We have two other, mutually exclusive text executions already and do not need this one -->
+              <id>default-test</id>
+              <phase>none</phase>
+            </execution>
+          </executions>
         </plugin>
 
         <plugin>
@@ -83,8 +111,6 @@
           <!--          <version>3.0.0-RC1</version>-->
           <version>3.0.0-M4</version>
           <configuration>
-            <!-- Do not reuse forked VMs because of potentially unexpected instrumentation bleed-over -->
-            <reuseForks>false</reuseForks>
             <!-- Fix for "[WARNING] Corrupted STDOUT by directly writing to native stream in forked JVM" -->
             <!--            <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>-->
             <systemPropertyVariables>
@@ -96,8 +122,29 @@
           </configuration>
           <executions>
             <execution>
+              <id>reuse-jvm</id>
               <goals>
                 <goal>integration-test</goal>
+              </goals>
+              <configuration>
+                <!-- One JVM for multiple test classes -->
+                <reuseForks>true</reuseForks>
+                <excludedGroups>dev.sarek.agent.test.SeparateJVM</excludedGroups>
+              </configuration>
+            </execution>
+            <execution>
+              <id>separate-jvm</id>
+              <goals>
+                <goal>integration-test</goal>
+              </goals>
+              <configuration>
+                <!-- One JVM per test class (per method is not possible) -->
+                <reuseForks>false</reuseForks>
+                <groups>dev.sarek.agent.test.SeparateJVM</groups>
+              </configuration>
+            </execution>
+            <execution>
+              <goals>
                 <goal>verify</goal>
               </goals>
             </execution>
@@ -289,6 +336,18 @@
 
     </dependencies>
   </dependencyManagement>
+
+  <dependencies>
+    <!--
+      Define globally here because otherwise Surefire/Failsafe groups/excludedGroups would not work.
+      This will not be fixed, see https://issues.apache.org/jira/browse/SUREFIRE-1266.
+    -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
   <pluginRepositories>
     <!-- TODO: As soon as the next Surefire milestone is available on Maven Central, get rid of this repository -->

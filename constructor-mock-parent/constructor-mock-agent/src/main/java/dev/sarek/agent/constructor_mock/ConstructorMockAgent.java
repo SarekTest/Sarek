@@ -37,11 +37,11 @@ public class ConstructorMockAgent {
     active = true;
     System.out.println("[Constructor Mock Agent] Installing ConstructorMockTransformer");
     instrumentation.addTransformer(
-//      new ConstructorMockTransformer(configFile)
+      // new ConstructorMockTransformer(configFile)
       (ClassFileTransformer) Class
         .forName("dev.sarek.agent.constructor_mock.ConstructorMockTransformer")
-        .getDeclaredConstructor(String.class)
-        .newInstance(configFile),
+        .getDeclaredConstructor()
+        .newInstance(), // TODO: pass through 'logConstructorMock'
       true
     );
   }
