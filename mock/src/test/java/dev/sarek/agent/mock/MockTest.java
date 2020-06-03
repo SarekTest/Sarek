@@ -46,7 +46,8 @@ public class MockTest {
     try (Mock mock = new Mock(UUID.class)) {
       // Calling instrumented constructors/methods requires helper classes on the bootstrap classpath
       assertThrows(NoClassDefFoundError.class, () -> new UUID(0xABBA, 0xCAFE));
-      assertThrows(NoClassDefFoundError.class, () -> UUID.randomUUID());
+      //noinspection ResultOfMethodCallIgnored
+      assertThrows(NoClassDefFoundError.class, UUID::randomUUID);
     }
 
     // After auto-close, class transformations have been reverted

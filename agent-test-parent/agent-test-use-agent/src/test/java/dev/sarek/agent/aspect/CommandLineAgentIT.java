@@ -63,6 +63,7 @@ public class CommandLineAgentIT {
 
     // Matcher too broad (all methods of target class) + sloppy advice implementation
     // (assuming specific parameter types) -> runtime exception
+    //noinspection ResultOfMethodCallIgnored
     assertThrows(ClassCastException.class, underTest::getName);
 
     // After unregistering the transformer, the target is unaffected by the aspect

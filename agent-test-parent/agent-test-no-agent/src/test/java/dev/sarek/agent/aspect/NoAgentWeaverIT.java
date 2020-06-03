@@ -95,6 +95,7 @@ public class NoAgentWeaverIT {
     // if the advice should fire. But in order to do that, the aspect classes need to exist in the target
     // class' class loader, which in this case they do not because the test runs without the Java agent
     // injecting them into the boot class loader.
+    //noinspection ResultOfMethodCallIgnored
     assertThrows(NoClassDefFoundError.class, uuid::toString);
   }
 
@@ -119,6 +120,7 @@ public class NoAgentWeaverIT {
     // if the advice should fire. But in order to do that, the aspect classes need to exist in the target
     // class' class loader, which in this case they do not because the test runs without the Java agent
     // injecting them into the boot class loader.
+    //noinspection ResultOfMethodCallIgnored
     assertThrows(NoClassDefFoundError.class, () -> "dummy".replaceAll("foo", "bar"));
   }
 

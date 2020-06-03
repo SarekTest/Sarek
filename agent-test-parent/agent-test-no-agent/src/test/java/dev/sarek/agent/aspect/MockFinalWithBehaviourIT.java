@@ -85,6 +85,7 @@ public class MockFinalWithBehaviourIT {
     assertEquals(3, new FinalClass().add(1, 2));
     assertEquals(12.3, new FinalClass().percentOf(123, 10), 1e-6);
     assertEquals('t', new FinalClass().firstChar("test"));
+    //noinspection ConstantConditions
     assertTrue(new FinalClass().invert(false));
 
     // Each constructor call was executed
@@ -109,6 +110,7 @@ public class MockFinalWithBehaviourIT {
     // Check instance methods
     FinalClass.resetInstanceCounter();
     new FinalClass().doSomething();
+    //noinspection ConstantConditions
     assertNull(new FinalClass().greet("world"));
     assertEquals(0, new FinalClass().add(1, 2));
     assertEquals(0, new FinalClass().percentOf(123, 10), 1e-6);

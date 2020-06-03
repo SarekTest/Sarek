@@ -50,7 +50,6 @@ public abstract class ConstructorAspect extends Aspect<Constructor<?>> {
     args = argsCopy;
   }
 
-  @SuppressWarnings("UnusedAssignment")
   @OnMethodExit(backupArguments = false)
   public static void after(
     @This(typing = DYNAMIC, optional = true) Object target,

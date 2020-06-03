@@ -17,7 +17,6 @@ public abstract class TypeInitialiserAspect extends Aspect<Class<?>>{
   // TODO: Try @Advice.Local for transferring additional state between before/after advices if necessary
   public static final Map<Object, TypeInitialiserAroundAdvice> adviceRegistry = Collections.synchronizedMap(new HashMap<>());
 
-  @SuppressWarnings("UnusedAssignment")
   @OnMethodEnter(skipOn = OnDefaultValue.class)
   public static boolean before(
     @Advice.Origin("#t") String staticInitialiserClassName

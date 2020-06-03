@@ -54,6 +54,7 @@ public class InstrumentedBootstrapClassesIT {
         .getInstance(123, 456)
         .toString()
     );
+    //noinspection StringOperationCanBeSimplified
     assertEquals(
       "mocked String",
       SimpleMock
@@ -61,6 +62,7 @@ public class InstrumentedBootstrapClassesIT {
         .withToStringMessage("mocked String")
         .withConstructor(String.class)
         .getInstance("dummy")
+        // Keep this in order to make the test pass
         .toString()
     );
     assertEquals(

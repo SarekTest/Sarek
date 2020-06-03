@@ -1,6 +1,7 @@
 package dev.sarek.app;
 
 public class UnderTest {
+  @SuppressWarnings("UnusedAssignment")
   public static String staticText = "default";
 
   private String name;
