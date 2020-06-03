@@ -35,7 +35,21 @@ public class Mock implements AutoCloseable {
     weaver = new Weaver(
       INSTRUMENTATION,
       anyOf(classes),
-      any(),//not(nameEndsWith("InstanceCounter")),
+      // By default exclude some Object methods
+      // TODO: think about which Object methods we really need
+      // TODO: make list more precise with regard to method signatures
+      // TODO: provide an override option for this default black list
+      not(
+        named("getClass")
+          .or(named("hashCode"))
+          .or(named("equals"))
+          .or(named("clone"))
+          .or(named("notify"))
+          .or(named("notifyAll"))
+          .or(named("wait"))
+          .or(named("finalize"))
+        //.or(named("toString"))
+      ),
       MethodAroundAdvice.MOCK,
       (Object[]) classes
     );
