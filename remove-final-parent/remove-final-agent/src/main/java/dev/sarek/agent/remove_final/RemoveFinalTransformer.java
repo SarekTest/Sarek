@@ -10,13 +10,26 @@ import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Modifier;
 import java.security.ProtectionDomain;
 
-import static net.bytebuddy.jar.asm.ClassReader.SKIP_DEBUG;
-import static net.bytebuddy.jar.asm.ClassReader.SKIP_FRAMES;
 import static net.bytebuddy.jar.asm.Opcodes.ASM8;
 
 public class RemoveFinalTransformer extends ClassVisitor {
-  // We just change class/method modifiers -> no need to visit all parts of the code
-  public final static int PARSING_FLAGS = SKIP_DEBUG | SKIP_FRAMES;
+  /*
+    Formerly it was: PARSING_FLAGS = SKIP_DEBUG | SKIP_FRAMES.
+    This worked flawlessly for all application classes, but when activating group filters in Maven Surefire,
+    it suddenly broke:
+
+    java.lang.VerifyError: Expecting a stackmap frame at branch target 23
+    Exception Details:
+      Location:
+        org/apache/maven/surefire/group/parse/GroupMatcherParser.group()
+          Lorg/apache/maven/surefire/group/match/GroupMatcher; @14: ifeq
+      Reason:
+        Expected stackmap frame at this location.
+
+    So we parse the complete class with stackmap frames, debug info and all. This is slower, but less error-prone.
+    Better safe than sorry.
+  */
+  public final static int PARSING_FLAGS = 0;
 
   // TODO: make log level configurable
   private boolean logRemoveFinal;
