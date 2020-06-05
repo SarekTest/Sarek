@@ -23,7 +23,8 @@ public abstract class ConstructorAspect extends Aspect<Constructor<?>> {
   public static void before(
     @Origin Constructor constructor,
     @AllArguments(readOnly = false, typing = DYNAMIC) Object[] args
-  ) {
+  )
+  {
     // Get advice for target object instance or target class
     // TODO: use @Advice.Local in order to communicate advice to 'after' method instead of a 2nd lookup
     ConstructorAroundAdvice advice = getAroundAdvice(constructor);
@@ -55,7 +56,8 @@ public abstract class ConstructorAspect extends Aspect<Constructor<?>> {
     @This(typing = DYNAMIC, optional = true) Object target,
     @Origin Constructor constructor,
     @AllArguments(readOnly = false, typing = DYNAMIC) Object[] args
-  ) {
+  )
+  {
     // Get advice for target object instance or target class
     ConstructorAroundAdvice advice = getAroundAdvice(constructor);
 

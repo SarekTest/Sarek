@@ -50,7 +50,8 @@ public class RemoveFinalTransformer extends ClassVisitor {
           Class<?> classBeingRedefined,
           ProtectionDomain protectionDomain,
           byte[] classfileBuffer
-        ) {
+        )
+        {
           ClassReader classReader = new ClassReader(classfileBuffer);
           ClassWriter classWriter = new ClassWriter(classReader, 0);
           classReader.accept(new RemoveFinalTransformer(classWriter, logRemoveFinal), PARSING_FLAGS);

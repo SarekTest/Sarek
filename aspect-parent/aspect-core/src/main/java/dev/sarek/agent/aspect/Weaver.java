@@ -75,7 +75,8 @@ public class Weaver {
     Junction<MethodDescription> methodMatcher,
     MethodAroundAdvice advice,
     Object... targets
-  ) throws IllegalArgumentException, IOException {
+  ) throws IllegalArgumentException, IOException
+  {
     this(instrumentation, typeMatcher, methodMatcher, METHOD_ADVICE, advice, targets);
   }
 
@@ -85,7 +86,8 @@ public class Weaver {
     Junction<MethodDescription> methodMatcher,
     ConstructorAroundAdvice advice,
     Object... targets
-  ) throws IllegalArgumentException, IOException {
+  ) throws IllegalArgumentException, IOException
+  {
     this(instrumentation, typeMatcher, methodMatcher, CONSTRUCTOR_ADVICE, advice, targets);
   }
 
@@ -94,7 +96,8 @@ public class Weaver {
     Junction<TypeDescription> typeMatcher,
     TypeInitialiserAroundAdvice advice,
     Object... targets
-  ) throws IllegalArgumentException, IOException {
+  ) throws IllegalArgumentException, IOException
+  {
     this(instrumentation, typeMatcher, any(), TYPE_INITIALISER_ADVICE, advice, targets);
   }
 
@@ -105,7 +108,8 @@ public class Weaver {
     Aspect.AdviceType adviceType,
     AroundAdvice<?> advice,
     Object... targets
-  ) throws IllegalArgumentException, IOException {
+  ) throws IllegalArgumentException, IOException
+  {
     System.out.println("Creating new weaver " + this);
     if (instrumentation == null)
       throw new IllegalArgumentException("instrumentation must not be null");

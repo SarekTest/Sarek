@@ -25,7 +25,8 @@ public abstract class MethodAspect extends Aspect<Method> {
     @This(typing = DYNAMIC, optional = true) Object target,
     @Origin Method method,
     @AllArguments(readOnly = false, typing = DYNAMIC) Object[] args
-  ) {
+  )
+  {
     // Get advice for target object instance or target class
     // TODO: use @Advice.Local in order to communicate advice to 'after' method instead of a 2nd lookup
     MethodAroundAdvice advice = getAroundAdvice(target, method);
@@ -65,7 +66,8 @@ public abstract class MethodAspect extends Aspect<Method> {
     @Return(readOnly = false, typing = DYNAMIC) Object returnValue,
     @StubValue Object stubReturnValue,
     @Thrown(readOnly = false, typing = DYNAMIC) Throwable throwable
-  ) {
+  )
+  {
     // Get advice for target object instance or target class
     MethodAroundAdvice advice = getAroundAdvice(target, method);
 

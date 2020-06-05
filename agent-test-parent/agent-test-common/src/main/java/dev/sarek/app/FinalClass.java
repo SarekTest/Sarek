@@ -19,7 +19,7 @@ public final class FinalClass {
     return String.join(" ", strings);
   }
 
-  public static double multiply (double factor1, double factor2) {
+  public static double multiply(double factor1, double factor2) {
     return factor1 * factor2;
   }
 

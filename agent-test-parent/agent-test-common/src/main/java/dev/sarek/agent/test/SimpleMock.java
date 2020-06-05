@@ -34,6 +34,7 @@ public class SimpleMock<T> {
 
   /**
    * Overrides (stubs) {@link #toString()} return value; default is "mocked"
+   *
    * @param toStringMessage {@link #toString()} return value
    * @return the same mock creator instance
    */
@@ -44,6 +45,7 @@ public class SimpleMock<T> {
 
   /**
    * Defines which parent constructor is to be called when creating a mock instance via {@link #getInstance(Object...)}
+   *
    * @param constructorParameterTypes constructor parameter types
    * @return the same mock creator instance
    */
@@ -54,6 +56,7 @@ public class SimpleMock<T> {
 
   /**
    * Creates mock instance
+   *
    * @param constructorParameters parameters for parent constructor defined via {@link #withConstructor(Class[])}
    * @return new instance of type to be mocked (actually an instance of a dynamically created subclass)
    * @throws ReflectiveOperationException

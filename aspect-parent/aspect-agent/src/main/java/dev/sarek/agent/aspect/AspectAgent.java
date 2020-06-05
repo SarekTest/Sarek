@@ -9,17 +9,15 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.jar.JarFile;
 
-/**
- * TODO:
- *   - In order to avoid possible collisions with clients using BB in a conflicting
- *     version already, I could relocate the BB classes (including ASM) to a
- *     separate base package such as dev.sarek.jar and exclude that package
- *     from both definalisation and aspect weaving.
- *   - A fat JAR version of the wrapper agent could contain the aspect framework
- *     JAR as a resource and unpack it upon start-up. This would make both JAR
- *     detection more reliable and also relieve the user from having to add the
- *     aspect framework to her class path.
- */
+// TODO:
+//   - In order to avoid possible collisions with clients using BB in a conflicting
+//     version already, I could relocate the BB classes (including ASM) to a
+//     separate base package such as dev.sarek.jar and exclude that package
+//     from both definalisation and aspect weaving.
+//   - A fat JAR version of the wrapper agent could contain the aspect framework
+//     JAR as a resource and unpack it upon start-up. This would make both JAR
+//     detection more reliable and also relieve the user from having to add the
+//     aspect framework to her class path.
 public class AspectAgent {
   private static boolean active;
   private static boolean removeFinalActive;

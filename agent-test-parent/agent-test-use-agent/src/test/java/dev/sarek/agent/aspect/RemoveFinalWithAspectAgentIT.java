@@ -1,7 +1,7 @@
 package dev.sarek.agent.aspect;
 
-import dev.sarek.app.FinalClass;
 import dev.sarek.agent.test.SimpleMock;
+import dev.sarek.app.FinalClass;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -27,7 +27,7 @@ import static org.junit.Assert.assertFalse;
  * boot class loader injection for the Java agent does not work as expected.
  */
 public class RemoveFinalWithAspectAgentIT {
-//  private static final Instrumentation INSTRUMENTATION =
+  //  private static final Instrumentation INSTRUMENTATION =
   @Test
   public void checkDefinaliser() throws NoSuchMethodException {
     // Final application class has been definalised

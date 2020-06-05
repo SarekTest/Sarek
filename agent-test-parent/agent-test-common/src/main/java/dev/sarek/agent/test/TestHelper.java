@@ -9,7 +9,8 @@ public class TestHelper {
       Method findLoadedClass = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);
       findLoadedClass.setAccessible(true);
       return findLoadedClass.invoke(TestHelper.class.getClassLoader(), className) != null;
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException reflectionProblem) {
+    }
+    catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException reflectionProblem) {
       throw new RuntimeException(
         "Cannot use ClassLoader.findLoadedClass in order to check for already loaded classes",
         reflectionProblem

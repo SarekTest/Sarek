@@ -33,7 +33,8 @@ public class MethodAroundAdvice extends AroundAdvice<Method> {
   public Object after(
     Object target, Method method, Object[] args,
     boolean proceedMode, Object returnValue, Throwable throwable
-  ) throws Throwable {
+  ) throws Throwable
+  {
     return after.apply(target, method, args, proceedMode, returnValue, throwable);
   }
 

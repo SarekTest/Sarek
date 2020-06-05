@@ -1,7 +1,7 @@
 package dev.sarek.agent.remove_final;
 
-import dev.sarek.app.FinalClass;
 import dev.sarek.agent.test.SimpleMock;
+import dev.sarek.app.FinalClass;
 import org.junit.Test;
 
 import java.io.ObjectOutputStream;

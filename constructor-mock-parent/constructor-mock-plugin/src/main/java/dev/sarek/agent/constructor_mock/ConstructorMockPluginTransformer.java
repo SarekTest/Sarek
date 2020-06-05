@@ -10,6 +10,7 @@ import java.util.Properties;
  * This class can be used from Maven in order to create constructor mocks during build time by delegating to
  * {@link ConstructorMockTransformer}
  * <p></p>
+ *
  * @see <a href="https://github.com/icon-Systemhaus-GmbH/javassist-maven-plugin">Javassist Maven Plugin</a>
  * <p></p>
  * TODO: implement configurability in ConstructorMockTransformer

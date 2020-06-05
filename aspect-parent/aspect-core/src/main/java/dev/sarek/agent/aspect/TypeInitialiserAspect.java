@@ -11,7 +11,7 @@ import java.util.Map;
 
 import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAMIC;
 
-public abstract class TypeInitialiserAspect extends Aspect<Class<?>>{
+public abstract class TypeInitialiserAspect extends Aspect<Class<?>> {
 
   // TODO: What happens if more than one transformer matches the same instance or class?
   // TODO: Try @Advice.Local for transferring additional state between before/after advices if necessary
@@ -20,7 +20,8 @@ public abstract class TypeInitialiserAspect extends Aspect<Class<?>>{
   @OnMethodEnter(skipOn = OnDefaultValue.class)
   public static boolean before(
     @Advice.Origin("#t") String staticInitialiserClassName
-  ) throws ClassNotFoundException {
+  ) throws ClassNotFoundException
+  {
     // Get advice for target class
     Class<?> targetClass = toClass(staticInitialiserClassName);
     TypeInitialiserAroundAdvice advice = getAroundAdvice(targetClass);
@@ -39,7 +40,8 @@ public abstract class TypeInitialiserAspect extends Aspect<Class<?>>{
     @Advice.Origin("#t") String staticInitialiserClassName,
     @Advice.Enter boolean proceedMode,
     @Advice.Thrown(readOnly = false, typing = DYNAMIC) Throwable throwable
-  ) throws ClassNotFoundException {
+  ) throws ClassNotFoundException
+  {
     // Get advice for target class
     Class<?> targetClass = toClass(staticInitialiserClassName);
     // TODO: use @Advice.Local in order to communicate advice to 'after' method instead of a 2nd lookup
@@ -52,7 +54,8 @@ public abstract class TypeInitialiserAspect extends Aspect<Class<?>>{
     try {
       advice.after(targetClass, proceedMode, throwable);
       throwable = null;
-    } catch (Throwable e) {
+    }
+    catch (Throwable e) {
       throwable = e;
     }
   }
@@ -61,7 +64,7 @@ public abstract class TypeInitialiserAspect extends Aspect<Class<?>>{
    * Keep this method public because it must be callable from advice code woven into other classes
    */
   public static TypeInitialiserAroundAdvice getAroundAdvice(Class<?> clazz) {
-      return adviceRegistry.get(clazz);
+    return adviceRegistry.get(clazz);
   }
 
   /**
