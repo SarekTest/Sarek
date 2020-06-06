@@ -60,6 +60,12 @@ public class Weaver {
   // Do not use ByteBuddyAgent.install() in this class but get an Instrumentation instance injected.
   // Otherwise bytebuddy-agent.jar would have to be on the boot classpath. To put bytebuddy.jar there
   // is bothersome enough already. :-/
+  // TODO: Think about using ByteBuddyAgent anyway in order to unburden the user from providing an Instrumentation
+  //       instance in the constructor. The functionality to obtain an instance could be located in base class
+  //       dev.sarek.agent.Agent and lazily initialised in a getter method if not explicitly set in a subclass agent's
+  //       premain method. As there is no such thing as a static super class method being automatically called, we have
+  //       to rely on subclasses initialising the parent class member if in situations where the JVM is started via
+  //       '-javaagent' we want to avoid calling ByteBuddyAgent.install(), because that requires a JDK, not just a JRE.
   private final Instrumentation instrumentation;
   private final Junction<TypeDescription> typeMatcher;
   private final Junction<MethodDescription> methodMatcher;
@@ -172,7 +178,8 @@ public class Weaver {
     unregisterTransformer(true);
   }
 
-  public void unregisterTransformer(boolean reset) {
+  // TODO: Maybe delete this method because usually when unregistering the transformer we also reset it.
+  private void unregisterTransformer(boolean reset) {
     for (Object target : targets.toArray())
       removeTarget(target);
     if (reset)
@@ -180,7 +187,7 @@ public class Weaver {
     instrumentation.removeTransformer(transformer);
   }
 
-  public void resetTransformer() {
+  private void resetTransformer() {
 //    System.out.println("[Aspect Agent] Resetting transformer for weaver " + this);
     // If transformation was reversed successfully (i.e. target classes are no longer woven),
     // remove all associated methods for this weaver from the woven method registry
@@ -195,6 +202,7 @@ public class Weaver {
       .ignore(none())
       .with(RETRANSFORMATION)
       .with(AgentBuilder.RedefinitionStrategy.Listener.StreamWriting.toSystemError())
+      // TODO: make weaver logging configurable in general and with regard to '.withTransformationsOnly()' in particular
       .with(AgentBuilder.Listener.StreamWriting.toSystemError().withTransformationsOnly())
       .with(AgentBuilder.InstallationListener.StreamWriting.toSystemError())
       .with(new AgentBuilder.InstallationListener.Adapter() {
