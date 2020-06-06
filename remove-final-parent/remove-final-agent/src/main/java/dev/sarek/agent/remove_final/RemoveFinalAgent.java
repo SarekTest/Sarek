@@ -3,20 +3,22 @@ package dev.sarek.agent.remove_final;
 import dev.sarek.agent.Agent;
 import dev.sarek.agent.Agent.TransformerFactoryMethod.IllegalTransformerFactoryMethodException;
 import dev.sarek.agent.AgentRegistry.AgentAlreadyRegisteredException;
+import dev.sarek.agent.OptionParser.IllegalAgentIdException;
+import dev.sarek.agent.OptionParser.IllegalOptionNameException;
 
 import java.lang.instrument.Instrumentation;
-import java.util.HashSet;
-import java.util.Set;
 
 public class RemoveFinalAgent extends Agent {
   public RemoveFinalAgent(String options, Instrumentation instrumentation)
-    throws ReflectiveOperationException, AgentAlreadyRegisteredException, IllegalTransformerFactoryMethodException
+    throws ReflectiveOperationException, AgentAlreadyRegisteredException, IllegalTransformerFactoryMethodException,
+    IllegalOptionNameException, IllegalAgentIdException
   {
     super(options, instrumentation);
   }
 
   public RemoveFinalAgent(String options)
-    throws ReflectiveOperationException, AgentAlreadyRegisteredException, IllegalTransformerFactoryMethodException
+    throws ReflectiveOperationException, AgentAlreadyRegisteredException, IllegalTransformerFactoryMethodException,
+    IllegalOptionNameException, IllegalAgentIdException
   {
     super(options);
   }
@@ -29,7 +31,8 @@ public class RemoveFinalAgent extends Agent {
    *                after the Java agent path via <code>=/path/to/my-config.properties</code>.
    */
   public static void agentmain(String options, Instrumentation instrumentation)
-    throws ReflectiveOperationException, AgentAlreadyRegisteredException, IllegalTransformerFactoryMethodException
+    throws ReflectiveOperationException, AgentAlreadyRegisteredException, IllegalTransformerFactoryMethodException,
+    IllegalOptionNameException, IllegalAgentIdException
   {
     premain(options, instrumentation);
   }
@@ -42,7 +45,8 @@ public class RemoveFinalAgent extends Agent {
    *                after the Java agent path via <code>=/path/to/my-config.properties</code>.
    */
   public static void premain(String options, Instrumentation instrumentation)
-    throws AgentAlreadyRegisteredException, ReflectiveOperationException, IllegalTransformerFactoryMethodException
+    throws AgentAlreadyRegisteredException, ReflectiveOperationException, IllegalTransformerFactoryMethodException,
+    IllegalOptionNameException, IllegalAgentIdException
   {
     // TODO: Maybe catch exceptions + log errors instead so as to enable the system to start up anyway
     new RemoveFinalAgent(options, instrumentation);
@@ -54,10 +58,8 @@ public class RemoveFinalAgent extends Agent {
   }
 
   @Override
-  public Set<String> getOptionKeys() {
-    Set<String> optionKeys = new HashSet<>();
-    optionKeys.add("verbose");
-    return optionKeys;
+  public String[] getOptionKeys() {
+    return new String[] { "verbose" };
   }
 
   @Override
