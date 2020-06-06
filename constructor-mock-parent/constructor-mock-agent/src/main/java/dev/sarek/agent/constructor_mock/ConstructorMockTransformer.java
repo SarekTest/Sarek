@@ -137,14 +137,15 @@ public class ConstructorMockTransformer implements ClassFileTransformer {
     for (CtConstructor ctConstructor : ctClass.getDeclaredConstructors()) {
       if (LOG_CONSTRUCTOR_MOCK)
         log("Adding constructor mock capability to constructor " + ctConstructor.getLongName());
-      ctConstructor.insertBefore(
-        String.join("\n",
-          "if (dev.sarek.agent.constructor_mock.ConstructorMockRegistry.isObjectInConstructionMock()) {",
-          "  " + superCall,
-          "  return;",
-          "}"
-        )
+      String ifCondition = String.join("\n",
+        "if (dev.sarek.agent.constructor_mock.ConstructorMockRegistry.isObjectInConstructionMock()) {",
+        "  " + superCall,
+        "  return;",
+        "}"
       );
+      if (LOG_CONSTRUCTOR_MOCK)
+        log(ifCondition);
+      ctConstructor.insertBefore(ifCondition);
       // Alternative idea by Björn Kautler without stack trace generation + parsing:
 /*
       if (ConstructorMockRegistry.isCurrentlyInitializingMockThreadLocal()) {
