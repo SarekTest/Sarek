@@ -20,6 +20,7 @@ public class Mock implements AutoCloseable {
   private ConstructorMockTransformer constructorMockTransformer;
   private Weaver weaver;
   private Set<Class<?>> classes;
+  private Set<String> classNames;
 
   public Mock(Class<?>... classes) throws IOException {
     constructorMockTransformer = new ConstructorMockTransformer(classes);
@@ -31,7 +32,7 @@ public class Mock implements AutoCloseable {
       .stream()
       .map(Class::getName)
       .forEach(ConstructorMockRegistry::activate);
-    // Automatically retransforms, thus also applies constructorMockTransformer -> TODO: test!
+    // Automatically retransforms, thus also applies constructorMockTransformer
     weaver = new Weaver(
       INSTRUMENTATION,
       anyOf(classes),
@@ -40,6 +41,22 @@ public class Mock implements AutoCloseable {
       (Object[]) classes
     );
     // INSTRUMENTATION.retransformClasses(classes);
+  }
+
+  public Mock(String... classNames) throws IOException {
+    this(
+      Arrays
+        .stream(classNames)
+        .map((String className) -> {
+          try {
+            return Class.forName(className);
+          }
+          catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+          }
+        })
+        .toArray(Class<?>[]::new)
+    );
   }
 
   @Override
