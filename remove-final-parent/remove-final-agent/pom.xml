@@ -114,6 +114,10 @@
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy</artifactId>
     </dependency>
+    <dependency>
+      <groupId>dev.sarek</groupId>
+      <artifactId>sarek-agent-common</artifactId>
+    </dependency>
   </dependencies>
 
 </project>

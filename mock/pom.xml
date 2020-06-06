@@ -31,8 +31,8 @@
       <artifactId>aspect-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>net.bytebuddy</groupId>
-      <artifactId>byte-buddy-agent</artifactId>
+      <groupId>dev.sarek</groupId>
+      <artifactId>sarek-agent-common</artifactId>
     </dependency>
 
     <!-- Test dependencies -->

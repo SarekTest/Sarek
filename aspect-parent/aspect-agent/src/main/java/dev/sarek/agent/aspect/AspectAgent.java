@@ -90,10 +90,14 @@ public class AspectAgent {
   }
 
   private static void attachRemoveFinalTransformer(boolean logRemoveFinal) throws ReflectiveOperationException {
-    Class
-      .forName("dev.sarek.agent.remove_final.RemoveFinalTransformer")
-      .getDeclaredMethod("install", Instrumentation.class, boolean.class)
-      .invoke(null, instrumentation, logRemoveFinal);
+    // TODO: refactor to use new Agent API
+    instrumentation.addTransformer(
+      (ClassFileTransformer) Class
+        .forName("dev.sarek.agent.remove_final.RemoveFinalTransformer")
+        .getDeclaredMethod("createTransformer", boolean.class)
+        .invoke(null, logRemoveFinal),
+      false
+    );
   }
 
   private static void attachConstructorMockTransformer(boolean logConstructorMock) throws ReflectiveOperationException {

@@ -1,18 +1,36 @@
 package dev.sarek.agent.remove_final;
 
-import java.lang.instrument.Instrumentation;
+import dev.sarek.agent.Agent;
+import dev.sarek.agent.Agent.TransformerFactoryMethod.IllegalTransformerFactoryMethodException;
+import dev.sarek.agent.AgentRegistry.AgentAlreadyRegisteredException;
 
-public class RemoveFinalAgent {
-  private static boolean active;
+import java.lang.instrument.Instrumentation;
+import java.util.HashSet;
+import java.util.Set;
+
+public class RemoveFinalAgent extends Agent {
+  public RemoveFinalAgent(String options, Instrumentation instrumentation)
+    throws ReflectiveOperationException, AgentAlreadyRegisteredException, IllegalTransformerFactoryMethodException
+  {
+    super(options, instrumentation);
+  }
+
+  public RemoveFinalAgent(String options)
+    throws ReflectiveOperationException, AgentAlreadyRegisteredException, IllegalTransformerFactoryMethodException
+  {
+    super(options);
+  }
 
   /**
    * Attach agent dynamically after JVM start-up
    *
    * @param options path to configuration properties file for class
-   *                   {@link RemoveFinalTransformer}. Add this parameter on the command line
-   *                   after the Java agent path via <code>=/path/to/my-config.properties</code>.
+   *                {@link RemoveFinalTransformer}. Add this parameter on the command line
+   *                after the Java agent path via <code>=/path/to/my-config.properties</code>.
    */
-  public static void agentmain(String options, Instrumentation instrumentation) {
+  public static void agentmain(String options, Instrumentation instrumentation)
+    throws ReflectiveOperationException, AgentAlreadyRegisteredException, IllegalTransformerFactoryMethodException
+  {
     premain(options, instrumentation);
   }
 
@@ -20,26 +38,49 @@ public class RemoveFinalAgent {
    * Start agent via <code>-javaagent:/path/to/my-agent.jar=<i>options</i></code> JVM parameter
    *
    * @param options path to configuration properties file for class
-   *                   {@link RemoveFinalTransformer}. Add this parameter on the command line
-   *                   after the Java agent path via <code>=/path/to/my-config.properties</code>.
+   *                {@link RemoveFinalTransformer}. Add this parameter on the command line
+   *                after the Java agent path via <code>=/path/to/my-config.properties</code>.
    */
-  public static void premain(String options, Instrumentation instrumentation) {
-    active = true;
-    // TODO: document how to use '-javaagent:my.jar=verbose' -> Javadoc, read-me
-    boolean logRemoveFinal = options != null && options.trim().toLowerCase().contains("verbose");
-
-    RemoveFinalTransformer.install(instrumentation, logRemoveFinal);
+  public static void premain(String options, Instrumentation instrumentation)
+    throws AgentAlreadyRegisteredException, ReflectiveOperationException, IllegalTransformerFactoryMethodException
+  {
+    // TODO: Maybe catch exceptions + log errors instead so as to enable the system to start up anyway
+    new RemoveFinalAgent(options, instrumentation);
   }
 
-  /**
-   * Report agent status. This method can be used e.g. by tests which should be ignored if
-   * the agent is inactive because then there would be unmockable target classes which only
-   * become mockable if the agent transforms the classes during class-loading.
-   *
-   * @return <code>true</code> if agent was canonically started via <code>premain</code> or
-   * <code>agentmain</code> methods; <code>false</code> otherwise
-   */
-  public static boolean isActive() {
-    return active;
+  @Override
+  public String getAgentId() {
+    return "RemoveFinal";
   }
+
+  @Override
+  public Set<String> getOptionKeys() {
+    Set<String> optionKeys = new HashSet<>();
+    optionKeys.add("verbose");
+    return optionKeys;
+  }
+
+  @Override
+  public boolean canRetransform() {
+    return false;
+  }
+
+  @Override
+  public TransformerFactoryMethod getTransformerFactoryMethod()
+    throws NoSuchMethodException, IllegalTransformerFactoryMethodException, ClassNotFoundException
+  {
+    return new TransformerFactoryMethod(
+      "dev.sarek.agent.remove_final.RemoveFinalTransformer",
+      "createTransformer",
+      new Class<?>[] { boolean.class }
+    );
+  }
+
+  @Override
+  public Object[] getDefaultTransformerArgs(Object... factoryMethodArgs) {
+    return new Object[] {
+      getOptions().containsKey("verbose")
+    };
+  }
+
 }

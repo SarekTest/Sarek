@@ -313,6 +313,11 @@
         <artifactId>mock</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>dev.sarek</groupId>
+        <artifactId>sarek-agent-common</artifactId>
+        <version>${project.version}</version>
+      </dependency>
 
       <!-- Test dependencies -->
       <dependency>

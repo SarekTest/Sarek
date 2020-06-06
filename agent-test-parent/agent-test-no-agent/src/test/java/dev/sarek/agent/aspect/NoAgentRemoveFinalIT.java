@@ -1,9 +1,11 @@
 package dev.sarek.agent.aspect;
 
+import dev.sarek.agent.Agent;
+import dev.sarek.agent.Agent.TransformerFactoryMethod.IllegalTransformerFactoryMethodException;
+import dev.sarek.agent.AgentRegistry.AgentAlreadyRegisteredException;
 import dev.sarek.agent.remove_final.RemoveFinalTransformer;
 import dev.sarek.agent.test.SeparateJVM;
 import dev.sarek.app.FinalClass;
-import net.bytebuddy.agent.ByteBuddyAgent;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -22,10 +24,12 @@ import static org.junit.Assert.assertTrue;
  */
 @Category(SeparateJVM.class)
 public class NoAgentRemoveFinalIT {
-  private static final Instrumentation INSTRUMENTATION = ByteBuddyAgent.install();
+  private static final Instrumentation INSTRUMENTATION = Agent.getInstrumentation();
 
   @Test
-  public void hotAttachDefinaliser() throws NoSuchMethodException {
+  public void hotAttachDefinaliser()
+    throws ReflectiveOperationException, AgentAlreadyRegisteredException, IllegalTransformerFactoryMethodException
+  {
     // Ensure classes under test have not been loaded yet
     assertFalse(
       "This test needs to run in its own JVM, otherwise it could be too late for the" +
@@ -39,7 +43,7 @@ public class NoAgentRemoveFinalIT {
     );
 
     // Activate definaliser
-    RemoveFinalTransformer.install(INSTRUMENTATION, true);
+    INSTRUMENTATION.addTransformer(RemoveFinalTransformer.createTransformer(true), false);
 
     // Final application class has been definalised
     assertFalse(Modifier.isFinal(FinalClass.class.getModifiers()));

@@ -1,5 +1,6 @@
 package dev.sarek.agent.mock;
 
+import dev.sarek.agent.Agent;
 import dev.sarek.agent.aspect.Weaver;
 import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;
 import dev.sarek.agent.test.SeparateJVM;
@@ -31,7 +32,7 @@ public class MockWithBootstrapInjectionTest {
 
   @BeforeClass
   public static void addDependenciesToBootClassPath() throws IOException {
-    Instrumentation INSTRUMENTATION = ByteBuddyAgent.install();
+    Instrumentation INSTRUMENTATION = Agent.getInstrumentation();
 
     // This property is usually set in Maven in order to tell us the path to the constructor mock agent.
     // Important: The JAR needs to contain Javassist too, so it should be the '-all' or '-all-special' artifact.

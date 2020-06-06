@@ -10,6 +10,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Modifier;
 import java.security.ProtectionDomain;
 
+import static dev.sarek.agent.AgentRegistry.AGENT_REGISTRY;
 import static net.bytebuddy.jar.asm.Opcodes.ASM8;
 
 public class RemoveFinalTransformer extends ClassVisitor {
@@ -34,31 +35,29 @@ public class RemoveFinalTransformer extends ClassVisitor {
   // TODO: make log level configurable
   private boolean logRemoveFinal;
 
-  private final String LOG_PREFIX = RemoveFinalAgent.isActive()
+  private final String LOG_PREFIX = AGENT_REGISTRY.isRegistered(RemoveFinalAgent.class)
     ? "[Remove Final Agent] "
     : "[Remove Final Transformer] ";
 
   private String className;
 
-  public static void install(Instrumentation instrumentation, boolean logRemoveFinal) {
-    instrumentation.addTransformer(
-      new ClassFileTransformer() {
-        @Override
-        public byte[] transform(
-          ClassLoader loader,
-          String className,
-          Class<?> classBeingRedefined,
-          ProtectionDomain protectionDomain,
-          byte[] classfileBuffer
-        )
-        {
-          ClassReader classReader = new ClassReader(classfileBuffer);
-          ClassWriter classWriter = new ClassWriter(classReader, 0);
-          classReader.accept(new RemoveFinalTransformer(classWriter, logRemoveFinal), PARSING_FLAGS);
-          return classWriter.toByteArray();
-        }
+  public static ClassFileTransformer createTransformer(boolean logRemoveFinal) {
+    return new ClassFileTransformer() {
+      @Override
+      public byte[] transform(
+        ClassLoader loader,
+        String className,
+        Class<?> classBeingRedefined,
+        ProtectionDomain protectionDomain,
+        byte[] classfileBuffer
+      )
+      {
+        ClassReader classReader = new ClassReader(classfileBuffer);
+        ClassWriter classWriter = new ClassWriter(classReader, 0);
+        classReader.accept(new RemoveFinalTransformer(classWriter, logRemoveFinal), PARSING_FLAGS);
+        return classWriter.toByteArray();
       }
-    );
+    };
   }
 
   public RemoveFinalTransformer(ClassVisitor cv, boolean logRemoveFinal) {
