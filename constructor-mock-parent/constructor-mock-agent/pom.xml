@@ -45,14 +45,13 @@
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <shadedArtifactAttached>true</shadedArtifactAttached>
               <shadedClassifierName>all</shadedClassifierName>
-              <filters>
-                <filter>
-                  <artifact>org.javassist:javassist</artifact>
+              <relocations>
+                <relocation>
                   <excludes>
-                    <exclude>META-INF/**</exclude>
+                    <exclude>*</exclude>
                   </excludes>
-                </filter>
-              </filters>
+                </relocation>
+              </relocations>
             </configuration>
           </execution>
           <execution>
@@ -66,20 +65,6 @@
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <shadedArtifactAttached>true</shadedArtifactAttached>
               <shadedClassifierName>all-special</shadedClassifierName>
-              <filters>
-                <filter>
-                  <artifact>org.javassist:javassist</artifact>
-                  <excludes>
-                    <exclude>META-INF/**</exclude>
-                  </excludes>
-                </filter>
-              </filters>
-              <relocations>
-                <relocation>
-                  <pattern>javassist</pattern>
-                  <shadedPattern>dev.sarek.jar.javassist</shadedPattern>
-                </relocation>
-              </relocations>
             </configuration>
           </execution>
         </executions>
@@ -92,6 +77,10 @@
     <dependency>
       <groupId>org.javassist</groupId>
       <artifactId>javassist</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>dev.sarek</groupId>
+      <artifactId>sarek-agent-common</artifactId>
     </dependency>
   </dependencies>
 

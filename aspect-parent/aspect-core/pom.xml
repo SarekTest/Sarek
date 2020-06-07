@@ -29,30 +29,13 @@
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <shadedArtifactAttached>true</shadedArtifactAttached>
               <shadedClassifierName>all</shadedClassifierName>
-              <filters>
-                <filter>
-                  <artifact>dev.sarek:remove-final-agent</artifact>
-                  <includes>
-                    <include>dev/sarek/agent/**</include>
-                  </includes>
-                </filter>
-                <filter>
-                  <artifact>net.bytebuddy:*</artifact>
+              <relocations>
+                <relocation>
                   <excludes>
-                    <exclude>**/maven/net.bytebuddy/**</exclude>
-                    <exclude>**/module-info.class</exclude>
-                    <exclude>**/NOTICE</exclude>
-                    <exclude>**/MANIFEST.MF</exclude>
-                    <!--
-                      Just retain ByteBuddy Apache 2.0 licence mentioning ASM because for now all files we include
-                      in this minimised JAR are ASM classes relocated into ByteBuddy name space anyway. If in the
-                      future this agent needs real ByteBuddy classes, consider to add an own licence file and move
-                      the ByteBuddy licence to META-INF/licenses/ByteBuddy.
-                    -->
-                    <!--<exclude>**/LICENSE</exclude>-->
+                    <exclude>*</exclude>
                   </excludes>
-                </filter>
-              </filters>
+                </relocation>
+              </relocations>
             </configuration>
           </execution>
           <execution>
@@ -66,40 +49,6 @@
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <shadedArtifactAttached>true</shadedArtifactAttached>
               <shadedClassifierName>all-special</shadedClassifierName>
-              <filters>
-                <filter>
-                  <artifact>dev.sarek:remove-final-agent</artifact>
-                  <includes>
-                    <include>dev/sarek/agent/**</include>
-                  </includes>
-                </filter>
-                <filter>
-                  <artifact>net.bytebuddy:*</artifact>
-                  <excludes>
-                    <exclude>**/maven/net.bytebuddy/**</exclude>
-                    <exclude>**/module-info.class</exclude>
-                    <exclude>**/NOTICE</exclude>
-                    <exclude>**/MANIFEST.MF</exclude>
-                    <!--
-                      Just retain ByteBuddy Apache 2.0 licence mentioning ASM because for now all files we include
-                      in this minimised JAR are ASM classes relocated into ByteBuddy name space anyway. If in the
-                      future this agent needs real ByteBuddy classes, consider to add an own licence file and move
-                      the ByteBuddy licence to META-INF/licenses/ByteBuddy.
-                    -->
-                    <!--<exclude>**/LICENSE</exclude>-->
-                  </excludes>
-                </filter>
-              </filters>
-              <relocations>
-                <relocation>
-                  <pattern>net.bytebuddy.jar.asm</pattern>
-                  <shadedPattern>dev.sarek.jar.asm</shadedPattern>
-                </relocation>
-                <relocation>
-                  <pattern>net.bytebuddy</pattern>
-                  <shadedPattern>dev.sarek.jar.bytebuddy</shadedPattern>
-                </relocation>
-              </relocations>
             </configuration>
           </execution>
         </executions>
@@ -116,6 +65,10 @@
     <dependency>
       <groupId>dev.sarek</groupId>
       <artifactId>remove-final-agent</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>dev.sarek</groupId>
+      <artifactId>sarek-agent-common</artifactId>
     </dependency>
 
   </dependencies>

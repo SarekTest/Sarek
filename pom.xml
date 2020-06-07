@@ -164,6 +164,72 @@
         <plugin>
           <artifactId>maven-shade-plugin</artifactId>
           <version>3.2.3</version>
+          <configuration>
+            <filters>
+              <filter>
+                <artifact>dev.sarek:sarek-agent-common</artifact>
+                <includes>
+                  <include>dev/sarek/agent/**</include>
+                  <!-- Includes copies of ByteBuddy, ASM and Javassist licences in module sarek-agent-common -->
+                  <include>META-INF/license/**</include>
+                </includes>
+              </filter>
+              <filter>
+                <artifact>dev.sarek:aspect-core</artifact>
+                <excludes>
+                  <exclude>META-INF/**</exclude>
+                </excludes>
+              </filter>
+              <filter>
+                <artifact>dev.sarek:*</artifact>
+                <excludes>
+                  <exclude>META-INF/maven/**</exclude>
+                </excludes>
+              </filter>
+              <filter>
+                <artifact>net.bytebuddy:*</artifact>
+                <excludes>
+                  <exclude>META-INF/**</exclude>
+                </excludes>
+              </filter>
+              <filter>
+                <artifact>org.javassist:*</artifact>
+                <excludes>
+                  <exclude>META-INF/**</exclude>
+                </excludes>
+              </filter>
+              <filter>
+                <artifact>*:*</artifact>
+                <excludes>
+                  <exclude>META-INF/maven/**</exclude>
+                </excludes>
+              </filter>
+            </filters>
+            <!--
+              Caveat: For non-shaded artifacts, make sure to override relocation via
+              <relocations>
+                <relocation>
+                  <excludes>
+                    <exclude>*</exclude>
+                  </excludes>
+                </relocation>
+              </relocations>
+            -->
+            <relocations>
+              <relocation>
+                <pattern>net.bytebuddy.jar.asm</pattern>
+                <shadedPattern>dev.sarek.jar.asm</shadedPattern>
+              </relocation>
+              <relocation>
+                <pattern>net.bytebuddy</pattern>
+                <shadedPattern>dev.sarek.jar.bytebuddy</shadedPattern>
+              </relocation>
+              <relocation>
+                <pattern>javassist</pattern>
+                <shadedPattern>dev.sarek.jar.javassist</shadedPattern>
+              </relocation>
+            </relocations>
+          </configuration>
         </plugin>
 
         <plugin>
