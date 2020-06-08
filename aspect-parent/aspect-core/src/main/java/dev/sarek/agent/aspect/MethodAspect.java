@@ -3,10 +3,7 @@ package dev.sarek.agent.aspect;
 import net.bytebuddy.asm.Advice.*;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAMIC;
 
@@ -39,12 +36,7 @@ public abstract class MethodAspect extends Aspect<Method> {
     // See also https://github.com/raphw/byte-buddy/issues/850#issuecomment-621387855.
     // The only way to make it back here for argument changes applied to the array in the delegate advice
     // called by advice.before() is to pass it a copy and then re-assign that copy back to 'args'.
-    // TODO: https://github.com/raphw/byte-buddy/issues/850 has been fixed, so replace this by
-    //       Object[] argsCopy = Arrays.copyOf(args, args.length);
-    //       after ByteBuddy 1.10.11 has been released
-
-    Object[] argsCopy = new Object[args.length];
-    System.arraycopy(args, 0, argsCopy, 0, args.length);
+    Object[] argsCopy = Arrays.copyOf(args, args.length);
 
     // Check if user-defined advice wants to proceed (true) to target method or not (false)
     boolean shouldProceed = advice.before(target, method, argsCopy);
