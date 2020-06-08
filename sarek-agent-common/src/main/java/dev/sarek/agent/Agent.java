@@ -15,6 +15,9 @@ import java.util.Map;
 
 import static dev.sarek.agent.AgentRegistry.AGENT_REGISTRY;
 
+// TODO: add auto discover capability for external and embedded dependency JARs (got to move some stuff over from
+//       AspectAgent)
+// TODO: add bootstrap injection capability for external and embedded dependency JARs
 public abstract class Agent {
   private static Instrumentation _instr;
   private final Map<String, String> options;
@@ -28,6 +31,7 @@ public abstract class Agent {
     this.options = getOptionParser().parse(options);
     setInstrumentation(instrumentation);
     Object[] transformerArgs = getDefaultTransformerArgs();
+    // TODO: make default transformer creation optional
     if (transformerArgs != null) {
       getInstrumentation().addTransformer(
         getTransformerFactoryMethod().invoke(transformerArgs),
