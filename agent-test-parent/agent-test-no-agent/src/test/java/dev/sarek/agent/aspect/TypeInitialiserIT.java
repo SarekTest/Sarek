@@ -2,13 +2,11 @@ package dev.sarek.agent.aspect;
 
 import dev.sarek.agent.test.SeparateJVM;
 import dev.sarek.app.UnderTest;
-import net.bytebuddy.agent.ByteBuddyAgent;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
-import java.lang.instrument.Instrumentation;
 
 import static dev.sarek.agent.test.TestHelper.isClassLoaded;
 import static net.bytebuddy.matcher.ElementMatchers.is;
@@ -21,8 +19,6 @@ import static org.junit.Assert.assertFalse;
  */
 @Category(SeparateJVM.class)
 public class TypeInitialiserIT {
-  private static final Instrumentation INSTRUMENTATION = ByteBuddyAgent.install();
-
   private Weaver weaver;
 
   @After
@@ -41,7 +37,6 @@ public class TypeInitialiserIT {
 
     // Create weaver, directly registering a target class in the constructor
     weaver = new Weaver(
-      INSTRUMENTATION,
       is(UnderTest.class),
       new TypeInitialiserAroundAdvice(
         // false = suppress type initialiser

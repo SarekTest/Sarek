@@ -1,5 +1,6 @@
 package dev.sarek.agent.aspect;
 
+import dev.sarek.agent.Agent;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
 import net.bytebuddy.description.method.MethodDescription;
@@ -57,16 +58,6 @@ public class Weaver {
     }
   }
 
-  // Do not use ByteBuddyAgent.install() in this class but get an Instrumentation instance injected.
-  // Otherwise bytebuddy-agent.jar would have to be on the boot classpath. To put bytebuddy.jar there
-  // is bothersome enough already. :-/
-  // TODO: Think about using ByteBuddyAgent anyway in order to unburden the user from providing an Instrumentation
-  //       instance in the constructor. The functionality to obtain an instance could be located in base class
-  //       dev.sarek.agent.Agent and lazily initialised in a getter method if not explicitly set in a subclass agent's
-  //       premain method. As there is no such thing as a static super class method being automatically called, we have
-  //       to rely on subclasses initialising the parent class member if in situations where the JVM is started via
-  //       '-javaagent' we want to avoid calling ByteBuddyAgent.install(), because that requires a JDK, not just a JRE.
-  private final Instrumentation instrumentation;
   private final Junction<TypeDescription> typeMatcher;
   private final Junction<MethodDescription> methodMatcher;
   private final ResettableClassFileTransformer transformer;
@@ -76,39 +67,35 @@ public class Weaver {
   private final Set<Object> targets = Collections.synchronizedSet(new HashSet<>());
 
   public Weaver(
-    Instrumentation instrumentation,
     Junction<TypeDescription> typeMatcher,
     Junction<MethodDescription> methodMatcher,
     MethodAroundAdvice advice,
     Object... targets
   ) throws IllegalArgumentException, IOException
   {
-    this(instrumentation, typeMatcher, methodMatcher, METHOD_ADVICE, advice, targets);
+    this(typeMatcher, methodMatcher, METHOD_ADVICE, advice, targets);
   }
 
   public Weaver(
-    Instrumentation instrumentation,
     Junction<TypeDescription> typeMatcher,
     Junction<MethodDescription> methodMatcher,
     ConstructorAroundAdvice advice,
     Object... targets
   ) throws IllegalArgumentException, IOException
   {
-    this(instrumentation, typeMatcher, methodMatcher, CONSTRUCTOR_ADVICE, advice, targets);
+    this(typeMatcher, methodMatcher, CONSTRUCTOR_ADVICE, advice, targets);
   }
 
   public Weaver(
-    Instrumentation instrumentation,
     Junction<TypeDescription> typeMatcher,
     TypeInitialiserAroundAdvice advice,
     Object... targets
   ) throws IllegalArgumentException, IOException
   {
-    this(instrumentation, typeMatcher, any(), TYPE_INITIALISER_ADVICE, advice, targets);
+    this(typeMatcher, any(), TYPE_INITIALISER_ADVICE, advice, targets);
   }
 
   protected Weaver(
-    Instrumentation instrumentation,
     Junction<TypeDescription> typeMatcher,
     Junction<MethodDescription> methodMatcher,
     Aspect.AdviceType adviceType,
@@ -117,9 +104,6 @@ public class Weaver {
   ) throws IllegalArgumentException, IOException
   {
     System.out.println("Creating new weaver " + this);
-    if (instrumentation == null)
-      throw new IllegalArgumentException("instrumentation must not be null");
-    this.instrumentation = instrumentation;
     this.typeMatcher = typeMatcher == null ? any() : typeMatcher;
     this.methodMatcher = methodMatcher == null ? any() : methodMatcher;
     this.adviceType = adviceType;
@@ -171,7 +155,7 @@ public class Weaver {
   }
 
   protected ResettableClassFileTransformer registerTransformer() throws IOException {
-    return createAgentBuilder().installOn(instrumentation);
+    return createAgentBuilder().installOn(Agent.getInstrumentation());
   }
 
   public void unregisterTransformer() {
@@ -184,14 +168,14 @@ public class Weaver {
       removeTarget(target);
     if (reset)
       resetTransformer();
-    instrumentation.removeTransformer(transformer);
+    Agent.getInstrumentation().removeTransformer(transformer);
   }
 
   private void resetTransformer() {
 //    System.out.println("[Aspect Agent] Resetting transformer for weaver " + this);
     // If transformation was reversed successfully (i.e. target classes are no longer woven),
     // remove all associated methods for this weaver from the woven method registry
-    if (transformer.reset(instrumentation, RETRANSFORMATION))
+    if (transformer.reset(Agent.getInstrumentation(), RETRANSFORMATION))
       wovenMethodRegistry.removeAll(this);
 //    System.out.println("[Aspect Agent] Resetting transformer for weaver " + this + " finished");
   }

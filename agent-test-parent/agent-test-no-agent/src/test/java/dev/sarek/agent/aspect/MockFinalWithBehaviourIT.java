@@ -1,16 +1,15 @@
 package dev.sarek.agent.aspect;
 
+import dev.sarek.agent.Agent;
 import dev.sarek.agent.constructor_mock.ConstructorMockRegistry;
 import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;
 import dev.sarek.app.FinalClass;
-import net.bytebuddy.agent.ByteBuddyAgent;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.lang.instrument.Instrumentation;
 import java.util.jar.JarFile;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
@@ -29,8 +28,6 @@ import static org.junit.Assert.*;
  * are not permitted in retransformations, so they have to be done during class-loading.
  */
 public class MockFinalWithBehaviourIT {
-  private static final Instrumentation INSTRUMENTATION = ByteBuddyAgent.install();
-
   private ConstructorMockTransformer constructorMockTransformer;
   private Weaver weaver;
 
@@ -42,7 +39,7 @@ public class MockFinalWithBehaviourIT {
     // Important: The JAR needs to contain Javassist too, so it should be the '-all' or '-all-special' artifact.
     JarFile constructorMockAgentJar = new JarFile(System.getProperty("constructor-mock-agent.jar"));
     // Inject constructor mock agent JAR into bootstrap classloader
-    INSTRUMENTATION.appendToBootstrapClassLoaderSearch(constructorMockAgentJar);
+    Agent.getInstrumentation().appendToBootstrapClassLoaderSearch(constructorMockAgentJar);
 
     // This property is usually set in Maven in order to tell us the path to the aspect agent.
     // Important: The JAR needs to contain ByteBuddy too, so it should be the '-all' or '-all-special' artifact.
@@ -50,7 +47,7 @@ public class MockFinalWithBehaviourIT {
     // 'dev.sarek.jar.bytebuddy' and e.g. the ElementMatcher imports would need to be changed.
     JarFile aspectAgentJar = new JarFile(System.getProperty("aspect-agent.jar"));
     // Inject aspect agent JAR into bootstrap classloader
-    INSTRUMENTATION.appendToBootstrapClassLoaderSearch(aspectAgentJar);
+    Agent.getInstrumentation().appendToBootstrapClassLoaderSearch(aspectAgentJar);
   }
 
   private static void useApplicationClassBeforeInstrumentation() {
@@ -61,12 +58,12 @@ public class MockFinalWithBehaviourIT {
   public void beforeTest() {
     constructorMockTransformer = new ConstructorMockTransformer(FinalClass.class);
     // Important: set 'canRetransform' parameter to true
-    INSTRUMENTATION.addTransformer(constructorMockTransformer, true);
+    Agent.getInstrumentation().addTransformer(constructorMockTransformer, true);
   }
 
   @After
   public void afterTest() {
-    INSTRUMENTATION.removeTransformer(constructorMockTransformer);
+    Agent.getInstrumentation().removeTransformer(constructorMockTransformer);
     constructorMockTransformer = null;
     if (weaver != null)
       weaver.unregisterTransformer();
@@ -98,7 +95,6 @@ public class MockFinalWithBehaviourIT {
     // (2) Mock both constructors and methods
     ConstructorMockRegistry.activate(FinalClass.class.getName());
     weaver = new Weaver(
-      INSTRUMENTATION,
       is(FinalClass.class),
       not(nameEndsWith("InstanceCounter")),
       MethodAroundAdvice.MOCK,

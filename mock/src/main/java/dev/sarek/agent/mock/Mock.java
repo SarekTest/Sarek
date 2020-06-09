@@ -32,7 +32,6 @@ public class Mock implements AutoCloseable {
       .forEach(ConstructorMockRegistry::activate);
     // Automatically retransforms, thus also applies constructorMockTransformer
     weaver = new Weaver(
-      Agent.getInstrumentation(),
       anyOf(classes),
       any(),
       MethodAroundAdvice.MOCK,

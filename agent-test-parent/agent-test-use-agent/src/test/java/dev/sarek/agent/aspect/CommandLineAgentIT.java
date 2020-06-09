@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.instrument.Instrumentation;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
@@ -27,8 +26,6 @@ import static org.junit.Assert.*;
  * boot class loader injection for the Java agent does not work as expected.
  */
 public class CommandLineAgentIT {
-  private static final Instrumentation INSTRUMENTATION = AspectAgent.getInstrumentation();
-
   private Weaver weaver;
 
   @After
@@ -47,7 +44,6 @@ public class CommandLineAgentIT {
 
     // Create weaver, directly registering a target in the constructor
     weaver = new Weaver(
-      INSTRUMENTATION,
       named(CLASS_NAME),
       isMethod().and(not(named("greet"))),
       new MethodAroundAdvice(
@@ -77,7 +73,6 @@ public class CommandLineAgentIT {
     final String UUID_TEXT_STUB = "111-222-333-444";
 
     weaver = new Weaver(
-      INSTRUMENTATION,
       named(CLASS_NAME),
       named("toString"),
       // Skip target method and return fixed result -> a classical stub
@@ -122,7 +117,6 @@ public class CommandLineAgentIT {
     // Create weaver *after* bootstrap class is loaded (should not make a difference, but check anyway)
     assertTrue(isClassLoaded(CLASS_NAME));
     weaver = new Weaver(
-      INSTRUMENTATION,
       named(CLASS_NAME),
       named("replaceAll").and(takesArguments(String.class, String.class)),
       replaceAllAdvice()
@@ -156,7 +150,6 @@ public class CommandLineAgentIT {
   @Test
   public void weaveStaticJREMethods() throws IOException {
     weaver = new Weaver(
-      INSTRUMENTATION,
       is(System.class),
       named("getProperty"),
       new MethodAroundAdvice(
@@ -176,7 +169,6 @@ public class CommandLineAgentIT {
   @Test
   public void weavingNativeMethodsHasNoEffect() throws IOException {
     weaver = new Weaver(
-      INSTRUMENTATION,
       is(System.class),
       named("currentTimeMillis").or(named("nanoTime")),
       new MethodAroundAdvice(
@@ -231,7 +223,6 @@ public class CommandLineAgentIT {
 
     // Count all File constructor calls, modify first argument if it is a String
     weaver = new Weaver(
-      INSTRUMENTATION,
       is(File.class),
       any(),
       new ConstructorAroundAdvice(

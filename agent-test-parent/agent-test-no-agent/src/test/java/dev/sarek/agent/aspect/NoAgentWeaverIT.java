@@ -2,12 +2,10 @@ package dev.sarek.agent.aspect;
 
 import dev.sarek.app.StringWrapper;
 import dev.sarek.app.UnderTest;
-import net.bytebuddy.agent.ByteBuddyAgent;
 import org.junit.After;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.lang.instrument.Instrumentation;
 import java.util.UUID;
 
 import static dev.sarek.agent.test.TestHelper.isClassLoaded;
@@ -31,8 +29,6 @@ import static org.junit.Assert.*;
  * </ul>
  */
 public class NoAgentWeaverIT {
-  private static final Instrumentation INSTRUMENTATION = ByteBuddyAgent.install();
-
   private Weaver weaver;
 
   @After
@@ -51,7 +47,6 @@ public class NoAgentWeaverIT {
 
     // Create weaver, directly registering a target in the constructor
     weaver = new Weaver(
-      INSTRUMENTATION,
       named(CLASS_NAME),
       named("add"),
       new MethodAroundAdvice(
@@ -75,7 +70,6 @@ public class NoAgentWeaverIT {
     final String CLASS_NAME = "java.util.UUID";
 
     weaver = new Weaver(
-      INSTRUMENTATION,
       named(CLASS_NAME),
       named("toString"),
       // No-op advice just passing through results and exceptions
@@ -104,7 +98,6 @@ public class NoAgentWeaverIT {
     // Create weaver *after* bootstrap class is loaded (should not make a difference, but check anyway)
     assertTrue(isClassLoaded(CLASS_NAME));
     weaver = new Weaver(
-      INSTRUMENTATION,
       named(CLASS_NAME),
       named("replaceAll").and(takesArguments(String.class, String.class)),
       // No-op advice just passing through results and exceptions
@@ -127,7 +120,6 @@ public class NoAgentWeaverIT {
     StringWrapper TEXT = new StringWrapper("To be, or not to be, that is the question");
 
     Weaver weaver = new Weaver(
-      INSTRUMENTATION,
       is(StringWrapper.class),
       named("replaceAll").and(takesArguments(String.class, String.class)),
       replaceAllAdvice()
@@ -193,7 +185,6 @@ public class NoAgentWeaverIT {
   public void staticMethodCall() throws IOException {
     // Create weaver, directly registering a target class in the constructor
     weaver = new Weaver(
-      INSTRUMENTATION,
       is(UnderTest.class),
       named("greet"),
       new MethodAroundAdvice(
@@ -215,7 +206,6 @@ public class NoAgentWeaverIT {
   public void perClassAdvice() throws IOException {
     // Create weaver, directly registering a target class in the constructor
     weaver = new Weaver(
-      INSTRUMENTATION,
       is(UnderTest.class),
       isMethod(),
       new MethodAroundAdvice(
@@ -248,7 +238,6 @@ public class NoAgentWeaverIT {
     assertEquals(0, (int) callCount.get());
 
     weaver = new Weaver(
-      INSTRUMENTATION,
       is(UnderTest.class),
       takesArguments(String.class),
       new ConstructorAroundAdvice(
@@ -276,7 +265,6 @@ public class NoAgentWeaverIT {
   public void multipleWeavers() throws IOException {
     UnderTest underTest = new UnderTest();
     weaver = new Weaver(
-      INSTRUMENTATION,
       is(UnderTest.class),
       named("add"),
       new MethodAroundAdvice(null, (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11),
@@ -287,7 +275,6 @@ public class NoAgentWeaverIT {
     assertEquals(55, underTest.add(2, 3));
 
     Weaver weaver2 = new Weaver(
-      INSTRUMENTATION,
       is(UnderTest.class),
       named("greet"),
       new MethodAroundAdvice(null, (target, method, args, proceedMode, returnValue, throwable) -> {
@@ -314,13 +301,13 @@ public class NoAgentWeaverIT {
     // Cannot create a weaver, trying to register an already registered target to it from the constructor
     assertThrows(
       IllegalArgumentException.class,
-      () -> new Weaver(INSTRUMENTATION, is(UnderTest.class), any(), new MethodAroundAdvice(null, null), underTest)
+      () -> new Weaver(is(UnderTest.class), any(), new MethodAroundAdvice(null, null), underTest)
     );
 
     // Cannot create a weaver, trying to register an already registered target to it from the constructor
     assertThrows(
       IllegalArgumentException.class,
-      () -> new Weaver(INSTRUMENTATION, is(UnderTest.class), any(), new MethodAroundAdvice(null, null), UnderTest.class)
+      () -> new Weaver(is(UnderTest.class), any(), new MethodAroundAdvice(null, null), UnderTest.class)
     );
 
     // Both weavers are active because the second one targets a static method and thus is registered under the class
@@ -337,7 +324,6 @@ public class NoAgentWeaverIT {
 
     // Another advice type can be registered for the same class (method vs. constructor)
     Weaver weaver3 = new Weaver(
-      INSTRUMENTATION,
       is(UnderTest.class),
       takesArguments(String.class),
       new ConstructorAroundAdvice((constructor, args) -> args[0] = "ADVISED", null),

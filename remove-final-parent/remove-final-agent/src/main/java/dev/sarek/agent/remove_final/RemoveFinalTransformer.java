@@ -6,7 +6,6 @@ import net.bytebuddy.jar.asm.ClassWriter;
 import net.bytebuddy.jar.asm.MethodVisitor;
 
 import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Modifier;
 import java.security.ProtectionDomain;
 
