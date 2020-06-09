@@ -16,6 +16,7 @@ import static net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy.RETR
 import static net.bytebuddy.matcher.ElementMatchers.any;
 import static net.bytebuddy.matcher.ElementMatchers.none;
 
+// TODO: Add builder API to enable multiple advices per Weaver, ideally also mixed method, constructor, type initialiser
 public class Weaver {
   private static final WovenMethodRegistry wovenMethodRegistry = new WovenMethodRegistry();
 
@@ -69,47 +70,19 @@ public class Weaver {
   public Weaver(
     Junction<TypeDescription> typeMatcher,
     Junction<MethodDescription> methodMatcher,
-    MethodAroundAdvice advice,
-    Object... targets
-  ) throws IllegalArgumentException, IOException
-  {
-    this(typeMatcher, methodMatcher, METHOD_ADVICE, advice, targets);
-  }
-
-  public Weaver(
-    Junction<TypeDescription> typeMatcher,
-    Junction<MethodDescription> methodMatcher,
-    ConstructorAroundAdvice advice,
-    Object... targets
-  ) throws IllegalArgumentException, IOException
-  {
-    this(typeMatcher, methodMatcher, CONSTRUCTOR_ADVICE, advice, targets);
-  }
-
-  public Weaver(
-    Junction<TypeDescription> typeMatcher,
-    TypeInitialiserAroundAdvice advice,
-    Object... targets
-  ) throws IllegalArgumentException, IOException
-  {
-    this(typeMatcher, any(), TYPE_INITIALISER_ADVICE, advice, targets);
-  }
-
-  protected Weaver(
-    Junction<TypeDescription> typeMatcher,
-    Junction<MethodDescription> methodMatcher,
-    Aspect.AdviceType adviceType,
     AroundAdvice<?> advice,
     Object... targets
   ) throws IllegalArgumentException, IOException
   {
     System.out.println("Creating new weaver " + this);
-    this.typeMatcher = typeMatcher == null ? any() : typeMatcher;
-    this.methodMatcher = methodMatcher == null ? any() : methodMatcher;
-    this.adviceType = adviceType;
     if (advice == null)
       throw new IllegalArgumentException("advice must not be null");
     this.advice = advice;
+    adviceType = Aspect.AdviceType.forAdvice(advice);
+    this.typeMatcher = typeMatcher == null ? any() : typeMatcher;
+    // TODO: document that for TypeInitialiserAroundAdvice the methodMatcher constructor parameter is ignored
+    this.methodMatcher = methodMatcher == null || adviceType.equals(TYPE_INITIALISER_ADVICE) ? any() : methodMatcher;
+
     // TODO: exception during target registration -> dangling targets in advice registry -> FIXME via:
     //   (a) memorise + clean up (argh!) or
     //   (b) don't allow target registration in constructor or
@@ -118,6 +91,7 @@ public class Weaver {
     //   (a) difficult + inefficient, (b) easy to implement, (c) also fairly easy, better usability
     for (Object target : targets)
       addTarget(target);
+
     // Register transformer last so as not to have a dangling active transformer if an exception occurs
     // in the constructor, e.g. because trying to register already registered targets
     this.transformer = registerTransformer();

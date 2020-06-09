@@ -38,6 +38,7 @@ public class TypeInitialiserIT {
     // Create weaver, directly registering a target class in the constructor
     weaver = new Weaver(
       is(UnderTest.class),
+      null,  // For TypeInitialiserAroundAdvice the methodMatcher constructor parameter is ignored
       new TypeInitialiserAroundAdvice(
         // false = suppress type initialiser
         // true = initialiser runs, sets static property and prints something on the console

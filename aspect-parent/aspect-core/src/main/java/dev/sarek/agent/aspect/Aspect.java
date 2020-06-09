@@ -107,6 +107,20 @@ public abstract class Aspect<T> {
     public SortedSet<AdviceScope> getAllowedTargetScopes() {
       return allowedTargetScopes;
     }
+
+    public static AdviceType forAdvice(AroundAdvice<?> aroundAdvice) throws IllegalArgumentException {
+      return forAdviceClass(aroundAdvice.getClass());
+    }
+
+    private static AdviceType forAdviceClass(Class<?> aroundAdviceClass) throws IllegalArgumentException {
+      if (aroundAdviceClass.equals(MethodAroundAdvice.class))
+        return METHOD_ADVICE;
+      if (aroundAdviceClass.equals(ConstructorAroundAdvice.class))
+        return CONSTRUCTOR_ADVICE;
+      if (aroundAdviceClass.equals(TypeInitialiserAroundAdvice.class))
+        return TYPE_INITIALISER_ADVICE;
+      throw new IllegalArgumentException("unknown advice type " + aroundAdviceClass);
+    }
   }
 
 }
