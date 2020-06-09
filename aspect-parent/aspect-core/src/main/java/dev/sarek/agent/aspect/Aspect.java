@@ -88,12 +88,12 @@ public abstract class Aspect<T> {
 
     private final Advice advice;
     private final ElementMatcher.Junction<MethodDescription> methodType;
-    private final SortedSet<AdviceScope> allowedTargetTypes = new TreeSet<>();
+    private final SortedSet<AdviceScope> allowedTargetScopes = new TreeSet<>();
 
-    AdviceType(Advice advice, ElementMatcher.Junction<MethodDescription> methodType, AdviceScope... allowedTargetTypes) {
+    AdviceType(Advice advice, ElementMatcher.Junction<MethodDescription> methodType, AdviceScope... allowedTargetScopes) {
       this.advice = advice;
       this.methodType = methodType;
-      Collections.addAll(this.allowedTargetTypes, allowedTargetTypes);
+      Collections.addAll(this.allowedTargetScopes, allowedTargetScopes);
     }
 
     public Advice getAdvice() {
@@ -104,8 +104,8 @@ public abstract class Aspect<T> {
       return methodType;
     }
 
-    public SortedSet<AdviceScope> getAllowedTargetTypes() {
-      return allowedTargetTypes;
+    public SortedSet<AdviceScope> getAllowedTargetScopes() {
+      return allowedTargetScopes;
     }
   }
 
