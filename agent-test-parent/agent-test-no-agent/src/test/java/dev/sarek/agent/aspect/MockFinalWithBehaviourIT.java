@@ -97,7 +97,11 @@ public class MockFinalWithBehaviourIT {
     weaver = Weaver
       .forTypes(is(FinalClass.class))
       .addAdvice(
-        MethodAroundAdvice.MOCK,
+        InstanceMethodAroundAdvice.MOCK,
+        null
+      )
+      .addAdvice(
+        StaticMethodAroundAdvice.MOCK,
         not(nameEndsWith("InstanceCounter"))
       )
       .addTargets(FinalClass.class)

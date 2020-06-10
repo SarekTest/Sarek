@@ -49,7 +49,7 @@ public class NoAgentWeaverIT {
     weaver = Weaver
       .forTypes(named(CLASS_NAME))
       .addAdvice(
-        new MethodAroundAdvice(
+        new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
         ),
@@ -75,7 +75,7 @@ public class NoAgentWeaverIT {
       .forTypes(named(CLASS_NAME))
       .addAdvice(
         // No-op advice just passing through results and exceptions
-        new MethodAroundAdvice(
+        new InstanceMethodAroundAdvice(
           (target, method, args) -> false,
           (target, method, args, proceedMode, returnValue, throwable) -> false
         ),
@@ -105,7 +105,7 @@ public class NoAgentWeaverIT {
       .forTypes(named(CLASS_NAME))
       .addAdvice(
         // No-op advice just passing through results and exceptions
-        new MethodAroundAdvice(
+        new InstanceMethodAroundAdvice(
           (target, method, args) -> false,
           (target, method, args, proceedMode, returnValue, throwable) -> false
         ),
@@ -166,8 +166,8 @@ public class NoAgentWeaverIT {
    * 4. in case target method was not called (proceed), return special value
    * 5. otherwise pass through return value from target method
    */
-  private MethodAroundAdvice replaceAllAdvice() {
-    return new MethodAroundAdvice(
+  private InstanceMethodAroundAdvice replaceAllAdvice() {
+    return new InstanceMethodAroundAdvice(
       // Should proceed?
       (target, method, args) -> {
         String replacement = (String) args[1];
@@ -195,9 +195,9 @@ public class NoAgentWeaverIT {
     weaver = Weaver
       .forTypes(is(UnderTest.class))
       .addAdvice(
-        new MethodAroundAdvice(
+        new StaticMethodAroundAdvice(
           null,
-          (target, method, args, proceedMode, returnValue, throwable) -> "Hi world!"
+          (method, args, proceedMode, returnValue, throwable) -> "Hi world!"
         ),
         named("greet")
       )
@@ -218,9 +218,9 @@ public class NoAgentWeaverIT {
     weaver = Weaver
       .forTypes(is(UnderTest.class))
       .addAdvice(
-        new MethodAroundAdvice(
+        new StaticMethodAroundAdvice(
           null,
-          (target, method, args, proceedMode, returnValue, throwable) ->
+          (method, args, proceedMode, returnValue, throwable) ->
             returnValue instanceof Integer
               ? ((int) returnValue) * 11
               : "Welcome, dear " + args[0]
@@ -230,9 +230,10 @@ public class NoAgentWeaverIT {
       .addTargets(UnderTest.class)
       .build();
 
-    // Registered class is affected by aspect, both for static and instance methods
+    // Static method is affected by aspect
     assertEquals("Welcome, dear Sir", UnderTest.greet("Sir"));
-    assertEquals(33, new UnderTest().add(1, 2));
+    // Instance method is unaffected by aspect
+    assertEquals(3, new UnderTest().add(1, 2));
 
     // After unregistering the transformer, the class is unaffected by the aspect
     weaver.unregisterTransformer();
@@ -282,16 +283,16 @@ public class NoAgentWeaverIT {
     weaver = Weaver
       .forTypes(is(UnderTest.class))
       .addAdvice(
-        new MethodAroundAdvice(
+        new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
         ),
         named("add")
       )
       .addAdvice(
-        new MethodAroundAdvice(
+        new StaticMethodAroundAdvice(
           null,
-          (target, method, args, proceedMode, returnValue, throwable) -> "Hi world!"
+          (method, args, proceedMode, returnValue, throwable) -> "Hi world!"
         ),
         named("greet")
       )
@@ -316,7 +317,7 @@ public class NoAgentWeaverIT {
       IllegalArgumentException.class,
       () -> Weaver
         .forTypes(is(UnderTest.class))
-        .addAdvice(new MethodAroundAdvice(null, null), any())
+        .addAdvice(new InstanceMethodAroundAdvice(null, null), any())
         .addTargets(underTest)
         .build()
     );
@@ -334,7 +335,7 @@ public class NoAgentWeaverIT {
       IllegalArgumentException.class,
       () -> Weaver
         .forTypes(is(UnderTest.class))
-        .addAdvice(new MethodAroundAdvice(null, null), any())
+        .addAdvice(new InstanceMethodAroundAdvice(null, null), any())
         .addTargets(UnderTest.class)
         .build()
     );

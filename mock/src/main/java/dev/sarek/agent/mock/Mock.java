@@ -1,7 +1,8 @@
 package dev.sarek.agent.mock;
 
 import dev.sarek.agent.Agent;
-import dev.sarek.agent.aspect.MethodAroundAdvice;
+import dev.sarek.agent.aspect.InstanceMethodAroundAdvice;
+import dev.sarek.agent.aspect.StaticMethodAroundAdvice;
 import dev.sarek.agent.aspect.Weaver;
 import dev.sarek.agent.constructor_mock.ConstructorMockRegistry;
 import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;
@@ -33,7 +34,8 @@ public class Mock implements AutoCloseable {
     // Automatically retransforms, thus also applies constructorMockTransformer
     weaver = Weaver
       .forTypes(anyOf(classes))
-      .addAdvice(MethodAroundAdvice.MOCK, any())
+      .addAdvice(InstanceMethodAroundAdvice.MOCK, any())
+      .addAdvice(StaticMethodAroundAdvice.MOCK, any())
       .addTargets(classes)
       .build();
     // INSTRUMENTATION.retransformClasses(classes);

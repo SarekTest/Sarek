@@ -86,7 +86,7 @@ public class Weaver {
       return new Weaver(typeMatcher, adviceDescriptions, targets.toArray());
     }
 
-    public class AdviceDescription {
+    public static class AdviceDescription {
       public final Junction<MethodDescription> methodMatcher;
       public final AroundAdvice<?> advice;
       public Aspect.AdviceType adviceType;

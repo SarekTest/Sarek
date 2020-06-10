@@ -46,7 +46,7 @@ public class CommandLineAgentIT {
     weaver = Weaver
       .forTypes(named(CLASS_NAME))
       .addAdvice(
-        new MethodAroundAdvice(
+        new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
         ),
@@ -78,7 +78,7 @@ public class CommandLineAgentIT {
       .forTypes(named(CLASS_NAME))
       .addAdvice(
         // Skip target method and return fixed result -> a classical stub
-        new MethodAroundAdvice(
+        new InstanceMethodAroundAdvice(
           (target, method, args) -> false,
           (target, method, args, proceedMode, returnValue, throwable) -> UUID_TEXT_STUB
         ),
@@ -158,9 +158,9 @@ public class CommandLineAgentIT {
     weaver = Weaver
       .forTypes(is(System.class))
       .addAdvice(
-        new MethodAroundAdvice(
-          (target, method, args) -> !args[0].equals("java.version"),
-          (target, method, args, proceedMode, returnValue, throwable) -> proceedMode ? returnValue : "42"
+        new StaticMethodAroundAdvice(
+          (method, args) -> !args[0].equals("java.version"),
+          (method, args, proceedMode, returnValue, throwable) -> proceedMode ? returnValue : "42"
         ),
         named("getProperty")
       )
@@ -179,7 +179,7 @@ public class CommandLineAgentIT {
     weaver = Weaver
       .forTypes(is(System.class))
       .addAdvice(
-        new MethodAroundAdvice(
+        new InstanceMethodAroundAdvice(
           (target, method, args) -> false,
           (target, method, args, proceedMode, returnValue, throwable) -> 123
         ),
@@ -200,8 +200,8 @@ public class CommandLineAgentIT {
    * 4. in case target method was not called (proceed), return special value
    * 5. otherwise pass through return value from target method
    */
-  private MethodAroundAdvice replaceAllAdvice() {
-    return new MethodAroundAdvice(
+  private InstanceMethodAroundAdvice replaceAllAdvice() {
+    return new InstanceMethodAroundAdvice(
       // Should proceed?
       (target, method, args) -> {
         String replacement = (String) args[1];

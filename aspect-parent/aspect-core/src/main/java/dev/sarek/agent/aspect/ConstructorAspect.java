@@ -21,7 +21,7 @@ public abstract class ConstructorAspect extends Aspect<Constructor<?>> {
   @SuppressWarnings("UnusedAssignment")
   @OnMethodEnter
   public static void before(
-    @Origin Constructor constructor,
+    @Origin Constructor<?> constructor,
     @AllArguments(readOnly = false, typing = DYNAMIC) Object[] args
   )
   {
@@ -50,7 +50,7 @@ public abstract class ConstructorAspect extends Aspect<Constructor<?>> {
   @OnMethodExit(backupArguments = false)
   public static void after(
     @This(typing = DYNAMIC, optional = true) Object target,
-    @Origin Constructor constructor,
+    @Origin Constructor<?> constructor,
     @AllArguments(readOnly = false, typing = DYNAMIC) Object[] args
   )
   {
@@ -70,18 +70,13 @@ public abstract class ConstructorAspect extends Aspect<Constructor<?>> {
    * @param constructor
    * @return
    */
-  public static ConstructorAroundAdvice getAroundAdvice(Constructor constructor) {
-    // (1) Search for constructor advice
-    ConstructorAroundAdvice advice = doGetAdvice(constructor, constructor);
-    // (2) No constructor advice? -> search for class advice
-    if (advice == null)
-      advice = doGetAdvice(constructor.getDeclaringClass(), constructor);
-    return advice;
+  public static ConstructorAroundAdvice getAroundAdvice(Constructor<?> constructor) {
+    return doGetAdvice(constructor.getDeclaringClass(), constructor);
   }
 
   private final static Stack<Object> targets = new Stack<>();
 
-  private static ConstructorAroundAdvice doGetAdvice(Object target, Constructor constructor) {
+  private static ConstructorAroundAdvice doGetAdvice(Object target, Constructor<?> constructor) {
     // Detect endless (direct) recursion leading to stack overflow, such as (schematically simplified):
     // getAroundAdvice(target) → adviceRegistry.get(target) → target.hashCode() → getAroundAdvice(target)
     if (!targets.empty() && targets.peek() == target) {

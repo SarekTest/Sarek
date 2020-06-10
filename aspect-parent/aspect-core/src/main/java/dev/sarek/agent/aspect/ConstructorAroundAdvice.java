@@ -17,11 +17,11 @@ public class ConstructorAroundAdvice extends AroundAdvice<Constructor<?>> {
     this.after = after == null ? AFTER_DEFAULT : after;
   }
 
-  public void before(Constructor constructor, Object[] args) {
+  public void before(Constructor<?> constructor, Object[] args) {
     before.apply(constructor, args);
   }
 
-  public void after(Object target, Constructor constructor, Object[] args) {
+  public void after(Object target, Constructor<?> constructor, Object[] args) {
     after.apply(target, constructor, args);
   }
 
@@ -31,7 +31,7 @@ public class ConstructorAroundAdvice extends AroundAdvice<Constructor<?>> {
      * @param args        constructor arguments; change if you want to pass on other arguments
      *                    to the intercepted constructor
      */
-    void apply(Constructor constructor, Object[] args);
+    void apply(Constructor<?> constructor, Object[] args);
   }
 
   public interface After {
@@ -40,6 +40,6 @@ public class ConstructorAroundAdvice extends AroundAdvice<Constructor<?>> {
      * @param constructor constructor which has just been executed
      * @param args        constructor arguments, possibly changed in {@link Before#apply(Constructor, Object[])}
      */
-    void apply(Object target, Constructor constructor, Object[] args);
+    void apply(Object target, Constructor<?> constructor, Object[] args);
   }
 }

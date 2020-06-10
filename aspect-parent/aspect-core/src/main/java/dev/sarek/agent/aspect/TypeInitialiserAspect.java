@@ -67,7 +67,7 @@ public abstract class TypeInitialiserAspect extends Aspect<Class<?>> {
         .stream()
         .filter(adviceDescription -> adviceDescription.adviceType.equals(AdviceType.TYPE_INITIALISER_ADVICE))
         .map(adviceDescription -> (TypeInitialiserAroundAdvice) adviceDescription.advice)
-        .findFirst()
+        .findFirst()  // TODO: What if there are multiple static blocks?
         .orElse(null);
   }
 
