@@ -31,12 +31,11 @@ public class Mock implements AutoCloseable {
       .map(Class::getName)
       .forEach(ConstructorMockRegistry::activate);
     // Automatically retransforms, thus also applies constructorMockTransformer
-    weaver = new Weaver(
-      anyOf(classes),
-      any(),
-      MethodAroundAdvice.MOCK,
-      (Object[]) classes
-    );
+    weaver = Weaver
+      .forTypes(anyOf(classes))
+      .addAdvice(MethodAroundAdvice.MOCK, any())
+      .addTargets(classes)
+      .build();
     // INSTRUMENTATION.retransformClasses(classes);
   }
 

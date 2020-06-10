@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.util.*;
 
-import static dev.sarek.agent.aspect.Aspect.AdviceType.*;
+import static dev.sarek.agent.aspect.Aspect.AdviceType.TYPE_INITIALISER_ADVICE;
 import static net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy.RETRANSFORMATION;
 import static net.bytebuddy.matcher.ElementMatchers.any;
 import static net.bytebuddy.matcher.ElementMatchers.none;
@@ -59,29 +59,65 @@ public class Weaver {
     }
   }
 
+  public static Builder forTypes(Junction<TypeDescription> typeMatcher) {
+    return new Builder(typeMatcher);
+  }
+
+  public static class Builder {
+    private final Junction<TypeDescription> typeMatcher;
+    private final List<AdviceDescription> adviceDescriptions = new ArrayList<>();
+    private final List<Object> targets = new ArrayList<>();
+
+    private Builder(Junction<TypeDescription> typeMatcher) {
+      this.typeMatcher = typeMatcher == null ? any() : typeMatcher;
+    }
+
+    public Builder addAdvice(AroundAdvice<?> advice, Junction<MethodDescription> methodMatcher) {
+      adviceDescriptions.add(new AdviceDescription(advice, methodMatcher));
+      return this;
+    }
+
+    public Builder addTargets(Object... targets) {
+      this.targets.addAll(Arrays.asList(targets));
+      return this;
+    }
+
+    public Weaver build() throws IOException {
+      return new Weaver(typeMatcher, adviceDescriptions, targets.toArray());
+    }
+
+    public class AdviceDescription {
+      public final Junction<MethodDescription> methodMatcher;
+      public final AroundAdvice<?> advice;
+      public Aspect.AdviceType adviceType;
+
+      public AdviceDescription(AroundAdvice<?> advice, Junction<MethodDescription> methodMatcher) {
+        if (advice == null)
+          throw new IllegalArgumentException("advice must not be null");
+        this.advice = advice;
+        // TODO: document that for TypeInitialiserAroundAdvice the methodMatcher constructor parameter is ignored
+        adviceType = Aspect.AdviceType.forAdvice(advice);
+        this.methodMatcher = methodMatcher == null || adviceType.equals(TYPE_INITIALISER_ADVICE) ? any() : methodMatcher;
+      }
+    }
+
+  }
+
   private final Junction<TypeDescription> typeMatcher;
-  private final Junction<MethodDescription> methodMatcher;
+  private final List<Builder.AdviceDescription> adviceDescriptions;
   private final ResettableClassFileTransformer transformer;
-  private final AroundAdvice<?> advice;
-  private final Aspect.AdviceType adviceType;
   // TODO: maybe replace by a Set<WeakReference>
   private final Set<Object> targets = Collections.synchronizedSet(new HashSet<>());
 
-  public Weaver(
+  private Weaver(
     Junction<TypeDescription> typeMatcher,
-    Junction<MethodDescription> methodMatcher,
-    AroundAdvice<?> advice,
+    List<Builder.AdviceDescription> adviceDescriptions,
     Object... targets
-  ) throws IllegalArgumentException, IOException
+  ) throws IOException
   {
     System.out.println("Creating new weaver " + this);
-    if (advice == null)
-      throw new IllegalArgumentException("advice must not be null");
-    this.advice = advice;
-    adviceType = Aspect.AdviceType.forAdvice(advice);
-    this.typeMatcher = typeMatcher == null ? any() : typeMatcher;
-    // TODO: document that for TypeInitialiserAroundAdvice the methodMatcher constructor parameter is ignored
-    this.methodMatcher = methodMatcher == null || adviceType.equals(TYPE_INITIALISER_ADVICE) ? any() : methodMatcher;
+    this.typeMatcher = typeMatcher;
+    this.adviceDescriptions = adviceDescriptions;
 
     // TODO: exception during target registration -> dangling targets in advice registry -> FIXME via:
     //   (a) memorise + clean up (argh!) or
@@ -98,34 +134,21 @@ public class Weaver {
   }
 
   public Weaver addTarget(Object target) throws IllegalArgumentException {
-    Map<Object, AroundAdvice<?>> adviceRegistry = (Map<Object, AroundAdvice<?>>) getAdviceRegistry();
-    synchronized (adviceRegistry) {
-      if (adviceRegistry.get(target) != null)
+    synchronized (Aspect.adviceRegistry) {
+      if (Aspect.adviceRegistry.get(target) != null)
         throw new IllegalArgumentException("target " + target + " is already registered");
-      adviceRegistry.put(target, advice);
+      Aspect.adviceRegistry.put(target, adviceDescriptions);
       targets.add(target);
     }
     return this;
   }
 
   public Weaver removeTarget(Object target) {
-    Map<Object, AroundAdvice<?>> adviceRegistry = (Map<Object, AroundAdvice<?>>) getAdviceRegistry();
-    synchronized (adviceRegistry) {
-      adviceRegistry.remove(target);
+    synchronized (Aspect.adviceRegistry) {
+      Aspect.adviceRegistry.remove(target);
       targets.remove(target);
     }
     return this;
-  }
-
-  protected Map<Object, ? extends AroundAdvice<?>> getAdviceRegistry() {
-    switch (adviceType) {
-      case CONSTRUCTOR_ADVICE:
-        return ConstructorAspect.adviceRegistry;
-      case TYPE_INITIALISER_ADVICE:
-        return TypeInitialiserAspect.adviceRegistry;
-      default:
-        return MethodAspect.adviceRegistry;
-    }
   }
 
   protected ResettableClassFileTransformer registerTransformer() throws IOException {
@@ -155,7 +178,7 @@ public class Weaver {
   }
 
   protected AgentBuilder createAgentBuilder() throws IOException {
-    return new AgentBuilder.Default()
+    AgentBuilder.Identified.Narrowable narrowable = new AgentBuilder.Default()
       .disableClassFormatChanges()
       .ignore(none())
       .with(RETRANSFORMATION)
@@ -194,27 +217,33 @@ public class Weaver {
       // Dump all transformed class files into a directory
       //.with(new TransformedClassFileWriter("transformed-aspect"))
       // Match type + method, then bind to advice
-      .type(typeMatcher)
-      .transform((builder, typeDescription, classLoader, module) ->
-          builder.visit(
-            adviceType.getAdvice().on(
-              adviceType.getMethodType()
-                .and(methodMatcher)
+      .type(typeMatcher);
+
+    AgentBuilder.Identified identified = null;
+    for (Builder.AdviceDescription adviceDescription : adviceDescriptions) {
+      identified = (identified == null ? narrowable : identified)
+        .transform((builder, typeDescription, classLoader, module) ->
+            builder.visit(
+              adviceDescription.adviceType.getAdvice().on(
+                adviceDescription.adviceType.getMethodType()
+                  .and(adviceDescription.methodMatcher)
 //              .and(methodDescription -> wovenMethods.add(methodDescription))
-                .and(methodDescription -> {
-                    boolean woven = wovenMethodRegistry.isWoven(methodDescription);
-                    System.out.println(
-                      (woven ? "Avoid double" : "Perform")
-                        + " aspect weaving for: " + methodDescription
-                        + " / weaver = " + this
-                    );
-                    wovenMethodRegistry.add(methodDescription, this);
-                    return !woven;
-                  }
-                )
+                  .and(methodDescription -> {
+                      boolean woven = wovenMethodRegistry.isWoven(methodDescription);
+                      System.out.println(
+                        (woven ? "Avoid double" : "Perform")
+                          + " aspect weaving for: " + methodDescription
+                          + " / weaver = " + this
+                      );
+                      wovenMethodRegistry.add(methodDescription, this);
+                      return !woven;
+                    }
+                  )
+              )
             )
-          )
-      );
+        );
+    }
+    return (AgentBuilder) identified;
   }
 
 }

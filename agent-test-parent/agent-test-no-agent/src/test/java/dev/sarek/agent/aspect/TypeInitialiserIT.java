@@ -36,18 +36,20 @@ public class TypeInitialiserIT {
     );
 
     // Create weaver, directly registering a target class in the constructor
-    weaver = new Weaver(
-      is(UnderTest.class),
-      null,  // For TypeInitialiserAroundAdvice the methodMatcher constructor parameter is ignored
-      new TypeInitialiserAroundAdvice(
-        // false = suppress type initialiser
-        // true = initialiser runs, sets static property and prints something on the console
-        clazz -> false,
-        // Set static property to a value different from the one set by the type initialiser
-        (clazz, proceedMode, throwable) -> UnderTest.staticText = "aspect override"
-      ),
-      UnderTest.class
-    );
+    weaver = Weaver
+      .forTypes(is(UnderTest.class))
+      .addAdvice(
+        new TypeInitialiserAroundAdvice(
+          // false = suppress type initialiser
+          // true = initialiser runs, sets static property and prints something on the console
+          clazz -> false,
+          // Set static property to a value different from the one set by the type initialiser
+          (clazz, proceedMode, throwable) -> UnderTest.staticText = "aspect override"
+        ),
+        null
+      )
+      .addTargets(UnderTest.class)
+      .build();
 
     // Registered class is affected by aspect
     assertEquals("aspect override", UnderTest.staticText);

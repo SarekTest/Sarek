@@ -94,12 +94,14 @@ public class MockFinalWithBehaviourIT {
 
     // (2) Mock both constructors and methods
     ConstructorMockRegistry.activate(FinalClass.class.getName());
-    weaver = new Weaver(
-      is(FinalClass.class),
-      not(nameEndsWith("InstanceCounter")),
-      MethodAroundAdvice.MOCK,
-      FinalClass.class
-    );
+    weaver = Weaver
+      .forTypes(is(FinalClass.class))
+      .addAdvice(
+        MethodAroundAdvice.MOCK,
+        not(nameEndsWith("InstanceCounter"))
+      )
+      .addTargets(FinalClass.class)
+      .build();
 
     // (3) After mocking was activated, class under test behaves like a mock
 

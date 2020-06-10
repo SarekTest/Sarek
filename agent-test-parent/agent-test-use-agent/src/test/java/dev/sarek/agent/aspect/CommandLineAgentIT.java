@@ -43,15 +43,17 @@ public class CommandLineAgentIT {
     assertTrue(isClassLoaded(CLASS_NAME));
 
     // Create weaver, directly registering a target in the constructor
-    weaver = new Weaver(
-      named(CLASS_NAME),
-      isMethod().and(not(named("greet"))),
-      new MethodAroundAdvice(
-        null,
-        (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
-      ),
-      underTest
-    );
+    weaver = Weaver
+      .forTypes(named(CLASS_NAME))
+      .addAdvice(
+        new MethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
+        ),
+        isMethod().and(not(named("greet")))
+      )
+      .addTargets(underTest)
+      .build();
 
     // Registered target is affected by aspect, unregistered one is not
     assertEquals(55, underTest.add(2, 3));
@@ -72,15 +74,17 @@ public class CommandLineAgentIT {
     final String CLASS_NAME = "java.util.UUID";
     final String UUID_TEXT_STUB = "111-222-333-444";
 
-    weaver = new Weaver(
-      named(CLASS_NAME),
-      named("toString"),
-      // Skip target method and return fixed result -> a classical stub
-      new MethodAroundAdvice(
-        (target, method, args) -> false,
-        (target, method, args, proceedMode, returnValue, throwable) -> UUID_TEXT_STUB
+    weaver = Weaver
+      .forTypes(named(CLASS_NAME))
+      .addAdvice(
+        // Skip target method and return fixed result -> a classical stub
+        new MethodAroundAdvice(
+          (target, method, args) -> false,
+          (target, method, args, proceedMode, returnValue, throwable) -> UUID_TEXT_STUB
+        ),
+        named("toString")
       )
-    );
+      .build();
 
     // Load bootstrap class by instantiating it, if it was not loaded yet (should not make any difference)
     UUID uuid = UUID.randomUUID();
@@ -116,11 +120,13 @@ public class CommandLineAgentIT {
 
     // Create weaver *after* bootstrap class is loaded (should not make a difference, but check anyway)
     assertTrue(isClassLoaded(CLASS_NAME));
-    weaver = new Weaver(
-      named(CLASS_NAME),
-      named("replaceAll").and(takesArguments(String.class, String.class)),
-      replaceAllAdvice()
-    );
+    weaver = Weaver
+      .forTypes(named(CLASS_NAME))
+      .addAdvice(
+        replaceAllAdvice(),
+        named("replaceAll").and(takesArguments(String.class, String.class))
+      )
+      .build();
 
     // Before registering TEXT as an advice target instance, 'replaceAll' behaves normally
     assertEquals("To modify, or not to modify, that is the question", TEXT.replaceAll("be", "modify"));
@@ -149,15 +155,17 @@ public class CommandLineAgentIT {
 
   @Test
   public void weaveStaticJREMethods() throws IOException {
-    weaver = new Weaver(
-      is(System.class),
-      named("getProperty"),
-      new MethodAroundAdvice(
-        (target, method, args) -> !args[0].equals("java.version"),
-        (target, method, args, proceedMode, returnValue, throwable) -> proceedMode ? returnValue : "42"
-      ),
-      System.class
-    );
+    weaver = Weaver
+      .forTypes(is(System.class))
+      .addAdvice(
+        new MethodAroundAdvice(
+          (target, method, args) -> !args[0].equals("java.version"),
+          (target, method, args, proceedMode, returnValue, throwable) -> proceedMode ? returnValue : "42"
+        ),
+        named("getProperty")
+      )
+      .addTargets(System.class)
+      .build();
 
     // Only system property 'java.version' is mocked
     assertEquals("42", System.getProperty("java.version"));
@@ -168,15 +176,17 @@ public class CommandLineAgentIT {
 
   @Test
   public void weavingNativeMethodsHasNoEffect() throws IOException {
-    weaver = new Weaver(
-      is(System.class),
-      named("currentTimeMillis").or(named("nanoTime")),
-      new MethodAroundAdvice(
-        (target, method, args) -> false,
-        (target, method, args, proceedMode, returnValue, throwable) -> 123
-      ),
-      System.class
-    );
+    weaver = Weaver
+      .forTypes(is(System.class))
+      .addAdvice(
+        new MethodAroundAdvice(
+          (target, method, args) -> false,
+          (target, method, args, proceedMode, returnValue, throwable) -> 123
+        ),
+        named("currentTimeMillis").or(named("nanoTime"))
+      )
+      .addTargets(System.class)
+      .build();
 
     assertNotEquals(123, System.currentTimeMillis());
     assertNotEquals(123, System.nanoTime());
@@ -222,19 +232,21 @@ public class CommandLineAgentIT {
     assertEquals(0, (int) callCount.get());
 
     // Count all File constructor calls, modify first argument if it is a String
-    weaver = new Weaver(
-      is(File.class),
-      any(),
-      new ConstructorAroundAdvice(
-        (constructor, args) -> {
-          if (args[0] instanceof String)
-            args[0] = "ADVISED";
-          callCount.set(callCount.get() + 1);
-        },
-        null
-      ),
-      File.class
-    );
+    weaver = Weaver
+      .forTypes(is(File.class))
+      .addAdvice(
+        new ConstructorAroundAdvice(
+          (constructor, args) -> {
+            if (args[0] instanceof String)
+              args[0] = "ADVISED";
+            callCount.set(callCount.get() + 1);
+          },
+          null
+        ),
+        any()
+      )
+      .addTargets(File.class)
+      .build();
 
     // First argument is a String -> the aspect modifies it + increments the call counter
     assertEquals("ADVISED", new File("foo").getName());

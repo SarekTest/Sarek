@@ -1,12 +1,12 @@
 package dev.sarek.agent.aspect;
 
 import net.bytebuddy.asm.Advice.*;
+import net.bytebuddy.description.method.MethodDescription;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.Stack;
 
 import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAMIC;
 
@@ -17,7 +17,6 @@ public abstract class ConstructorAspect extends Aspect<Constructor<?>> {
   //       This would allow to register multiple ConstructorAroundAdvices per class and
   //       make a per-constructor mocking/stubbing scheme easy to implement.
   // TODO: Try @Advice.Local for transferring additional state between before/after advices if necessary
-  public static final Map<Object, ConstructorAroundAdvice> adviceRegistry = Collections.synchronizedMap(new HashMap<>());
 
   @SuppressWarnings("UnusedAssignment")
   @OnMethodEnter
@@ -73,11 +72,43 @@ public abstract class ConstructorAspect extends Aspect<Constructor<?>> {
    */
   public static ConstructorAroundAdvice getAroundAdvice(Constructor constructor) {
     // (1) Search for constructor advice
-    ConstructorAroundAdvice advice = adviceRegistry.get(constructor);
+    ConstructorAroundAdvice advice = doGetAdvice(constructor, constructor);
     // (2) No constructor advice? -> search for class advice
     if (advice == null)
-      advice = adviceRegistry.get(constructor.getDeclaringClass());
+      advice = doGetAdvice(constructor.getDeclaringClass(), constructor);
     return advice;
+  }
+
+  private final static Stack<Object> targets = new Stack<>();
+
+  private static ConstructorAroundAdvice doGetAdvice(Object target, Constructor constructor) {
+    // Detect endless (direct) recursion leading to stack overflow, such as (schematically simplified):
+    // getAroundAdvice(target) → adviceRegistry.get(target) → target.hashCode() → getAroundAdvice(target)
+    if (!targets.empty() && targets.peek() == target) {
+      // CAVEAT: Do not print 'target' here, it would lead to another endless recursion via:
+      // target.toString() -> getAroundAdvice(target) → adviceRegistry.get(target) → target.toString()
+      // This recursion would get detected but still run away because after detection it would be printed again etc.
+      // It is actually best to not call *any* target methods while just trying to access and call an around advice.
+      System.out.println("Recursion detected - origin: " + new Exception().getStackTrace()[2]);
+      return null;
+    }
+    targets.push(target);
+    try {
+      List<Weaver.Builder.AdviceDescription> adviceDescriptions = adviceRegistry.get(target);
+      return adviceDescriptions == null ? null :
+        adviceDescriptions
+          .stream()
+          .filter(
+            adviceDescription -> adviceDescription.adviceType.equals(AdviceType.CONSTRUCTOR_ADVICE)
+              && adviceDescription.methodMatcher.matches(new MethodDescription.ForLoadedConstructor(constructor))
+          )
+          .map(adviceDescription -> (ConstructorAroundAdvice) adviceDescription.advice)
+          .findFirst()
+          .orElse(null);
+    }
+    finally {
+      targets.pop();
+    }
   }
 
 }

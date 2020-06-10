@@ -1,9 +1,12 @@
 package dev.sarek.agent.aspect;
 
 import net.bytebuddy.asm.Advice.*;
+import net.bytebuddy.description.method.MethodDescription;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Stack;
 
 import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAMIC;
 
@@ -14,7 +17,6 @@ public abstract class MethodAspect extends Aspect<Method> {
   //       This would allow to register multiple MethodAroundAdvices per instance and
   //       make a per-method mocking/stubbing scheme easy to implement.
   // TODO: Try @Advice.Local for transferring additional state between before/after advices if necessary
-  public static final Map<Object, MethodAroundAdvice> adviceRegistry = Collections.synchronizedMap(new HashMap<>());
 
   @SuppressWarnings("UnusedAssignment")
   @OnMethodEnter(skipOn = OnDefaultValue.class)
@@ -88,10 +90,10 @@ public abstract class MethodAspect extends Aspect<Method> {
     MethodAroundAdvice advice = null;
     // Non-static method? -> search for instance advice
     if (target != null)
-      advice = doGetAdvice(target);
+      advice = doGetAdvice(target, method);
     // Static method or no instance advice? -> search for class advice
     if (advice == null)
-      advice = doGetAdvice(method.getDeclaringClass());
+      advice = doGetAdvice(method.getDeclaringClass(), method);
     return advice;
 
 /*
@@ -119,7 +121,7 @@ public abstract class MethodAspect extends Aspect<Method> {
 
   private final static Stack<Object> targets = new Stack<>();
 
-  private static MethodAroundAdvice doGetAdvice(Object target) {
+  private static MethodAroundAdvice doGetAdvice(Object target, Method method) {
     // Detect endless (direct) recursion leading to stack overflow, such as (schematically simplified):
     // getAroundAdvice(target) → adviceRegistry.get(target) → target.hashCode() → getAroundAdvice(target)
     if (!targets.empty() && targets.peek() == target) {
@@ -132,7 +134,20 @@ public abstract class MethodAspect extends Aspect<Method> {
     }
     targets.push(target);
     try {
-      return adviceRegistry.get(target);
+      List<Weaver.Builder.AdviceDescription> adviceDescriptions = adviceRegistry.get(target);
+      return adviceDescriptions == null ? null :
+        adviceDescriptions
+          .stream()
+          .filter(adviceDescription -> {
+              boolean result = adviceDescription.adviceType.equals(AdviceType.METHOD_ADVICE)
+                && adviceDescription.methodMatcher.matches(new MethodDescription.ForLoadedMethod(method));
+              System.out.println(target + " / " + method + " -> " + adviceDescription.methodMatcher + " / " + result);
+              return result;
+            }
+          )
+          .map(adviceDescription -> (MethodAroundAdvice) adviceDescription.advice)
+          .findFirst()
+          .orElse(null);
     }
     finally {
       targets.pop();

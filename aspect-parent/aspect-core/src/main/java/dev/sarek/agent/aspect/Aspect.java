@@ -11,7 +11,8 @@ import static dev.sarek.agent.aspect.Aspect.AdviceScope.*;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public abstract class Aspect<T> {
-  public static final Map<Object, MethodAroundAdvice> adviceRegistryXXX = Collections.synchronizedMap(new HashMap<>());
+  public static final Map<Object, List<Weaver.Builder.AdviceDescription>> adviceRegistry =
+    Collections.synchronizedMap(new HashMap<>());
 
   private static final ClassFileLocator CLASS_FILE_LOCATOR = ClassFileLocator.ForClassLoader.ofSystemLoader();
 

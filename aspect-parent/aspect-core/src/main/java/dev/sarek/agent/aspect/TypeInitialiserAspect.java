@@ -5,9 +5,7 @@ import net.bytebuddy.asm.Advice.OnDefaultValue;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
 import net.bytebuddy.asm.Advice.OnMethodExit;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAMIC;
 
@@ -15,7 +13,6 @@ public abstract class TypeInitialiserAspect extends Aspect<Class<?>> {
 
   // TODO: What happens if more than one transformer matches the same instance or class?
   // TODO: Try @Advice.Local for transferring additional state between before/after advices if necessary
-  public static final Map<Object, TypeInitialiserAroundAdvice> adviceRegistry = Collections.synchronizedMap(new HashMap<>());
 
   @OnMethodEnter(skipOn = OnDefaultValue.class)
   public static boolean before(
@@ -63,8 +60,15 @@ public abstract class TypeInitialiserAspect extends Aspect<Class<?>> {
   /**
    * Keep this method public because it must be callable from advice code woven into other classes
    */
-  public static TypeInitialiserAroundAdvice getAroundAdvice(Class<?> clazz) {
-    return adviceRegistry.get(clazz);
+  public static TypeInitialiserAroundAdvice getAroundAdvice(Class<?> target) {
+    List<Weaver.Builder.AdviceDescription> adviceDescriptions = adviceRegistry.get(target);
+    return adviceDescriptions == null ? null :
+      adviceDescriptions
+        .stream()
+        .filter(adviceDescription -> adviceDescription.adviceType.equals(AdviceType.TYPE_INITIALISER_ADVICE))
+        .map(adviceDescription -> (TypeInitialiserAroundAdvice) adviceDescription.advice)
+        .findFirst()
+        .orElse(null);
   }
 
   /**

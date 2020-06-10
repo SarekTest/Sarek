@@ -46,15 +46,17 @@ public class NoAgentWeaverIT {
     assertTrue(isClassLoaded(CLASS_NAME));
 
     // Create weaver, directly registering a target in the constructor
-    weaver = new Weaver(
-      named(CLASS_NAME),
-      named("add"),
-      new MethodAroundAdvice(
-        null,
-        (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
-      ),
-      underTest
-    );
+    weaver = Weaver
+      .forTypes(named(CLASS_NAME))
+      .addAdvice(
+        new MethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
+        ),
+        named("add")
+      )
+      .addTargets(underTest)
+      .build();
 
     // Registered target is affected by aspect, unregistered one is not
     assertEquals(55, underTest.add(2, 3));
@@ -69,15 +71,17 @@ public class NoAgentWeaverIT {
   public void cannotWeaveJREUtilityBootstrapClass() throws IOException {
     final String CLASS_NAME = "java.util.UUID";
 
-    weaver = new Weaver(
-      named(CLASS_NAME),
-      named("toString"),
-      // No-op advice just passing through results and exceptions
-      new MethodAroundAdvice(
-        (target, method, args) -> false,
-        (target, method, args, proceedMode, returnValue, throwable) -> false
+    weaver = Weaver
+      .forTypes(named(CLASS_NAME))
+      .addAdvice(
+        // No-op advice just passing through results and exceptions
+        new MethodAroundAdvice(
+          (target, method, args) -> false,
+          (target, method, args, proceedMode, returnValue, throwable) -> false
+        ),
+        named("toString")
       )
-    );
+      .build();
 
     // Load bootstrap class by instantiating it, if it was not loaded yet (should not make any difference)
     UUID uuid = UUID.randomUUID();
@@ -97,15 +101,17 @@ public class NoAgentWeaverIT {
 
     // Create weaver *after* bootstrap class is loaded (should not make a difference, but check anyway)
     assertTrue(isClassLoaded(CLASS_NAME));
-    weaver = new Weaver(
-      named(CLASS_NAME),
-      named("replaceAll").and(takesArguments(String.class, String.class)),
-      // No-op advice just passing through results and exceptions
-      new MethodAroundAdvice(
-        (target, method, args) -> false,
-        (target, method, args, proceedMode, returnValue, throwable) -> false
+    weaver = Weaver
+      .forTypes(named(CLASS_NAME))
+      .addAdvice(
+        // No-op advice just passing through results and exceptions
+        new MethodAroundAdvice(
+          (target, method, args) -> false,
+          (target, method, args, proceedMode, returnValue, throwable) -> false
+        ),
+        named("replaceAll").and(takesArguments(String.class, String.class))
       )
-    );
+      .build();
 
     // Even though no target instance has been registered on the weaver, the aspect runs in order to check
     // if the advice should fire. But in order to do that, the aspect classes need to exist in the target
@@ -119,11 +125,13 @@ public class NoAgentWeaverIT {
   public void complexAroundAdvice() throws IOException {
     StringWrapper TEXT = new StringWrapper("To be, or not to be, that is the question");
 
-    Weaver weaver = new Weaver(
-      is(StringWrapper.class),
-      named("replaceAll").and(takesArguments(String.class, String.class)),
-      replaceAllAdvice()
-    );
+    Weaver weaver = Weaver
+      .forTypes(is(StringWrapper.class))
+      .addAdvice(
+        replaceAllAdvice(),
+        named("replaceAll").and(takesArguments(String.class, String.class))
+      )
+      .build();
 
     // Before registering TEXT as an advice target instance, 'replaceAll' behaves normally
     assertEquals("To modify, or not to modify, that is the question", TEXT.replaceAll("be", "modify"));
@@ -184,15 +192,17 @@ public class NoAgentWeaverIT {
   @Test
   public void staticMethodCall() throws IOException {
     // Create weaver, directly registering a target class in the constructor
-    weaver = new Weaver(
-      is(UnderTest.class),
-      named("greet"),
-      new MethodAroundAdvice(
-        null,
-        (target, method, args, proceedMode, returnValue, throwable) -> "Hi world!"
-      ),
-      UnderTest.class
-    );
+    weaver = Weaver
+      .forTypes(is(UnderTest.class))
+      .addAdvice(
+        new MethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) -> "Hi world!"
+        ),
+        named("greet")
+      )
+      .addTargets(UnderTest.class)
+      .build();
 
     // Registered class is affected by aspect
     assertEquals("Hi world!", UnderTest.greet("Sir"));
@@ -205,18 +215,20 @@ public class NoAgentWeaverIT {
   @Test
   public void perClassAdvice() throws IOException {
     // Create weaver, directly registering a target class in the constructor
-    weaver = new Weaver(
-      is(UnderTest.class),
-      isMethod(),
-      new MethodAroundAdvice(
-        null,
-        (target, method, args, proceedMode, returnValue, throwable) ->
-          returnValue instanceof Integer
-            ? ((int) returnValue) * 11
-            : "Welcome, dear " + args[0]
-      ),
-      UnderTest.class
-    );
+    weaver = Weaver
+      .forTypes(is(UnderTest.class))
+      .addAdvice(
+        new MethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) ->
+            returnValue instanceof Integer
+              ? ((int) returnValue) * 11
+              : "Welcome, dear " + args[0]
+        ),
+        isMethod()
+      )
+      .addTargets(UnderTest.class)
+      .build();
 
     // Registered class is affected by aspect, both for static and instance methods
     assertEquals("Welcome, dear Sir", UnderTest.greet("Sir"));
@@ -237,18 +249,20 @@ public class NoAgentWeaverIT {
     assertEquals("whatever", new UnderTest("whatever").getName());
     assertEquals(0, (int) callCount.get());
 
-    weaver = new Weaver(
-      is(UnderTest.class),
-      takesArguments(String.class),
-      new ConstructorAroundAdvice(
-        (constructor, args) -> {
-          args[0] = "ADVISED";
-          callCount.set(callCount.get() + 1);
-        },
-        null
-      ),
-      UnderTest.class
-    );
+    weaver = Weaver
+      .forTypes(is(UnderTest.class))
+      .addAdvice(
+        new ConstructorAroundAdvice(
+          (constructor, args) -> {
+            args[0] = "ADVISED";
+            callCount.set(callCount.get() + 1);
+          },
+          null
+        ),
+        takesArguments(String.class)
+      )
+      .addTargets(UnderTest.class)
+      .build();
 
     // Registered class is affected by aspect
     assertEquals("ADVISED", new UnderTest("whatever").getName());
@@ -262,81 +276,73 @@ public class NoAgentWeaverIT {
   }
 
   @Test
-  public void multipleWeavers() throws IOException {
+  public void multiAdviceWeaver() throws IOException {
     UnderTest underTest = new UnderTest();
-    weaver = new Weaver(
-      is(UnderTest.class),
-      named("add"),
-      new MethodAroundAdvice(null, (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11),
-      underTest
-    );
+    UnderTest underTestUnregistered = new UnderTest();
+    weaver = Weaver
+      .forTypes(is(UnderTest.class))
+      .addAdvice(
+        new MethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
+        ),
+        named("add")
+      )
+      .addAdvice(
+        new MethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) -> "Hi world!"
+        ),
+        named("greet")
+      )
+      .addAdvice(
+        new ConstructorAroundAdvice(
+          (constructor, args) -> args[0] = "ADVISED",
+          null
+        ),
+        takesArguments(String.class)
+      )
+      .addTargets(underTest)
+      .build();
 
-    // Weaver is active for registered instance
+    // Weaver is only active for registered instance
     assertEquals(55, underTest.add(2, 3));
-
-    Weaver weaver2 = new Weaver(
-      is(UnderTest.class),
-      named("greet"),
-      new MethodAroundAdvice(null, (target, method, args, proceedMode, returnValue, throwable) -> {
-        System.out.println("### greet1");
-        return "Hi world!";
-      }),
-      UnderTest.class
-    );
-//    new Weaver(
-//      INSTRUMENTATION,
-//      is(UnderTest.class),
-//      named("greet"),
-//      new MethodAroundAdvice(null, (target, method, args, proceedMode, returnValue, throwable) -> {
-//        System.out.println("### greet2");
-//        return returnValue + "x";
-//      }),
-//      UnderTest.class
-//    );
-
-    // Both weavers are active because the second one targets a static method and thus is registered under the class
-    assertEquals(55, underTest.add(2, 3));
-    assertEquals("Hi world!", UnderTest.greet("Sir"));
+    assertEquals(5, underTestUnregistered.add(2, 3));
 
     // Cannot create a weaver, trying to register an already registered target to it from the constructor
+    // TODO: Implement n-to-m relationships between targets and advices, otherwise mocking different instance/static
+    //       methods or different constructors in the same class is impossible.
     assertThrows(
       IllegalArgumentException.class,
-      () -> new Weaver(is(UnderTest.class), any(), new MethodAroundAdvice(null, null), underTest)
+      () -> Weaver
+        .forTypes(is(UnderTest.class))
+        .addAdvice(new MethodAroundAdvice(null, null), any())
+        .addTargets(underTest)
+        .build()
     );
 
-    // Cannot create a weaver, trying to register an already registered target to it from the constructor
-    assertThrows(
-      IllegalArgumentException.class,
-      () -> new Weaver(is(UnderTest.class), any(), new MethodAroundAdvice(null, null), UnderTest.class)
-    );
-
-    // Both weavers are active because the second one targets a static method and thus is registered under the class
-    assertEquals(55, underTest.add(2, 3));
-    assertEquals("Hi world!", UnderTest.greet("Sir"));
-
-    //After unregistering one target, it can be registered on another weaver
-    weaver2.removeTarget(UnderTest.class);
+    // TODO: Currently when a class is registered, e.g. in order to support constructor, static method or type
+    //       initialiser advices, it also has the effect of globally affecting instance methods -> re-implement a way to
+    //       differentiate between advice types.
+    weaver.removeTarget(underTest);
     weaver.addTarget(UnderTest.class);
 
-    // Now the aspect advising 'greet' is global because the whole class has been registered
-    assertEquals(55, underTest.add(2, 3));
-    assertEquals(99, underTest.add(4, 5));
-
-    // Another advice type can be registered for the same class (method vs. constructor)
-    Weaver weaver3 = new Weaver(
-      is(UnderTest.class),
-      takesArguments(String.class),
-      new ConstructorAroundAdvice((constructor, args) -> args[0] = "ADVISED", null),
-      UnderTest.class
+    // Cannot create a weaver, trying to register an already registered target to it from the constructor
+    // TODO: Implement n-to-m relationships between targets and advices, otherwise mocking different instance/static
+    //       methods or different constructors in the same class is impossible.
+    assertThrows(
+      IllegalArgumentException.class,
+      () -> Weaver
+        .forTypes(is(UnderTest.class))
+        .addAdvice(new MethodAroundAdvice(null, null), any())
+        .addTargets(UnderTest.class)
+        .build()
     );
 
-    // Now both class-global aspects are active at the same time
-    assertEquals(99, underTest.add(4, 5));
+    assertEquals(55, underTest.add(2, 3));
+    assertEquals(55, underTestUnregistered.add(2, 3));
+    assertEquals("Hi world!", UnderTest.greet("Sir"));
     assertEquals("ADVISED", new UnderTest("whatever").getName());
-
-    // House-keeping: unregister transformers which are not taken care of by the @After method
-    weaver2.unregisterTransformer();
-    weaver3.unregisterTransformer();
   }
 
 }
