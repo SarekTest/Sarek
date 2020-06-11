@@ -1,5 +1,7 @@
 package dev.sarek.agent.aspect;
 
+// TODO: Document that only one around pair is triggered, even if there are multiple static blocks in the target class.
+//       Those blocks are treated as if they were effectively a single block with all the statements concatenated.
 public class TypeInitialiserAroundAdvice extends AroundAdvice<Class<?>> {
   private final Before before;
   private final After after;

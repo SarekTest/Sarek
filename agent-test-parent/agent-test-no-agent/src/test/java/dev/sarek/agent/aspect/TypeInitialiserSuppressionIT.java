@@ -18,7 +18,7 @@ import static org.junit.Assert.assertFalse;
  * So we do not need a Java agent here.
  */
 @Category(SeparateJVM.class)
-public class TypeInitialiserIT {
+public class TypeInitialiserSuppressionIT {
   private Weaver weaver;
 
   @After
@@ -40,19 +40,27 @@ public class TypeInitialiserIT {
       .forTypes(is(UnderTest.class))
       .addAdvice(
         new TypeInitialiserAroundAdvice(
-          // false = suppress type initialiser
-          // true = initialiser runs, sets static property and prints something on the console
-          clazz -> false,
+          clazz -> {
+            System.out.println("Before type initialiser advice #" + ++UnderTest.typeInitialiserAdviceCounter);
+            // false = suppress type initialiser
+            // true = initialiser runs, sets static property and prints something on the console
+            return true;
+          },
           // Set static property to a value different from the one set by the type initialiser
-          (clazz, proceedMode, throwable) -> UnderTest.staticText = "aspect override"
+          (clazz, proceedMode, throwable) -> {
+            System.out.println("After type initialiser advice #" + UnderTest.typeInitialiserAdviceCounter);
+            UnderTest.staticBlockCounter *= 11;
+          }
         ),
         null
       )
       .addTargets(UnderTest.class)
       .build();
 
-    // Registered class is affected by aspect
-    assertEquals("aspect override", UnderTest.staticText);
+    // Caveat: Even though there are 3 static blocks in the target class, only one advice pair is being triggered.
+    assertEquals(1, UnderTest.typeInitialiserAdviceCounter);
+    // 3 static blocks suppressed -> 0. The after advice multiplies by 11 -> 0.
+    assertEquals(33, UnderTest.staticBlockCounter);
   }
 
 }

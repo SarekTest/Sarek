@@ -1,14 +1,21 @@
 package dev.sarek.app;
 
 public class UnderTest {
-  @SuppressWarnings("UnusedAssignment")
-  public static String staticText = "default";
+  public static int staticBlockCounter;
+  public static int typeInitialiserAdviceCounter;
 
   private String name;
 
   static {
-    staticText = "type initialiser";
-    System.out.println(staticText);
+    System.out.println("Static block #" + ++staticBlockCounter);
+  }
+
+  static {
+    System.out.println("Static block #" + ++staticBlockCounter);
+  }
+
+  static {
+    System.out.println("Static block #" + ++staticBlockCounter);
   }
 
   public UnderTest() {
