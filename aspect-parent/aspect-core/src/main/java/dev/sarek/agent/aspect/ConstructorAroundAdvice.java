@@ -6,11 +6,9 @@ public class ConstructorAroundAdvice extends AroundAdvice<Constructor<?>> {
   private final Before before;
   private final After after;
 
-  public static final Before BEFORE_DEFAULT = (method, args) -> {
-  };
+  public static final Before BEFORE_DEFAULT = (method, args) -> { };
 
-  public static final After AFTER_DEFAULT = (target, method, args) -> {
-  };
+  public static final After AFTER_DEFAULT = (target, method, args) -> { };
 
   public ConstructorAroundAdvice(Before before, After after) {
     this.before = before == null ? BEFORE_DEFAULT : before;

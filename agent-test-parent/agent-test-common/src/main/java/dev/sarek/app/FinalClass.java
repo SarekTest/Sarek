@@ -23,8 +23,7 @@ public final class FinalClass {
     return factor1 * factor2;
   }
 
-  public final void doSomething() {
-  }
+  public final void doSomething() { }
 
   public final int add(int a, int b) {
     return a + b;

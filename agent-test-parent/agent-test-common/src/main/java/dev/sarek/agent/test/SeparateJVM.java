@@ -12,5 +12,4 @@ package dev.sarek.agent.test;
  * one JVM per class. So if a test class contains multiple methods requiring separate JVMs, please split them
  * into separate classes.
  */
-public interface SeparateJVM {
-}
+public interface SeparateJVM { }
