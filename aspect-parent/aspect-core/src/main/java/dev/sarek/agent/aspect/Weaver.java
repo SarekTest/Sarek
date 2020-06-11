@@ -134,20 +134,14 @@ public class Weaver {
   }
 
   public Weaver addTarget(Object target) throws IllegalArgumentException {
-    synchronized (Aspect.adviceRegistry) {
-      if (Aspect.adviceRegistry.get(target) != null)
-        throw new IllegalArgumentException("target " + target + " is already registered");
-      Aspect.adviceRegistry.put(target, adviceDescriptions);
-      targets.add(target);
-    }
+    Aspect.adviceRegistry.addAll(target, adviceDescriptions);
+    targets.add(target);
     return this;
   }
 
   public Weaver removeTarget(Object target) {
-    synchronized (Aspect.adviceRegistry) {
-      Aspect.adviceRegistry.remove(target);
-      targets.remove(target);
-    }
+    Aspect.adviceRegistry.removeAll(target, adviceDescriptions);
+    targets.remove(target);
     return this;
   }
 

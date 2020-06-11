@@ -5,7 +5,6 @@ import net.bytebuddy.description.method.MethodDescription;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Stack;
 
 import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAMIC;
@@ -17,6 +16,11 @@ public abstract class InstanceMethodAspect extends Aspect<Method> {
   //       This would allow to register multiple MethodAroundAdvices per instance and
   //       make a per-method mocking/stubbing scheme easy to implement.
   // TODO: Try @Advice.Local for transferring additional state between before/after advices if necessary
+  // TODO: Document that if a user wants to build a special type of aspect or mock which only applies to static methods,
+  //       constructors or type initialisers, she simply can do one of the following:
+  //         a) Register no advices for instance methods.
+  //         b) If there are instance method advices registered and global instance method mocking advising is unwanted,
+  //            the user can just register a dummy instance which is not used elsewhere in the code.
 
   @SuppressWarnings("UnusedAssignment")
   @OnMethodEnter(skipOn = OnDefaultValue.class)
@@ -88,40 +92,16 @@ public abstract class InstanceMethodAspect extends Aspect<Method> {
    */
   public static synchronized InstanceMethodAroundAdvice getAroundAdvice(Object target, Method method) {
     InstanceMethodAroundAdvice advice = null;
-    // Non-static method? -> search for instance advice
-    if (target != null)
-      advice = doGetAdvice(target, method);
+    advice = doGetAdvice(target, method, true);
     // Static method or no instance advice? -> search for class advice
     if (advice == null)
-      advice = doGetAdvice(method.getDeclaringClass(), method);
+      advice = doGetAdvice(method.getDeclaringClass(), method, false);
     return advice;
-
-/*
-    //    MethodAroundAdvice perInstance = adviceRegistry.get(target);
-//    MethodAroundAdvice perMethod = adviceRegistry.get(method);
-//    MethodAroundAdvice perClass = adviceRegistry.get(method.getDeclaringClass());
-    MethodAroundAdvice advice;
-    // (1) Search for method advice
-    if ((advice = adviceRegistry.get(method)) != null) {
-
-      // An instance must be registered for the exact same method advice
-      if (!advice.equals(adviceRegistry.get(target)))
-        return null;
-    }
-    // (2) No method advice found and non-static method? -> search for instance advice
-    if (advice == null && target != null)
-      advice = adviceRegistry.get(target);
-    // (3) Static method or no instance advice? -> search for class advice
-    if (advice == null)
-      advice = adviceRegistry.get(method.getDeclaringClass());
-    return advice;
-*/
-
   }
 
   private final static Stack<Object> targets = new Stack<>();
 
-  private static InstanceMethodAroundAdvice doGetAdvice(Object target, Method method) {
+  private static InstanceMethodAroundAdvice doGetAdvice(Object target, Method method, boolean instanceMode) {
     // Detect endless (direct) recursion leading to stack overflow, such as (schematically simplified):
     // getAroundAdvice(target) → adviceRegistry.get(target) → target.hashCode() → getAroundAdvice(target)
     if (!targets.empty() && targets.peek() == target) {
@@ -134,20 +114,25 @@ public abstract class InstanceMethodAspect extends Aspect<Method> {
     }
     targets.push(target);
     try {
-      List<Weaver.Builder.AdviceDescription> adviceDescriptions = adviceRegistry.get(target);
-      return adviceDescriptions == null ? null :
-        adviceDescriptions
-          .stream()
-          .filter(adviceDescription -> {
-              boolean result = adviceDescription.adviceType.equals(AdviceType.INSTANCE_METHOD_ADVICE)
-                && adviceDescription.methodMatcher.matches(new MethodDescription.ForLoadedMethod(method));
-              System.out.println(target + " / " + method + " -> " + adviceDescription.methodMatcher + " / " + result);
-              return result;
-            }
-          )
-          .map(adviceDescription -> (InstanceMethodAroundAdvice) adviceDescription.advice)
-          .findFirst()
-          .orElse(null);
+      Weaver.Builder.AdviceDescription adviceDescription = adviceRegistry
+        .getValues(target)
+        .stream()
+        .filter(adviceDescr ->
+          adviceDescr.adviceType.equals(AdviceType.INSTANCE_METHOD_ADVICE)
+            && adviceDescr.methodMatcher.matches(new MethodDescription.ForLoadedMethod(method))
+        )
+        .findFirst()
+        .orElse(null);
+      if (adviceDescription == null)
+        return null;
+      InstanceMethodAroundAdvice advice = (InstanceMethodAroundAdvice) adviceDescription.advice;
+      if (instanceMode)
+        return advice;
+      boolean instancesRegistered = adviceRegistry
+        .getKeys(adviceDescription)
+        .stream()
+        .anyMatch(adviceTarget -> !(adviceTarget instanceof Class));
+      return instancesRegistered ? null : advice;
     }
     finally {
       targets.pop();

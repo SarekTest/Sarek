@@ -290,6 +290,13 @@ public class NoAgentWeaverIT {
         named("add")
       )
       .addAdvice(
+        new InstanceMethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) / 5
+        ),
+        named("multiply")
+      )
+      .addAdvice(
         new StaticMethodAroundAdvice(
           null,
           (method, args, proceedMode, returnValue, throwable) -> "Hi world!"
@@ -303,47 +310,38 @@ public class NoAgentWeaverIT {
         ),
         takesArguments(String.class)
       )
-      .addTargets(underTest)
+      .addTargets(underTest, UnderTest.class)
       .build();
 
-    // Weaver is only active for registered instance
+    // Weaver is only active for registered instance and we can advice multiple instance methods for the same advice
     assertEquals(55, underTest.add(2, 3));
+    assertEquals(3, underTest.multiply(3, 6));
     assertEquals(5, underTestUnregistered.add(2, 3));
-
-    // Cannot create a weaver, trying to register an already registered target to it from the constructor
-    // TODO: Implement n-to-m relationships between targets and advices, otherwise mocking different instance/static
-    //       methods or different constructors in the same class is impossible.
-    assertThrows(
-      IllegalArgumentException.class,
-      () -> Weaver
-        .forTypes(is(UnderTest.class))
-        .addAdvice(new InstanceMethodAroundAdvice(null, null), any())
-        .addTargets(underTest)
-        .build()
-    );
-
-    // TODO: Currently when a class is registered, e.g. in order to support constructor, static method or type
-    //       initialiser advices, it also has the effect of globally affecting instance methods -> re-implement a way to
-    //       differentiate between advice types.
-    weaver.removeTarget(underTest);
-    weaver.addTarget(UnderTest.class);
-
-    // Cannot create a weaver, trying to register an already registered target to it from the constructor
-    // TODO: Implement n-to-m relationships between targets and advices, otherwise mocking different instance/static
-    //       methods or different constructors in the same class is impossible.
-    assertThrows(
-      IllegalArgumentException.class,
-      () -> Weaver
-        .forTypes(is(UnderTest.class))
-        .addAdvice(new InstanceMethodAroundAdvice(null, null), any())
-        .addTargets(UnderTest.class)
-        .build()
-    );
-
-    assertEquals(55, underTest.add(2, 3));
-    assertEquals(55, underTestUnregistered.add(2, 3));
+    assertEquals(18, underTestUnregistered.multiply(3, 6));
+    // Weaver is also active for static method and constructor
     assertEquals("Hi world!", UnderTest.greet("Sir"));
     assertEquals("ADVISED", new UnderTest("whatever").getName());
+
+    // Now there are two registered instances
+    weaver.addTarget(underTestUnregistered);
+    assertEquals(55, underTest.add(2, 3));
+    assertEquals(55, underTestUnregistered.add(2, 3));
+    assertEquals(5, new UnderTest().add(2, 3));
+
+    // Caveat: If there no more registered instances but still the class is registered, all instances will be advised
+    weaver.removeTarget(underTest);
+    weaver.removeTarget(underTestUnregistered);
+    assertEquals(55, underTest.add(2, 3));
+    assertEquals(55, underTestUnregistered.add(2, 3));
+    assertEquals(55, new UnderTest().add(2, 3));
+
+    // If the class target is also removed, there no instances are advised, but also no static methods and constructors
+    weaver.removeTarget(UnderTest.class);
+    assertEquals(5, underTest.add(2, 3));
+    assertEquals(5, underTestUnregistered.add(2, 3));
+    assertEquals(5, new UnderTest().add(2, 3));
+    assertEquals("Hello Sir", UnderTest.greet("Sir"));
+    assertEquals("whatever", new UnderTest("whatever").getName());
   }
 
 }

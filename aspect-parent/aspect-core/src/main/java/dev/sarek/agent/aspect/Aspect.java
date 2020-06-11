@@ -1,5 +1,6 @@
 package dev.sarek.agent.aspect;
 
+import dev.sarek.agent.util.BiMultiMap;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
@@ -12,8 +13,7 @@ import static dev.sarek.agent.aspect.Aspect.AdviceTargetType.*;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public abstract class Aspect<T> {
-  public static final Map<Object, List<Weaver.Builder.AdviceDescription>> adviceRegistry =
-    Collections.synchronizedMap(new HashMap<>());
+  public static final BiMultiMap<Object, Weaver.Builder.AdviceDescription> adviceRegistry = new BiMultiMap<>();
 
   private static final ClassFileLocator CLASS_FILE_LOCATOR = ClassFileLocator.ForClassLoader.ofSystemLoader();
 

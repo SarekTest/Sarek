@@ -26,8 +26,13 @@ public class UnderTest {
   }
 
   public int add(int a, int b) {
-//    System.out.println("instance method with parameters: " + a + ", " + b);
+//    System.out.println("instance method 'add' with parameters: " + a + ", " + b);
     return a + b;
+  }
+
+  public int multiply(int a, int b) {
+//    System.out.println("instance method 'multiply' with parameters: " + a + ", " + b);
+    return a * b;
   }
 
   public static String greet(String recipient) {

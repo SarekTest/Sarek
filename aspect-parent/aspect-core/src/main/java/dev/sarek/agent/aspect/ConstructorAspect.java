@@ -5,7 +5,6 @@ import net.bytebuddy.description.method.MethodDescription;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Stack;
 
 import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAMIC;
@@ -89,17 +88,17 @@ public abstract class ConstructorAspect extends Aspect<Constructor<?>> {
     }
     targets.push(target);
     try {
-      List<Weaver.Builder.AdviceDescription> adviceDescriptions = adviceRegistry.get(target);
-      return adviceDescriptions == null ? null :
-        adviceDescriptions
-          .stream()
-          .filter(
-            adviceDescription -> adviceDescription.adviceType.equals(AdviceType.CONSTRUCTOR_ADVICE)
+      return adviceRegistry
+        .getValues(target)
+        .stream()
+        .filter(
+          adviceDescription ->
+            adviceDescription.adviceType.equals(AdviceType.CONSTRUCTOR_ADVICE)
               && adviceDescription.methodMatcher.matches(new MethodDescription.ForLoadedConstructor(constructor))
-          )
-          .map(adviceDescription -> (ConstructorAroundAdvice) adviceDescription.advice)
-          .findFirst()
-          .orElse(null);
+        )
+        .map(adviceDescription -> (ConstructorAroundAdvice) adviceDescription.advice)
+        .findFirst()
+        .orElse(null);
     }
     finally {
       targets.pop();

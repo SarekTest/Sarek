@@ -61,14 +61,13 @@ public abstract class TypeInitialiserAspect extends Aspect<Class<?>> {
    * Keep this method public because it must be callable from advice code woven into other classes
    */
   public static TypeInitialiserAroundAdvice getAroundAdvice(Class<?> target) {
-    List<Weaver.Builder.AdviceDescription> adviceDescriptions = adviceRegistry.get(target);
-    return adviceDescriptions == null ? null :
-      adviceDescriptions
-        .stream()
-        .filter(adviceDescription -> adviceDescription.adviceType.equals(AdviceType.TYPE_INITIALISER_ADVICE))
-        .map(adviceDescription -> (TypeInitialiserAroundAdvice) adviceDescription.advice)
-        .findFirst()  // TODO: What if there are multiple static blocks?
-        .orElse(null);
+    return adviceRegistry
+      .getValues(target)
+      .stream()
+      .filter(adviceDescription -> adviceDescription.adviceType.equals(AdviceType.TYPE_INITIALISER_ADVICE))
+      .map(adviceDescription -> (TypeInitialiserAroundAdvice) adviceDescription.advice)
+      .findFirst()  // TODO: What if there are multiple static blocks?
+      .orElse(null);
   }
 
   /**

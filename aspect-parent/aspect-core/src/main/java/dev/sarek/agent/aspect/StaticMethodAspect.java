@@ -5,7 +5,6 @@ import net.bytebuddy.description.method.MethodDescription;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Stack;
 
 import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAMIC;
@@ -103,20 +102,16 @@ public abstract class StaticMethodAspect extends Aspect<Method> {
     }
     targets.push(target);
     try {
-      List<Weaver.Builder.AdviceDescription> adviceDescriptions = adviceRegistry.get(target);
-      return adviceDescriptions == null ? null :
-        adviceDescriptions
-          .stream()
-          .filter(adviceDescription -> {
-              boolean result = adviceDescription.adviceType.equals(AdviceType.STATIC_METHOD_ADVICE)
-                && adviceDescription.methodMatcher.matches(new MethodDescription.ForLoadedMethod(method));
-              System.out.println(target + " / " + method + " -> " + adviceDescription.methodMatcher + " / " + result);
-              return result;
-            }
-          )
-          .map(adviceDescription -> (StaticMethodAroundAdvice) adviceDescription.advice)
-          .findFirst()
-          .orElse(null);
+      return adviceRegistry
+        .getValues(target)
+        .stream()
+        .filter(adviceDescription ->
+          adviceDescription.adviceType.equals(AdviceType.STATIC_METHOD_ADVICE)
+            && adviceDescription.methodMatcher.matches(new MethodDescription.ForLoadedMethod(method))
+        )
+        .map(adviceDescription -> (StaticMethodAroundAdvice) adviceDescription.advice)
+        .findFirst()
+        .orElse(null);
     }
     finally {
       targets.pop();
