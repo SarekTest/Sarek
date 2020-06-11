@@ -119,18 +119,21 @@ public class Weaver {
     this.typeMatcher = typeMatcher;
     this.adviceDescriptions = adviceDescriptions;
 
-    // TODO: exception during target registration -> dangling targets in advice registry -> FIXME via:
-    //   (a) memorise + clean up (argh!) or
-    //   (b) don't allow target registration in constructor or
-    //   (c) reverse order: register transformer first, then after target registration error
-    //       unregister transformer again, which also removes targets already added for that transformer
-    //   (a) difficult + inefficient, (b) easy to implement, (c) also fairly easy, better usability
-    for (Object target : targets)
-      addTarget(target);
+    try {
+      for (Object target : targets)
+        addTarget(target);
+      this.transformer = registerTransformer();
+    }
+    catch (Exception exceptionDuringRegistration) {
+      try {
+        // First unregister targets, then unregister transformer
+        unregisterTransformer();
+      }
+      catch (Exception ignored) { }
+      // Re-throw first caught exception after clean-up
+      throw exceptionDuringRegistration;
+    }
 
-    // Register transformer last so as not to have a dangling active transformer if an exception occurs
-    // in the constructor, e.g. because trying to register already registered targets
-    this.transformer = registerTransformer();
   }
 
   public Weaver addTarget(Object target) throws IllegalArgumentException {
