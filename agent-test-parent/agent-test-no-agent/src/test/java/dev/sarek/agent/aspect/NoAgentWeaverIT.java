@@ -277,7 +277,7 @@ public class NoAgentWeaverIT {
   }
 
   @Test
-  public void multiAdviceWeaver() throws IOException {
+  public void multiAdvice() throws IOException {
     UnderTest underTest = new UnderTest();
     UnderTest underTestUnregistered = new UnderTest();
     weaver = Weaver
@@ -313,7 +313,7 @@ public class NoAgentWeaverIT {
       .addTargets(underTest, UnderTest.class)
       .build();
 
-    // Weaver is only active for registered instance and we can advice multiple instance methods for the same advice
+    // Weaver is only active for registered instance and we can advise multiple instance methods for the same advice
     assertEquals(55, underTest.add(2, 3));
     assertEquals(3, underTest.multiply(3, 6));
     assertEquals(5, underTestUnregistered.add(2, 3));
@@ -342,6 +342,173 @@ public class NoAgentWeaverIT {
     assertEquals(5, new UnderTest().add(2, 3));
     assertEquals("Hello Sir", UnderTest.greet("Sir"));
     assertEquals("whatever", new UnderTest("whatever").getName());
+  }
+
+  @Test
+  public void multiAdvicePrecedence() throws IOException {
+    UnderTest underTest = new UnderTest("John Doe");
+    UnderTest underTestUnregistered = new UnderTest("Nobody");
+
+    // Scenario 1: advices ordered from more to less specific
+    weaver = Weaver
+      .forTypes(is(UnderTest.class))
+      .addAdvice(
+        new InstanceMethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
+        ),
+        named("add")
+      )
+      .addAdvice(
+        new InstanceMethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) / 5
+        ),
+        takesArguments(int.class, int.class)
+      )
+      .addAdvice(
+        new InstanceMethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) -> 42
+        ),
+        returns(int.class)
+      )
+      .addAdvice(
+        InstanceMethodAroundAdvice.MOCK,
+        any()
+      )
+      .addTargets(underTest)
+      .build();
+
+    // Weaver is only active for registered instance
+    assertEquals(5, underTestUnregistered.add(2, 3));
+    assertEquals(18, underTestUnregistered.multiply(3, 6));
+    assertEquals(-11, underTestUnregistered.negate(11));
+    assertEquals("Nobody", underTestUnregistered.getName());
+
+    // Advice matching is sensitive to chronological order in which advices were added
+    assertEquals(55, underTest.add(2, 3));
+    assertEquals(3, underTest.multiply(3, 6));
+    assertEquals(42, underTest.negate(11));
+    assertNull(underTest.getName());
+
+    weaver.unregisterTransformer();
+
+    // Scenario 2: advice #2 is less specific than #3, so #3 is never in effect
+    weaver = Weaver
+      .forTypes(is(UnderTest.class))
+      .addAdvice(
+        new InstanceMethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
+        ),
+        named("add")
+      )
+      .addAdvice(
+        new InstanceMethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) -> 42
+        ),
+        returns(int.class)
+      )
+      .addAdvice(
+        new InstanceMethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) / 5
+        ),
+        takesArguments(int.class, int.class)
+      )
+      .addAdvice(
+        InstanceMethodAroundAdvice.MOCK,
+        any()
+      )
+      .addTargets(underTest)
+      .build();
+
+    // Advice matching is sensitive to chronological order in which advices were added
+    assertEquals(55, underTest.add(2, 3));
+    assertEquals(42, underTest.multiply(3, 6));
+    assertEquals(42, underTest.negate(11));
+    assertNull(underTest.getName());
+
+    weaver.unregisterTransformer();
+
+    // Scenario 3: advice #1 is less specific than #2 and #3, so #2 and #3 are never in effect
+    weaver = Weaver
+      .forTypes(is(UnderTest.class))
+      .addAdvice(
+        new InstanceMethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) -> 42
+        ),
+        returns(int.class)
+      )
+      .addAdvice(
+        new InstanceMethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
+        ),
+        named("add")
+      )
+      .addAdvice(
+        new InstanceMethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) / 5
+        ),
+        takesArguments(int.class, int.class)
+      )
+      .addAdvice(
+        InstanceMethodAroundAdvice.MOCK,
+        any()
+      )
+      .addTargets(underTest)
+      .build();
+
+    // Advice matching is sensitive to chronological order in which advices were added
+    assertEquals(42, underTest.add(2, 3));
+    assertEquals(42, underTest.multiply(3, 6));
+    assertEquals(42, underTest.negate(11));
+    assertNull(underTest.getName());
+
+    weaver.unregisterTransformer();
+
+    // Scenario 4: advice #1 is less specific than all the others, so none of them are never in effect
+    weaver = Weaver
+      .forTypes(is(UnderTest.class))
+      .addAdvice(
+        InstanceMethodAroundAdvice.MOCK,
+        any()
+      )
+      .addAdvice(
+        new InstanceMethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
+        ),
+        named("add")
+      )
+      .addAdvice(
+        new InstanceMethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) / 5
+        ),
+        takesArguments(int.class, int.class)
+      )
+      .addAdvice(
+        new InstanceMethodAroundAdvice(
+          null,
+          (target, method, args, proceedMode, returnValue, throwable) -> 42
+        ),
+        returns(int.class)
+      )
+      .addTargets(underTest)
+      .build();
+
+    // Advice matching is sensitive to chronological order in which advices were added
+    assertEquals(0, underTest.add(2, 3));
+    assertEquals(0, underTest.multiply(3, 6));
+    assertEquals(0, underTest.negate(11));
+    assertNull(underTest.getName());
+
   }
 
 }

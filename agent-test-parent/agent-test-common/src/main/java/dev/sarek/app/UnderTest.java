@@ -42,6 +42,11 @@ public class UnderTest {
     return a * b;
   }
 
+  public int negate(int a) {
+//    System.out.println("instance method 'negate' with parameters: " + a);
+    return -a;
+  }
+
   public static String greet(String recipient) {
 //    System.out.println("static method with parameter: " + recipient);
     return "Hello " + recipient;
