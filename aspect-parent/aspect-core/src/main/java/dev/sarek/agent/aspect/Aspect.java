@@ -128,7 +128,7 @@ public abstract class Aspect<T> {
   public enum AdviceType {
     INSTANCE_METHOD_ADVICE(
       Advice.to(InstanceMethodAspect.class, CLASS_FILE_LOCATOR),
-      isMethod().and(not(isStatic())),
+      isMethod().and(not(isStatic().or(isAbstract()))),
       Collections.unmodifiableList(
         Arrays.asList(SCOPE_GLOBAL, SCOPE_MODULE, SCOPE_PACKAGE, SCOPE_CLASS, SCOPE_METHOD, SCOPE_INSTANCE)
       ),
