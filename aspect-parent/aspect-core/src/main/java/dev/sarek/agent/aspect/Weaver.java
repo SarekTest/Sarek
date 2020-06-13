@@ -3,6 +3,7 @@ package dev.sarek.agent.aspect;
 import dev.sarek.agent.Agent;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
+import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
@@ -12,13 +13,17 @@ import java.lang.instrument.Instrumentation;
 import java.util.*;
 
 import static dev.sarek.agent.aspect.Aspect.AdviceType.TYPE_INITIALISER_ADVICE;
+import static dev.sarek.agent.aspect.Aspect.CLASS_FILE_LOCATOR;
 import static net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy.RETRANSFORMATION;
-import static net.bytebuddy.matcher.ElementMatchers.any;
-import static net.bytebuddy.matcher.ElementMatchers.none;
+import static net.bytebuddy.matcher.ElementMatchers.*;
 
 // TODO: Add builder API to enable multiple advices per Weaver, ideally also mixed method, constructor, type initialiser
 public class Weaver {
   private static final WovenMethodRegistry wovenMethodRegistry = new WovenMethodRegistry();
+  private static final Junction<MethodDescription> HASH_CODE_METHOD = isMethod()
+      .and(isPublic()).and(not(isStatic()))
+      .and(named("hashCode")).and(takesNoArguments())
+      .and(returns(int.class));
 
   /**
    * TODO: make thread-safe
@@ -64,8 +69,9 @@ public class Weaver {
   }
 
   public static class Builder {
-    private final Junction<TypeDescription> typeMatcher;
+    private Junction<TypeDescription> typeMatcher;
     private final List<AdviceDescription> adviceDescriptions = new ArrayList<>();
+    private boolean provideHashCodeMethod = false;
     private final List<Object> targets = new ArrayList<>();
 
     private Builder(Junction<TypeDescription> typeMatcher) {
@@ -77,13 +83,23 @@ public class Weaver {
       return this;
     }
 
+    public Builder provideHashCodeMethod() {
+      provideHashCodeMethod = true;
+      return this;
+    }
+
+    public Builder excludeTypes(Junction<TypeDescription> excludedTypes) {
+      typeMatcher = typeMatcher.and(not(excludedTypes));
+      return this;
+    }
+
     public Builder addTargets(Object... targets) {
       this.targets.addAll(Arrays.asList(targets));
       return this;
     }
 
     public Weaver build() throws IOException {
-      return new Weaver(typeMatcher, adviceDescriptions, targets.toArray());
+      return new Weaver(typeMatcher, adviceDescriptions, provideHashCodeMethod, targets.toArray());
     }
 
     public static class AdviceDescription {
@@ -106,18 +122,21 @@ public class Weaver {
   private final Junction<TypeDescription> typeMatcher;
   private final List<Builder.AdviceDescription> adviceDescriptions;
   private final ResettableClassFileTransformer transformer;
+  private final boolean provideHashCodeMethod;
   // TODO: maybe replace by a Set<WeakReference>
   private final Set<Object> targets = Collections.synchronizedSet(new HashSet<>());
 
   private Weaver(
     Junction<TypeDescription> typeMatcher,
     List<Builder.AdviceDescription> adviceDescriptions,
+    boolean provideHashCodeMethod,
     Object... targets
   ) throws IOException
   {
     System.out.println("Creating new weaver " + this);
     this.typeMatcher = typeMatcher;
     this.adviceDescriptions = adviceDescriptions;
+    this.provideHashCodeMethod = provideHashCodeMethod;
 
     try {
       for (Object target : targets)
@@ -216,31 +235,44 @@ public class Weaver {
       // Match type + method, then bind to advice
       .type(typeMatcher);
 
-    AgentBuilder.Identified identified = null;
-    for (Builder.AdviceDescription adviceDescription : adviceDescriptions) {
-      identified = (identified == null ? narrowable : identified)
+    AgentBuilder.Identified identified = narrowable;
+
+    if (provideHashCodeMethod) {
+      identified = identified
         .transform((builder, typeDescription, classLoader, module) ->
-            builder.visit(
-              adviceDescription.adviceType.getAdvice().on(
-                adviceDescription.adviceType.getMethodType()
-                  .and(adviceDescription.methodMatcher)
-//              .and(methodDescription -> wovenMethods.add(methodDescription))
-                  .and(methodDescription -> {
-                      boolean woven = wovenMethodRegistry.isWoven(methodDescription);
-                      System.out.println(
-                        (woven ? "Avoid double" : "Perform")
-                          + " aspect weaving for: " + methodDescription
-                          + " / weaver = " + this
-                      );
-                      wovenMethodRegistry.add(methodDescription, this);
-                      return !woven;
-                    }
-                  )
-              )
-            )
+          builder.visit(
+            Advice
+              .to(HashCodeAspect.class, CLASS_FILE_LOCATOR)
+              .on(HASH_CODE_METHOD)
+          )
         );
     }
+
+    for (Builder.AdviceDescription adviceDescription : adviceDescriptions) {
+      identified = identified
+        .transform((builder, typeDescription, classLoader, module) ->
+          builder.visit(
+            adviceDescription.adviceType.getAdvice().on(
+              adviceDescription.adviceType.getMethodType()
+                // Exclude public int hashCode() from user-defined weaving if overridden by HashCodeAspect
+                .and(provideHashCodeMethod ? not(HASH_CODE_METHOD) : any())
+                .and(adviceDescription.methodMatcher)
+                .and(methodDescription -> {
+                    boolean woven = wovenMethodRegistry.isWoven(methodDescription);
+                    System.out.println(
+                      (woven ? "Avoid double" : "Perform")
+                        + " aspect weaving for: " + methodDescription
+                        + " / weaver = " + this
+                    );
+                    wovenMethodRegistry.add(methodDescription, this);
+                    return !woven;
+                  }
+                )
+            )
+          )
+        );
+    }
+
     return (AgentBuilder) identified;
   }
-
 }

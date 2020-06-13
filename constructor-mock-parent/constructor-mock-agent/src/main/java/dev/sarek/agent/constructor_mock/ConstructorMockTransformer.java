@@ -70,6 +70,13 @@ public class ConstructorMockTransformer implements ClassFileTransformer {
       .collect(Collectors.toSet());
   }
 
+  public ConstructorMockTransformer(Set<Class<?>> classWhiteList) {
+    this.classWhiteList = classWhiteList
+      .stream()
+      .map(Class::getName)
+      .collect(Collectors.toSet());
+  }
+
   /**
    * Constructor used by agent transformer which injects its configuration via
    * configuration properties file

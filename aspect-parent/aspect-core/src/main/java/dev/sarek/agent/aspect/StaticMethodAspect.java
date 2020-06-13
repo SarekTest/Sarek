@@ -87,6 +87,7 @@ public abstract class StaticMethodAspect extends Aspect<Method> {
     return doGetAdvice(method.getDeclaringClass(), method);
   }
 
+  // TODO: make thread-safe, maybe use ThreadLocal<Stack<Object>>
   private final static Stack<Object> targets = new Stack<>();
 
   private static StaticMethodAroundAdvice doGetAdvice(Object target, Method method) {

@@ -6,7 +6,9 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.matcher.ElementMatcher;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static dev.sarek.agent.aspect.Aspect.AdviceScope.*;
 import static dev.sarek.agent.aspect.Aspect.AdviceTargetType.*;
@@ -15,7 +17,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 public abstract class Aspect<T> {
   public static final BiMultiMap<Object, Weaver.Builder.AdviceDescription> adviceRegistry = new BiMultiMap<>();
 
-  private static final ClassFileLocator CLASS_FILE_LOCATOR = ClassFileLocator.ForClassLoader.ofSystemLoader();
+  public static final ClassFileLocator CLASS_FILE_LOCATOR = ClassFileLocator.ForClassLoader.ofSystemLoader();
 
   /**
    * A concrete advice can be registered with different scopes, e.g. per class or for a specific object instance.

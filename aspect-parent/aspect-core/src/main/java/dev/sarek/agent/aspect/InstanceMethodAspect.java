@@ -99,6 +99,7 @@ public abstract class InstanceMethodAspect extends Aspect<Method> {
     return advice;
   }
 
+  // TODO: make thread-safe, maybe use ThreadLocal<Stack<Object>>
   private final static Stack<Object> targets = new Stack<>();
 
   private static InstanceMethodAroundAdvice doGetAdvice(Object target, Method method, boolean instanceMode) {

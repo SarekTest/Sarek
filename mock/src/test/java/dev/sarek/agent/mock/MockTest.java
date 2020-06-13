@@ -14,7 +14,12 @@ public class MockTest {
   @Test
   public void canMockApplicationClasses() throws IOException {
     // Try with resources works for Mock because it implements AutoCloseable
-    try (Mock mock = new Mock(FinalClass.class, Base.class, Sub.class)) {
+    try (
+      MockFactory<FinalClass> mockFactory1 = MockFactory.forClass(FinalClass.class).global().build();
+      MockFactory<Sub> mockFactory2 = MockFactory.forClass(Sub.class).global().build();
+      MockFactory<Base> mockFactory3 = MockFactory.forClass(Base.class).global().build()
+    )
+    {
       System.out.println(new FinalClass().add(2, 3));
       assertEquals(0, new FinalClass().add(2, 3));
       assertEquals(0, new Base(11).getId());
@@ -30,7 +35,10 @@ public class MockTest {
   @Test
   public void cannotMockBootstrapClasses() throws IOException {
     // Try with resources works for Mock because it implements AutoCloseable
-    try (Mock mock = new Mock(UUID.class)) {
+    try (
+      MockFactory<UUID> mockFactory = MockFactory.forClass(UUID.class).global().build()
+    )
+    {
       // Calling instrumented constructors/methods requires helper classes on the bootstrap classpath
       assertThrows(NoClassDefFoundError.class, () -> new UUID(0xABBA, 0xCAFE));
       //noinspection ResultOfMethodCallIgnored

@@ -73,6 +73,7 @@ public abstract class ConstructorAspect extends Aspect<Constructor<?>> {
     return doGetAdvice(constructor.getDeclaringClass(), constructor);
   }
 
+  // TODO: make thread-safe, maybe use ThreadLocal<Stack<Object>>
   private final static Stack<Object> targets = new Stack<>();
 
   private static ConstructorAroundAdvice doGetAdvice(Object target, Constructor<?> constructor) {
