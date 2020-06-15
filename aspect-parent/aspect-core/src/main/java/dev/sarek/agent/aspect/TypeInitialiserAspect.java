@@ -5,8 +5,6 @@ import net.bytebuddy.asm.Advice.OnDefaultValue;
 import net.bytebuddy.asm.Advice.OnMethodEnter;
 import net.bytebuddy.asm.Advice.OnMethodExit;
 
-import java.util.List;
-
 import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAMIC;
 
 public abstract class TypeInitialiserAspect extends Aspect<Class<?>> {
@@ -74,7 +72,7 @@ public abstract class TypeInitialiserAspect extends Aspect<Class<?>> {
    * Keep this method public because it must be callable from advice code woven into other classes
    */
   public static Class<?> toClass(String className) throws ClassNotFoundException {
-    return Class.forName(className);
+    return Class.forName(className, false, ClassLoader.getSystemClassLoader());
   }
 
 }
