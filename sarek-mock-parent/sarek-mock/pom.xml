@@ -64,6 +64,13 @@
 
   <dependencies>
 
+    <!-- Objenesis, used for creating injectable mocks for final classes  -->
+    <dependency>
+      <groupId>org.objenesis</groupId>
+      <artifactId>objenesis</artifactId>
+<!--      <optional>true</optional>-->
+    </dependency>
+
     <dependency>
       <groupId>dev.sarek</groupId>
       <artifactId>constructor-mock-agent</artifactId>

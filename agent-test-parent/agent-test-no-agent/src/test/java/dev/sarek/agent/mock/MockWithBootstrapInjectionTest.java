@@ -1,7 +1,6 @@
 package dev.sarek.agent.mock;
 
 import dev.sarek.agent.Agent;
-import dev.sarek.agent.aspect.Weaver;
 import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;
 import dev.sarek.agent.test.SeparateJVM;
 import org.junit.BeforeClass;
@@ -53,6 +52,7 @@ public class MockWithBootstrapInjectionTest {
       MockFactory<UUID> mockFactory = MockFactory
         .forClass(UUID.class)
         .mockStaticMethods(true)  // include static methods, too
+        .provideHashCodeMethod()
         .global()
         .build()
     )
@@ -201,6 +201,39 @@ public class MockWithBootstrapInjectionTest {
       assertNull(new GroupLayout(null).getLayoutStyle());
       assertNull(new JTextField().getSelectedTextColor());
     }
+  }
+
+  @Test
+  public void createInstance() throws IOException {
+    // Try with resources works for Mock because it implements AutoCloseable
+    try (
+      MockFactory<UUID> mockFactory = MockFactory
+        .forClass(UUID.class)
+        .mockStaticMethods(true)  // include static methods, too
+        .provideHashCodeMethod()
+        .build()
+    )
+    {
+      // Static method is mocked
+      // TODO: implement way to differentiate between global mock mode (constructors + instance methods) and registering
+      //       a class for static and type initialiser mocking
+//      assertNull(UUID.randomUUID());
+
+      // Create mock and automatically register it as an active target
+      assertNull(mockFactory.createInstance().toString());
+
+      // Create mock and manually automatically (de-)register it as an active target
+      UUID uuid = mockFactory.createInstance(false);
+      assertNotNull(uuid.toString());
+      mockFactory.addTarget(uuid);
+      assertNull(uuid.toString());
+      mockFactory.removeTarget(uuid);
+      assertNotNull(uuid.toString());
+    }
+
+    // After auto-close, class transformations have been reverted
+    assertTrue(new UUID(0xABBA, 0xCAFE).toString().contains("abba"));
+    assertTrue(UUID.randomUUID().toString().matches("\\p{XDigit}+(-\\p{XDigit}+){4}"));
   }
 
 }

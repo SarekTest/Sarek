@@ -24,7 +24,6 @@ public class MockTest {
       MockFactory<Base> mockFactory3 = MockFactory.forClass(Base.class).global().build()
     )
     {
-      System.out.println(new FinalClass().add(2, 3));
       assertEquals(0, new FinalClass().add(2, 3));
       assertEquals(0, new Base(11).getId());
       assertNull(new Sub("foo").getName());
@@ -52,6 +51,26 @@ public class MockTest {
     // After auto-close, class transformations have been reverted
     assertTrue(new UUID(0xABBA, 0xCAFE).toString().contains("abba"));
     assertTrue(UUID.randomUUID().toString().matches("\\p{XDigit}+(-\\p{XDigit}+){4}"));
+  }
+
+  @Test
+  public void createInstance() throws IOException {
+    // Try with resources works for Mock because it implements AutoCloseable
+    try (
+      MockFactory<FinalClass> mockFactory = MockFactory.forClass(FinalClass.class).global().build()
+    )
+    {
+      // Create mock and automatically register it as an active target
+      assertEquals(0, mockFactory.createInstance().add(2, 3));
+
+      // Create mock and manually automatically (de-)register it as an active target
+      FinalClass finalClass = mockFactory.createInstance(false);
+      assertEquals(5, finalClass.add(2, 3));
+      mockFactory.addTarget(finalClass);
+      assertEquals(0, finalClass.add(2, 3));
+      mockFactory.removeTarget(finalClass);
+      assertEquals(5, finalClass.add(2, 3));
+    }
   }
 
 }

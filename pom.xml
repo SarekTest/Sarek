@@ -22,6 +22,7 @@
     <bytebuddy.version>1.10.11</bytebuddy.version>
     <javassist.version>3.27.0-GA</javassist.version>
     <javassist-maven-plugin.version>2.0.0</javassist-maven-plugin.version>
+    <objenesis.version>3.1</objenesis.version>
 
     <!--
       Defined by build-helper:rootlocation.
@@ -228,6 +229,12 @@
                 </excludes>
               </filter>
               <filter>
+                <artifact>org.objenesis:*</artifact>
+                <excludes>
+                  <exclude>META-INF/**</exclude>
+                </excludes>
+              </filter>
+              <filter>
                 <artifact>*:*</artifact>
                 <excludes>
                   <exclude>META-INF/maven/**</exclude>
@@ -256,6 +263,10 @@
               <relocation>
                 <pattern>javassist</pattern>
                 <shadedPattern>dev.sarek.jar.javassist</shadedPattern>
+              </relocation>
+              <relocation>
+                <pattern>org.objenesis</pattern>
+                <shadedPattern>dev.sarek.jar.objenesis</shadedPattern>
               </relocation>
             </relocations>
           </configuration>
@@ -380,6 +391,13 @@
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-utils</artifactId>
         <version>3.2.0</version>
+      </dependency>
+
+      <!-- Objenesis, used for creating injectable mocks for  final classes  -->
+      <dependency>
+        <groupId>org.objenesis</groupId>
+        <artifactId>objenesis</artifactId>
+        <version>${objenesis.version}</version>
       </dependency>
 
       <!-- Internal dependencies -->

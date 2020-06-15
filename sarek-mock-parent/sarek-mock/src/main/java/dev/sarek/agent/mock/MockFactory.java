@@ -10,6 +10,8 @@ import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import org.objenesis.ObjenesisStd;
+import org.objenesis.instantiator.ObjectInstantiator;
 
 import java.io.IOException;
 import java.util.LinkedHashSet;
@@ -24,6 +26,7 @@ public class MockFactory<T> implements AutoCloseable {
   private final boolean mockInstanceMethods;
   private final boolean mockStaticMethods;
   private boolean closed = false;
+  private ObjectInstantiator<T> instantiator;
 
   public static <T> Builder<T> forClass(Class<T> targetClass) {
     return new Builder<T>(targetClass);
@@ -154,6 +157,23 @@ public class MockFactory<T> implements AutoCloseable {
       throw new IllegalArgumentException(
         "cannot add/remove target because mock factory is configured to ignore instance methods"
       );
+  }
+
+  public T createInstance() throws IllegalArgumentException {
+    return createInstance(true);
+  }
+
+  public T createInstance(boolean addTarget) throws IllegalArgumentException {
+    T newInstance = getInstantiator().newInstance();
+    if (addTarget)
+      addTarget(newInstance);
+    return newInstance;
+  }
+
+  private ObjectInstantiator<T> getInstantiator() {
+    if (instantiator == null)
+      instantiator = new ObjenesisStd().getInstantiatorOf(targetClass);
+    return instantiator;
   }
 
   @Override
