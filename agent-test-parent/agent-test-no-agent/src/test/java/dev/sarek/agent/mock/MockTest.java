@@ -1,15 +1,19 @@
 package dev.sarek.agent.mock;
 
+import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;
+import dev.sarek.agent.test.SeparateJVM;
 import dev.sarek.app.Base;
 import dev.sarek.app.FinalClass;
 import dev.sarek.app.Sub;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
 
+@Category(SeparateJVM.class)
 public class MockTest {
   @Test
   public void canMockApplicationClasses() throws IOException {

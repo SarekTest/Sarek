@@ -1,9 +1,11 @@
 package dev.sarek.agent.aspect;
 
+import dev.sarek.agent.test.SeparateJVM;
 import dev.sarek.app.StringWrapper;
 import dev.sarek.app.UnderTest;
 import org.junit.After;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -24,10 +26,11 @@ import static org.junit.Assert.*;
  *   </li>
  *   <li>
  *     TODO: show how to weave already loaded classes via retransformation, also JRE bootstrap classes by adding
- *           the aspect agent JAR to to bopotstrap class path
+ *           the aspect agent JAR to to bootstrap class path
  *   </li>
  * </ul>
  */
+@Category(SeparateJVM.class)
 public class NoAgentWeaverIT {
   private Weaver weaver;
 

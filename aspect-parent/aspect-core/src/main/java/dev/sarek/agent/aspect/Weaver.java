@@ -21,9 +21,9 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 public class Weaver {
   private static final WovenMethodRegistry wovenMethodRegistry = new WovenMethodRegistry();
   private static final Junction<MethodDescription> HASH_CODE_METHOD = isMethod()
-      .and(isPublic()).and(not(isStatic()))
-      .and(named("hashCode")).and(takesNoArguments())
-      .and(returns(int.class));
+    .and(isPublic()).and(not(isStatic()))
+    .and(named("hashCode")).and(takesNoArguments())
+    .and(returns(int.class));
 
   /**
    * TODO: make thread-safe
@@ -133,7 +133,7 @@ public class Weaver {
     Object... targets
   ) throws IOException
   {
-    System.out.println("Creating new weaver " + this);
+//    System.out.println("Creating new weaver " + this);
     this.typeMatcher = typeMatcher;
     this.adviceDescriptions = adviceDescriptions;
     this.provideHashCodeMethod = provideHashCodeMethod;
@@ -251,25 +251,26 @@ public class Weaver {
     for (Builder.AdviceDescription adviceDescription : adviceDescriptions) {
       identified = identified
         .transform((builder, typeDescription, classLoader, module) ->
-          builder.visit(
-            adviceDescription.adviceType.getAdvice().on(
-              adviceDescription.adviceType.getMethodType()
-                // Exclude public int hashCode() from user-defined weaving if overridden by HashCodeAspect
-                .and(provideHashCodeMethod ? not(HASH_CODE_METHOD) : any())
-                .and(adviceDescription.methodMatcher)
-                .and(methodDescription -> {
-                    boolean woven = wovenMethodRegistry.isWoven(methodDescription);
-                    System.out.println(
-                      (woven ? "Avoid double" : "Perform")
-                        + " aspect weaving for: " + methodDescription
-                        + " / weaver = " + this
-                    );
-                    wovenMethodRegistry.add(methodDescription, this);
-                    return !woven;
-                  }
-                )
+            builder.visit(
+              adviceDescription.adviceType.getAdvice().on(
+                adviceDescription.adviceType.getMethodType()
+                  // Exclude public int hashCode() from user-defined weaving if overridden by HashCodeAspect
+                  .and(provideHashCodeMethod ? not(HASH_CODE_METHOD) : any())
+                  .and(adviceDescription.methodMatcher)
+                  .and(methodDescription -> {
+                      boolean woven = wovenMethodRegistry.isWoven(methodDescription);
+//                    System.out.println(
+//                      "[Aspect Agent] "
+//                        + (woven ? "Avoid double" : "Perform")
+//                        + " aspect weaving for: " + methodDescription
+//                        + " / weaver = " + this
+//                    );
+                      wovenMethodRegistry.add(methodDescription, this);
+                      return !woven;
+                    }
+                  )
+              )
             )
-          )
         );
     }
 

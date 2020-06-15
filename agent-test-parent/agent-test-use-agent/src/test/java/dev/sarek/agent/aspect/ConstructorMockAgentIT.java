@@ -1,12 +1,16 @@
 package dev.sarek.agent.aspect;
 
 import dev.sarek.agent.constructor_mock.ConstructorMockRegistry;
-import dev.sarek.app.AnotherSub;
-import dev.sarek.app.Base;
-import dev.sarek.app.ExtendsSub;
-import dev.sarek.app.Sub;
+import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;
+import dev.sarek.app.*;
+import net.bytebuddy.agent.ByteBuddyAgent;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.lang.instrument.Instrumentation;
+import java.lang.instrument.UnmodifiableClassException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
@@ -14,6 +18,31 @@ import java.util.UUID;
 import static org.junit.Assert.*;
 
 public class ConstructorMockAgentIT {
+  private static final Instrumentation INSTRUMENTATION = ByteBuddyAgent.install();
+  private ConstructorMockTransformer constructorMockTransformer;
+
+  @BeforeClass
+  public static void beforeClass() {
+    useBootstrapClassBeforeInstrumentation();
+  }
+
+  private static void useBootstrapClassBeforeInstrumentation() {
+    new UUID(0xABBA, 0xCAFE);
+  }
+
+  @Before
+  public void beforeTest() {
+    constructorMockTransformer = new ConstructorMockTransformer();
+    // Important: set 'canRetransform' parameter to true
+    INSTRUMENTATION.addTransformer(constructorMockTransformer, true);
+  }
+
+  @After
+  public void afterTest() {
+    INSTRUMENTATION.removeTransformer(constructorMockTransformer);
+    constructorMockTransformer = null;
+  }
+
   Base base;
   AnotherSub anotherSub;
   Sub sub;
@@ -27,7 +56,7 @@ public class ConstructorMockAgentIT {
   }
 
   @Test
-  public void constructorMockOnApplicationClass() {
+  public void constructorMockOnApplicationClass() throws UnmodifiableClassException {
     final String className_Sub = Sub.class.getName();
 
     // (1) Before activating constructor mock mode for class Sub, everything is normal
@@ -45,7 +74,12 @@ public class ConstructorMockAgentIT {
 
     System.out.println("-----");
 
-    // (2) After activating constructor mock mode for class Sub,
+    // (2a) Retransform already loaded application class (incl. all ancestors) in order to make constructor mockable
+    // TODO: make this easier by just providing Sub and letting the framework take care of the ancestors
+    // TODO: Multiple retransformations work fine, buy will byte code be inserted multiple times? -> check & improve
+    INSTRUMENTATION.retransformClasses(Sub.class, Base.class);
+
+    // (2b) After activating constructor mock mode for class Sub,
     //   - fields should be uninitialised for Sub instances,
     //   - but not for direct base class instances or siblings in the inheritance hierarchy such as AnotherSub.
     //   - When instantiating child classes of Sub, their own constructors will not be mocked either, but the
@@ -85,12 +119,15 @@ public class ConstructorMockAgentIT {
   }
 
   @Test
-  public void constructorMockOnAlreadyLoadedBootstrapClass() {
+  public void constructorMockOnAlreadyLoadedBootstrapClass() throws UnmodifiableClassException {
     // (1) Before activating constructor mock mode for class UUID, everything is normal
     assertFalse(ConstructorMockRegistry.isMock(UUID.class.getName()));
     assertEquals("00000000-0000-abba-0000-00000000cafe", new UUID(0xABBA, 0xCAFE).toString());
 
-    // (2) Make class UUID constructor mockable
+    // (2a) Retransform already loaded (bootstrap) class UUID in order to make constructors mockable
+    INSTRUMENTATION.retransformClasses(UUID.class);
+
+    // (2b) Make UUID constructor mockable
     ConstructorMockRegistry.activate(UUID.class.getName());
     assertTrue(ConstructorMockRegistry.isMock(UUID.class.getName()));
     assertEquals("00000000-0000-0000-0000-000000000000", new UUID(0xABBA, 0xCAFE).toString());
@@ -99,5 +136,29 @@ public class ConstructorMockAgentIT {
     ConstructorMockRegistry.deactivate(UUID.class.getName());
     assertFalse(ConstructorMockRegistry.isMock(UUID.class.getName()));
     assertEquals("00000000-0000-abba-0000-00000000cafe", new UUID(0xABBA, 0xCAFE).toString());
+  }
+
+  /**
+   * This test serves the purpose of checking if the transformation is working for constructor arguments of
+   * - all primitive types,
+   * - a reference type and
+   * - an array (technically also a reference type).
+   */
+  @Test
+  public void constructorMockComplexConstructor() {
+    String className = SubWithComplexConstructor.class.getName();
+    ConstructorMockRegistry.activate(className);
+    assertTrue(
+      new SubWithComplexConstructor(
+        (byte) 123, '@', 123.45, 67.89f,
+        123, 123, (short) 123, true,
+        "foo", new int[][] { { 12, 34 }, { 56, 78 } }
+      ).toString().contains(
+        "aByte=0, aChar=\0, aDouble=0.0, aFloat=0.0, " +
+          "anInt=0, aLong=0, aShort=0, aBoolean=false, " +
+          "string='null', ints=null"
+      )
+    );
+    ConstructorMockRegistry.deactivate(className);
   }
 }

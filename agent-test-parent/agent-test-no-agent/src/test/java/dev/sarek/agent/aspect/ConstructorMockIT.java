@@ -2,12 +2,14 @@ package dev.sarek.agent.aspect;
 
 import dev.sarek.agent.constructor_mock.ConstructorMockRegistry;
 import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;
+import dev.sarek.agent.test.SeparateJVM;
 import dev.sarek.app.*;
 import net.bytebuddy.agent.ByteBuddyAgent;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
@@ -31,6 +33,7 @@ import static org.junit.Assert.*;
  * removing 'final' modifiers because the latter change class/method signatures and are not permitted in
  * retransformations, so they have to be done during class-loading.
  */
+@Category(SeparateJVM.class)
 public class ConstructorMockIT {
   private static final Instrumentation INSTRUMENTATION = ByteBuddyAgent.install();
   private ConstructorMockTransformer constructorMockTransformer;
@@ -40,7 +43,7 @@ public class ConstructorMockIT {
     useBootstrapClassBeforeInstrumentation();
     // This property is usually set in Maven in order to tell us the path to the constructor mock agent.
     // Important: The JAR needs to contain Javassist too, so it should be the '-all' or '-all-special' artifact.
-    JarFile constructorMockAgentJar = new JarFile(System.getProperty("constructor-mock-agent.jar"));
+    JarFile sarekAllJar = new JarFile(System.getProperty("sarek-all.jar"));
     // Inject constructor mock agent JAR into bootstrap classloader
     INSTRUMENTATION.appendToBootstrapClassLoaderSearch(constructorMockAgentJar);
   }

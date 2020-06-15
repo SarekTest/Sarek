@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static dev.sarek.agent.test.TestHelper.isClassLoaded;
 import static net.bytebuddy.matcher.ElementMatchers.is;

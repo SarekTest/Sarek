@@ -3,14 +3,15 @@ package dev.sarek.agent.aspect;
 import dev.sarek.agent.Agent;
 import dev.sarek.agent.constructor_mock.ConstructorMockRegistry;
 import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;
+import dev.sarek.agent.test.SeparateJVM;
 import dev.sarek.app.FinalClass;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
-import java.util.jar.JarFile;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 import static org.junit.Assert.*;
@@ -27,27 +28,14 @@ import static org.junit.Assert.*;
  * that this is more flexible than e.g. removing 'final' modifiers because the latter change class/method signatures and
  * are not permitted in retransformations, so they have to be done during class-loading.
  */
+@Category(SeparateJVM.class)
 public class MockFinalWithBehaviourIT {
   private ConstructorMockTransformer constructorMockTransformer;
   private Weaver weaver;
 
   @BeforeClass
-  public static void beforeClass() throws IOException {
+  public static void beforeClass() {
     useApplicationClassBeforeInstrumentation();
-
-    // This property is usually set in Maven in order to tell us the path to the constructor mock agent.
-    // Important: The JAR needs to contain Javassist too, so it should be the '-all' or '-all-special' artifact.
-    JarFile constructorMockAgentJar = new JarFile(System.getProperty("constructor-mock-agent.jar"));
-    // Inject constructor mock agent JAR into bootstrap classloader
-    Agent.getInstrumentation().appendToBootstrapClassLoaderSearch(constructorMockAgentJar);
-
-    // This property is usually set in Maven in order to tell us the path to the aspect agent.
-    // Important: The JAR needs to contain ByteBuddy too, so it should be the '-all' or '-all-special' artifact.
-    // For now this test expects '-all'. With '-all-special' the ByteBuddy packages would be relocated to
-    // 'dev.sarek.jar.bytebuddy' and e.g. the ElementMatcher imports would need to be changed.
-    JarFile aspectAgentJar = new JarFile(System.getProperty("aspect-agent.jar"));
-    // Inject aspect agent JAR into bootstrap classloader
-    Agent.getInstrumentation().appendToBootstrapClassLoaderSearch(aspectAgentJar);
   }
 
   private static void useApplicationClassBeforeInstrumentation() {

@@ -36,26 +36,13 @@ public class MockWithBootstrapInjectionTest {
 
     // This property is usually set in Maven in order to tell us the path to the constructor mock agent.
     // Important: The JAR needs to contain Javassist too, so it should be the '-all' or '-all-special' artifact.
-    JarFile constructorMockAgentJar = new JarFile(System.getProperty("constructor-mock-agent.jar"));
+    JarFile sarekAllJar = new JarFile(System.getProperty("sarek-all.jar"));
     // Inject constructor mock agent JAR into bootstrap classloader
-    INSTRUMENTATION.appendToBootstrapClassLoaderSearch(constructorMockAgentJar);
+    INSTRUMENTATION.appendToBootstrapClassLoaderSearch(sarekAllJar);
     assertNull(
       "Agent library classes must be loaded by the bootstrap class loader, which is not the case here. " +
         "This indicates that you did not run this test in a separate JVM.",
       ConstructorMockTransformer.class.getClassLoader()
-    );
-
-    // This property is usually set in Maven in order to tell us the path to the aspect agent.
-    // Important: The JAR needs to contain ByteBuddy too, so it should be the '-all' or '-all-special' artifact.
-    // For now this test expects '-all'. With '-all-special' the ByteBuddy packages would be relocated to
-    // 'dev.sarek.jar.bytebuddy' and e.g. the ElementMatcher imports would need to be changed.
-    JarFile aspectAgentJar = new JarFile(System.getProperty("aspect-core.jar"));
-    // Inject aspect agent JAR into bootstrap classloader
-    INSTRUMENTATION.appendToBootstrapClassLoaderSearch(aspectAgentJar);
-    assertNull(
-      "Agent library classes must be loaded by the bootstrap class loader, which is not the case here. " +
-        "This indicates that you did not run this test in a separate JVM.",
-      Weaver.class.getClassLoader()
     );
   }
 

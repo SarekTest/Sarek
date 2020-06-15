@@ -23,6 +23,22 @@
     <javassist.version>3.27.0-GA</javassist.version>
     <javassist-maven-plugin.version>2.0.0</javassist-maven-plugin.version>
 
+    <!--
+      Defined by build-helper:rootlocation.
+      Unfortunately, for IntelliJ IDEA we still need "-DprojectRootDir=..." in <projectRootDir>/.mvn/jvm.config.
+    -->
+    <!--suppress UnresolvedMavenProperty -->
+    <projectRootDir>${rootlocation}</projectRootDir>
+
+    <sarek-agent.jar>
+      ${projectRootDir}/sarek-agent/target/sarek-agent-${project.version}.jar
+    </sarek-agent.jar>
+    <sarek-all.jar>
+      ${projectRootDir}/sarek/target/sarek-${project.version}-all.jar
+    </sarek-all.jar>
+    <mock-all.jar>
+      ${projectRootDir}/sarek-mock-parent/sarek-mock/target/sarek-mock-${project.version}-all.jar
+    </mock-all.jar>
     <aspect-agent.jar>
       ${projectRootDir}/aspect-parent/aspect-agent/target/aspect-agent-${project.version}.jar
     </aspect-agent.jar>
@@ -68,6 +84,9 @@
             <!-- Fix for "[WARNING] Corrupted STDOUT by directly writing to native stream in forked JVM" -->
             <!--            <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>-->
             <systemPropertyVariables>
+              <sarek-agent.jar>${sarek-agent.jar}</sarek-agent.jar>
+              <sarek-all.jar>${sarek-all.jar}</sarek-all.jar>
+              <mock-all.jar>${mock-all.jar}</mock-all.jar>
               <aspect-agent.jar>${aspect-agent.jar}</aspect-agent.jar>
               <aspect-core.jar>${aspect-core.jar}</aspect-core.jar>
               <constructor-mock-agent.jar>${constructor-mock-agent.jar}</constructor-mock-agent.jar>
@@ -119,6 +138,9 @@
             <!-- Fix for "[WARNING] Corrupted STDOUT by directly writing to native stream in forked JVM" -->
             <!--            <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>-->
             <systemPropertyVariables>
+              <sarek-agent.jar>${sarek-agent.jar}</sarek-agent.jar>
+              <sarek-all.jar>${sarek-all.jar}</sarek-all.jar>
+              <mock-all.jar>${mock-all.jar}</mock-all.jar>
               <aspect-agent.jar>${aspect-agent.jar}</aspect-agent.jar>
               <aspect-core.jar>${aspect-core.jar}</aspect-core.jar>
               <constructor-mock-agent.jar>${constructor-mock-agent.jar}</constructor-mock-agent.jar>
@@ -166,6 +188,13 @@
           <version>3.2.3</version>
           <configuration>
             <filters>
+              <!--  Include own manifest -->
+              <filter>
+                <artifact>dev.sarek:${project.artifactId}</artifact>
+                <includes>
+                  <include>META-INF/MANIFEST.MF</include>
+                </includes>
+              </filter>
               <filter>
                 <artifact>dev.sarek:sarek-agent-common</artifact>
                 <includes>
@@ -206,7 +235,7 @@
               </filter>
             </filters>
             <!--
-              Caveat: For non-shaded artifacts, make sure to override relocation via
+              Caveat: For non-relocated artifacts, make sure to override relocation via
               <relocations>
                 <relocation>
                   <excludes>
@@ -381,7 +410,17 @@
       </dependency>
       <dependency>
         <groupId>dev.sarek</groupId>
-        <artifactId>mock</artifactId>
+        <artifactId>sarek-mock</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>dev.sarek</groupId>
+        <artifactId>sarek</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>dev.sarek</groupId>
+        <artifactId>sarek-agent</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -448,13 +487,14 @@
     <module>remove-final-parent</module>
     <module>constructor-mock-parent</module>
     <module>agent-test-parent</module>
-    <module>mock</module>
 
     <module>sarek-constructor-mock-parent</module>
     <module>sarek-aspect-parent</module>
     <module>sarek-unfinal-parent</module>
+    <module>sarek-mock-parent</module>
     <module>sarek-agent-common</module>
     <module>sarek</module>
+    <module>sarek-agent</module>
   </modules>
 
 </project>

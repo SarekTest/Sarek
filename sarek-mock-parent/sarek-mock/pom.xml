@@ -5,14 +5,19 @@
 
   <parent>
     <groupId>dev.sarek</groupId>
-    <artifactId>sarek-parent</artifactId>
+    <artifactId>sarek-mock-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>sarek</artifactId>
+  <artifactId>sarek-mock</artifactId>
 
   <build>
     <plugins>
+
+      <!-- Note that here we use Surefire, not Failsafe, i.e. no agent JARs -->
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
 
       <!-- Include dependencies -->
       <plugin>
@@ -58,26 +63,28 @@
   </build>
 
   <dependencies>
+
     <dependency>
       <groupId>dev.sarek</groupId>
-      <artifactId>remove-final-agent</artifactId>
-<!--      <optional>true</optional>-->
+      <artifactId>constructor-mock-agent</artifactId>
     </dependency>
     <dependency>
       <groupId>dev.sarek</groupId>
       <artifactId>aspect-core</artifactId>
-<!--      <optional>true</optional>-->
     </dependency>
     <dependency>
       <groupId>dev.sarek</groupId>
-      <artifactId>constructor-mock-agent</artifactId>
-<!--      <optional>true</optional>-->
+      <artifactId>sarek-agent-common</artifactId>
     </dependency>
+
+    <!-- Test dependencies -->
+
     <dependency>
       <groupId>dev.sarek</groupId>
-      <artifactId>sarek-mock</artifactId>
-<!--      <optional>true</optional>-->
+      <artifactId>agent-test-common</artifactId>
+      <scope>test</scope>
     </dependency>
+
   </dependencies>
 
 </project>

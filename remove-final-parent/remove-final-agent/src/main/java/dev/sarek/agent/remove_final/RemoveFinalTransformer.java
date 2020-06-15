@@ -99,9 +99,7 @@ public class RemoveFinalTransformer extends ClassVisitor {
     return
       // Our own agent-related stuff
       !className.startsWith("dev.sarek.agent.")
-        && !className.startsWith("dev.sarek.jar.asm")
-        && !className.startsWith("dev.sarek.jar.bytebuddy")
-        && !className.startsWith("dev.sarek.jar.javassist")
+        && !className.startsWith("dev.sarek.jar")
         // The JVM does not tolerate definalisation of Object methods but says:
         //   Error occurred during initialization of VM
         //   Incompatible definition of java.lang.Object
