@@ -18,7 +18,7 @@ public class ConstructorMockRegistry {
     return mockClasses.remove(className);
   }
 
-  public static boolean isObjectInConstructionMock() {
+  public static boolean isMockUnderConstruction() {
     // TODO: This is slow and assumes that constructor mocks should be mocked on all class loaders.
     //       Consider Björn Kautler's ThreadLocal idea or an alternative approach?
 

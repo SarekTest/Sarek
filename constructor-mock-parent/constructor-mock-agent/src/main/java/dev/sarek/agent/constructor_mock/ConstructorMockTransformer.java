@@ -167,7 +167,7 @@ public class ConstructorMockTransformer implements ClassFileTransformer {
       if (LOG_CONSTRUCTOR_MOCK)
         log("Adding constructor mock capability to constructor " + ctConstructor.getLongName());
       String ifCondition = String.join("\n",
-        "if (dev.sarek.agent.constructor_mock.ConstructorMockRegistry.isObjectInConstructionMock()) {",
+        "if (dev.sarek.agent.constructor_mock.ConstructorMockRegistry.isMockUnderConstruction()) {",
         "  " + superCall,
         "  return;",
         "}"
