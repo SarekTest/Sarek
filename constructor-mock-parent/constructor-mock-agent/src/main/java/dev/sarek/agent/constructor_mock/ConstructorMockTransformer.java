@@ -167,41 +167,14 @@ public class ConstructorMockTransformer implements ClassFileTransformer {
       if (LOG_CONSTRUCTOR_MOCK)
         log("Adding constructor mock capability to constructor " + ctConstructor.getLongName());
       String ifCondition = String.join("\n",
-        // Original approach
-/*
         "if (dev.sarek.agent.constructor_mock.ConstructorMockRegistry.isObjectInConstructionMock()) {",
         "  " + superCall,
         "  return;",
         "}"
-*/
-
-        // Alternative idea by Björn Kautler without stack trace generation + parsing:
-        "{",
-        "  if (" + MOCK_REGISTRY + ".isMockInCreation()) {",
-        "    " + superCall,
-        "    return;",
-        "  }",
-        "  if (" + MOCK_REGISTRY + ".isMock(\"" + ctConstructor.getDeclaringClass().getName() + "\")) {",
-        "    " + MOCK_REGISTRY + ".setMockInCreation(true);",
-        "    " + superCall,
-        "    " + MOCK_REGISTRY + ".setMockInCreation(false);",
-        "    return;",
-        "  }",
-        "}"
       );
-      String catchClause = String.join("\n",
-        "{",
-        "  " + MOCK_REGISTRY + ".setMockInCreation(false);",
-        "  throw $e;",
-        "}"
-      );
-      if (LOG_CONSTRUCTOR_MOCK) {
+      if (LOG_CONSTRUCTOR_MOCK)
         log(ifCondition);
-        log(catchClause);
-      }
       ctConstructor.insertBefore(ifCondition);
-      // TODO: reactivate/refactor after knowing the result of https://github.com/jboss-javassist/javassist/issues/325
-       ctConstructor.addCatch(catchClause, classPool.get("java.lang.Throwable"));
     }
   }
 

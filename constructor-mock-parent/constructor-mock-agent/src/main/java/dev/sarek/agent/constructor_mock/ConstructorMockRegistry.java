@@ -5,15 +5,6 @@ import java.util.Set;
 
 public class ConstructorMockRegistry {
   private static Set<String> mockClasses = new HashSet<>();
-  private static ThreadLocal<Boolean> mockInCreation = ThreadLocal.withInitial(() -> false);
-
-  public static boolean isMockInCreation() {
-    return mockInCreation.get();
-  }
-
-  public static void setMockInCreation(boolean inCreation) {
-    mockInCreation.set(inCreation);
-  }
 
   public static boolean isMock(String className) {
     return mockClasses.contains(className);
