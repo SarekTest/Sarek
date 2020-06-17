@@ -96,9 +96,9 @@ public class ConstructorMockAgentIT {
     // No change in behaviour for sibling class AnotherSub
     assertEquals(33, anotherSub.getId());
     assertEquals("bar", anotherSub.getName());
-    // ExtendsSub extends Sub behaves normally in its own constructor, but Sub/Base still have constructor mock behaviour
-    assertEquals(0, extendsSub.getId());
-    assertNull(extendsSub.getName());
+    // ExtendsSub extends Sub is unaffected because it is not a target class but only a sub class
+    assertEquals(44, extendsSub.getId());
+    assertEquals("zot", extendsSub.getName());
     assertNotNull(extendsSub.getDate());
 
     System.out.println("-----");

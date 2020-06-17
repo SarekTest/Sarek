@@ -5,10 +5,7 @@ import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;
 import dev.sarek.agent.test.SeparateJVM;
 import dev.sarek.app.*;
 import net.bytebuddy.agent.ByteBuddyAgent;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
@@ -36,11 +33,15 @@ import static org.junit.Assert.*;
 @Category(SeparateJVM.class)
 public class ConstructorMockIT {
   private static final Instrumentation INSTRUMENTATION = ByteBuddyAgent.install();
-  private ConstructorMockTransformer constructorMockTransformer;
+  private static final Class<?>[] TRANSFORMATION_TARGETS = {
+    Sub.class, Base.class,
+    UUID.class,
+    SubWithComplexConstructor.class, BaseWithComplexConstructor.class
+  };
+  private static ConstructorMockTransformer constructorMockTransformer;
 
   @BeforeClass
-  public static void beforeClass() throws IOException {
-    useBootstrapClassBeforeInstrumentation();
+  public static void beforeClass() throws IOException, UnmodifiableClassException {
     // This property is usually set in Maven in order to tell us the path to the constructor mock agent.
     // Important: The JAR needs to contain Javassist too, so it should be the '-all' or '-all-special' artifact.
     JarFile sarekAllJar = new JarFile(System.getProperty("sarek-all.jar"));
@@ -48,21 +49,14 @@ public class ConstructorMockIT {
     INSTRUMENTATION.appendToBootstrapClassLoaderSearch(constructorMockAgentJar);
   }
 
-  private static void useBootstrapClassBeforeInstrumentation() {
-    new UUID(0xABBA, 0xCAFE);
-  }
-
-  @Before
-  public void beforeTest() {
-    constructorMockTransformer = new ConstructorMockTransformer();
-    // Important: set 'canRetransform' parameter to true
-    INSTRUMENTATION.addTransformer(constructorMockTransformer, true);
-  }
-
-  @After
-  public void afterTest() {
+  @AfterClass
+  public static void afterClass() throws IOException, UnmodifiableClassException {
     INSTRUMENTATION.removeTransformer(constructorMockTransformer);
+    INSTRUMENTATION.retransformClasses(TRANSFORMATION_TARGETS);
     constructorMockTransformer = null;
+
+    ConstructorMockTransformer.LOG_CONSTRUCTOR_MOCK = false;
+    ConstructorMockTransformer.DUMP_CLASS_FILES = false;
   }
 
   Base base;
@@ -118,9 +112,9 @@ public class ConstructorMockIT {
     // No change in behaviour for sibling class AnotherSub
     assertEquals(33, anotherSub.getId());
     assertEquals("bar", anotherSub.getName());
-    // ExtendsSub extends Sub behaves normally in its own constructor, but Sub/Base still have constructor mock behaviour
-    assertEquals(0, extendsSub.getId());
-    assertNull(extendsSub.getName());
+    // ExtendsSub extends Sub is unaffected because it is not a target class but only a sub class
+    assertEquals(44, extendsSub.getId());
+    assertEquals("zot", extendsSub.getName());
     assertNotNull(extendsSub.getDate());
 
     System.out.println("-----");

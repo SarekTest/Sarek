@@ -66,19 +66,42 @@ public class MockWithBootstrapInjectionTest {
     assertTrue(UUID.randomUUID().toString().matches("\\p{XDigit}+(-\\p{XDigit}+){4}"));
   }
 
+  /**
+   * Do not mock File and FileInputStream at the same time because at least under Java 8 it causes exceptions during
+   * FileInputStream transformation:
+   * <p></p>
+   * <pre>{@code RuntimeException: Cannot make constructors mockable for class FileInputStream
+   * ...
+   * Caused by: java.lang.NullPointerException
+   *   at java.io.FilePermission.init
+   *   ...
+   *   at javassist.CtClassType.getConstructors
+   *   at dev.sarek.agent.constructor_mock.ConstructorMockTransformer.getSuperCall}</pre>
+   * <p></p>
+   * If we mock them separately, we do not hit this problem, but this test might still fail in the future. Keep it as
+   * a show case for more difficult situations and to document known edge cases.
+   *
+   * @throws IOException
+   */
   @Test
   public void canMockBootstrapClass_FileInputStream() throws IOException {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
-      MockFactory<File> mockFactory1 = MockFactory.forClass(File.class).provideHashCodeMethod().global().build();
-      MockFactory<FileInputStream> mockFactory2 = MockFactory.forClass(FileInputStream.class).global().build()
+      MockFactory<File> mockFactory1 = MockFactory.forClass(File.class).provideHashCodeMethod().global().build()
     )
     {
       File file = new File("CTeWTxRxRTmdf8JtvzmC");
       // Check that HashCodeAspect was applied
       assertEquals(System.identityHashCode(file), file.hashCode());
       assertNull(file.getName());
+    }
 
+    // Try with resources works for Mock because it implements AutoCloseable
+    try (
+      MockFactory<FileInputStream> mockFactory2 = MockFactory.forClass(FileInputStream.class).global().build()
+    )
+    {
+      File file = new File("CTeWTxRxRTmdf8JtvzmC");
       FileInputStream fileInputStream = new FileInputStream(file);
       assertEquals(0, fileInputStream.read());
       assertNull(fileInputStream.getFD());

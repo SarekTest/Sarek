@@ -21,16 +21,15 @@ public class ConstructorMockRegistry {
   public static boolean isObjectInConstructionMock() {
     // TODO: This is slow and assumes that constructor mocks should be mocked on all class loaders.
     //       Consider Björn Kautler's ThreadLocal idea or an alternative approach?
+
     // This is said to be faster than Thread.currentThread().getStackTrace()
     StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-    assert stackTrace.length > 1;
+    int constructorIndex = -1;
     for (int i = 1; i < stackTrace.length; i++) {
-      StackTraceElement stackTraceElement = stackTrace[i];
-      if (!stackTraceElement.getMethodName().equals("<init>"))
+      if (!stackTrace[i].getMethodName().equals("<init>"))
         break;
-      if (isMock(stackTraceElement.getClassName()))
-        return true;
+      constructorIndex = i;
     }
-    return false;
+    return constructorIndex > 0 && isMock(stackTrace[constructorIndex].getClassName());
   }
 }

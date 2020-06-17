@@ -4,7 +4,6 @@ import javassist.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,12 +32,13 @@ import java.util.stream.Stream;
  * TODO: implement configurability
  */
 public class ConstructorMockTransformer implements ClassFileTransformer {
-
   // TODO: make log level configurable
   public static boolean LOG_CONSTRUCTOR_MOCK = false;
   // TODO: make class file dumping configurable
   public static boolean DUMP_CLASS_FILES = false;
   public static String DUMP_CLASS_BASE_DIR = "constructor-mock-transform";
+
+  private static final String MOCK_REGISTRY = ConstructorMockRegistry.class.getName();
 
   private final String LOG_PREFIX = ConstructorMockAgent.isActive()
     ? "[Constructor Mock Agent] "
@@ -106,27 +106,37 @@ public class ConstructorMockTransformer implements ClassFileTransformer {
     if (!shouldTransform(canonicalClassName))
       return null;
 
-    CtClass ctClass;
+    CtClass targetClass;
     try {
       // Caveat: Do not just use 'classPool.get(className)' because we would miss previous transformations.
       // It is necessary to really parse 'classfileBuffer'.
-      ctClass = classPool.makeClass(new ByteArrayInputStream(classfileBuffer));
+      targetClass = classPool.makeClass(new ByteArrayInputStream(classfileBuffer));
     }
-    catch (IOException | RuntimeException e) {
+    catch (Exception e) {
       log("ERROR: Cannot parse bytes for input class " + canonicalClassName);
       e.printStackTrace();
       return null;
     }
-    applyTransformations(ctClass);
+
+    try {
+      applyTransformations(targetClass);
+    }
+    catch (Exception e) {
+      log("ERROR: Cannot apply transformations to input class " + canonicalClassName);
+      e.printStackTrace();
+      return null;
+    }
+
     byte[] transformedBytecode;
     try {
-      transformedBytecode = ctClass.toBytecode();
+      transformedBytecode = targetClass.toBytecode();
     }
-    catch (IOException | CannotCompileException e) {
+    catch (Exception e) {
       log("ERROR: Cannot get byte code for transformed class " + canonicalClassName);
       e.printStackTrace();
       return null;
     }
+
     if (DUMP_CLASS_FILES) {
       Path path = new File(DUMP_CLASS_BASE_DIR + "/" + className + ".class").toPath();
       try {
@@ -134,11 +144,12 @@ public class ConstructorMockTransformer implements ClassFileTransformer {
         log("Dumping transformed class file " + path.toAbsolutePath());
         Files.write(path, transformedBytecode);
       }
-      catch (IOException e) {
+      catch (Exception e) {
         log("ERROR: Cannot write class file to " + path.toAbsolutePath());
         e.printStackTrace();
       }
     }
+
     return transformedBytecode;
   }
 
@@ -146,12 +157,17 @@ public class ConstructorMockTransformer implements ClassFileTransformer {
   //       does not require the user to retransform parent classes by himself. For that purpose but also generally, it
   //       would be good to also have a registry of already transformed classes (per classloader?) so as to avoid
   //       multiple transformations of the same constructor.
-  private void makeConstructorMockable(CtClass ctClass) throws NotFoundException, CannotCompileException {
-    String superCall = getSuperCall(ctClass);
-    for (CtConstructor ctConstructor : ctClass.getDeclaredConstructors()) {
+  private void makeConstructorsMockable(CtClass targetClass)
+    throws NotFoundException, CannotCompileException
+  {
+    String canonicalClassName = targetClass.getName().replace('/', '.');
+    CtClass superClass = classPool.getCtClass(canonicalClassName).getSuperclass();
+    String superCall = getSuperCall(superClass);
+    for (CtConstructor ctConstructor : targetClass.getDeclaredConstructors()) {
       if (LOG_CONSTRUCTOR_MOCK)
         log("Adding constructor mock capability to constructor " + ctConstructor.getLongName());
       String ifCondition = String.join("\n",
+        // Original approach
         "if (dev.sarek.agent.constructor_mock.ConstructorMockRegistry.isObjectInConstructionMock()) {",
         "  " + superCall,
         "  return;",
@@ -180,8 +196,7 @@ public class ConstructorMockTransformer implements ClassFileTransformer {
     }
   }
 
-  private String getSuperCall(CtClass childClass) throws NotFoundException {
-    CtClass superClass = childClass.getSuperclass();
+  private String getSuperCall(CtClass superClass) throws NotFoundException {
     // Get declared non-private constructors (we cannot call private ones via 'super()')
     // TODO: Maybe transform private constructors, too -> `.getInstance()` methods in typical singleton classes!
     CtConstructor[] superConstructors = superClass.getConstructors();
@@ -289,15 +304,15 @@ public class ConstructorMockTransformer implements ClassFileTransformer {
    * {@link de.icongmbh.oss.maven.plugin.javassist.ClassTransformer} in order to enable build time bytecode
    * instrumentation.
    */
-  public void applyTransformations(CtClass classToTransform) {
-    classToTransform.defrost();
+  public void applyTransformations(CtClass targetClass) {
+    targetClass.defrost();
     try {
-      makeConstructorMockable(classToTransform);
+      makeConstructorsMockable(targetClass);
     }
-    catch (NotFoundException | CannotCompileException e) {
-      e.printStackTrace();
+    catch (Exception e) {
+      throw new RuntimeException("Cannot make constructors mockable for class " + targetClass.getName(), e);
     }
-    classToTransform.detach();
+    targetClass.detach();
   }
 
   /**
