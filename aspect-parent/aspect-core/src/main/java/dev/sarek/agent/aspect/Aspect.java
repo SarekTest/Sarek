@@ -168,7 +168,13 @@ public abstract class Aspect<T> {
     private final List<AdviceScope> allowedTargetScopes;
     private final List<AdviceTargetType> allowedTargetTypes;
 
-    AdviceType(Advice advice, ElementMatcher.Junction<MethodDescription> methodType, List<AdviceScope> allowedTargetScopes, List<AdviceTargetType> allowedTargetTypes) {
+    AdviceType(
+      Advice advice,
+      ElementMatcher.Junction<MethodDescription> methodType,
+      List<AdviceScope> allowedTargetScopes,
+      List<AdviceTargetType> allowedTargetTypes
+    )
+    {
       this.advice = advice;
       this.methodType = methodType;
       this.allowedTargetScopes = allowedTargetScopes;

@@ -94,7 +94,14 @@ public class ConstructorMockTransformer implements ClassFileTransformer {
   }
 
   @Override
-  public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
+  public byte[] transform(
+    ClassLoader loader,
+    String className,
+    Class<?> classBeingRedefined,
+    ProtectionDomain protectionDomain,
+    byte[] classfileBuffer
+  )
+  {
     String canonicalClassName = className.replace('/', '.');
     if (!shouldTransform(canonicalClassName))
       return null;
