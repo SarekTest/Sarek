@@ -1,7 +1,7 @@
 package dev.sarek.agent.test;
 
 /**
- * In JUnit 4, use <code>@Category(SeparateJVM.class)</code> on each class you wish to run in a separate JVM in order to
+ * In JUnit 4, use {@code @Category(SeparateJVM.class)} on each class you wish to run in a separate JVM in order to
  * ensure certain JVM start-up conditions, e.g.
  * <ul>
  *   <li>certain bootstrap or application classes have not been loaded yet,</li>

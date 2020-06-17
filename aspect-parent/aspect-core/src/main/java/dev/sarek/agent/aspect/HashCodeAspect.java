@@ -11,8 +11,8 @@ import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAM
  * class. This can be helpful in order to
  * <ul>
  *   <li>
- *     avoid recursions such as <code>getAroundAdvice(target)</code> → <code>adviceRegistry.get(target)</code> →
- *     <code>target.hashCode()</code> → <code>getAroundAdvice(target)</code>, which would normally be caught by private
+ *     avoid recursions such as {@code getAroundAdvice(target)} → {@code adviceRegistry.get(target)} →
+ *     {@code target.hashCode()} → {@code getAroundAdvice(target)}, which would normally be caught by private
  *     helper methods such as {@link InstanceMethodAspect#doGetAdvice(Object, Method, boolean)} but still take time to
  *     execute,
  *   </li>

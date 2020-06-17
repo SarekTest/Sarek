@@ -58,8 +58,8 @@ public abstract class Agent {
    * <b>Please note:</b>
    * <ul>
    *   <li>
-   *     Whenever a JVM ist started with <code>-javaagent:/path/to/my-agent.jar</code>, its
-   *     <code>premain</code> method automatically obtains an {@link Instrumentation} instance, which it should pass on
+   *     Whenever a JVM ist started with {@code -javaagent:/path/to/my-agent.jar}, its
+   *     {@code premain} method automatically obtains an {@link Instrumentation} instance, which it should pass on
    *     to {@link #Agent(String, Instrumentation)}. This has the effect that the internal instrumentation instance
    *     backing this getter will then also be initialised with the passed on value.
    *   </li>
@@ -97,7 +97,7 @@ public abstract class Agent {
    * Creates an option parser. Override this method if you want to provide a more specialised or sophisticated option
    * parser to be used in the constructor.
    *
-   * @return a new instance created via <code>new OptionParser(getAgentId(), getOptionKeys())</code>
+   * @return a new instance created via {@code new OptionParser(getAgentId(), getOptionKeys())}
    * @see OptionParser#OptionParser(String, String...)
    */
   protected OptionParser getOptionParser()

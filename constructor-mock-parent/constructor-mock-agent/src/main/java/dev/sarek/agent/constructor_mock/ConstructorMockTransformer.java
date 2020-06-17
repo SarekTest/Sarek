@@ -19,8 +19,8 @@ import java.util.stream.Stream;
  * This class transformer injects code into constructors, optionally stopping the original code  from being executed
  * and thus avoiding any unwanted (and possibly expensive) side effects such as resource allocation. The result of
  * calling a constructor for a class which has been added to the {@link ConstructorMockRegistry} will be an uninitialised
- * object, i.e. all its instance fields have default values such as <code>null</code>, <code>0</code>,
- * <code>false</code>. Such an object can then be used as the basis for a mock by stubbing its methods by another byte
+ * object, i.e. all its instance fields have default values such as {@code null</code>, <code>0},
+ * {@code false}. Such an object can then be used as the basis for a mock by stubbing its methods by another byte
  * code instrumentation stage.
  * <p></p>
  * The class also has been prepared to be used from Maven by providing methods which a class derived from

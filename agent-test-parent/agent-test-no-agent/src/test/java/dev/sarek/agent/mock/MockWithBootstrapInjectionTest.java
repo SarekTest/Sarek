@@ -140,7 +140,7 @@ public class MockWithBootstrapInjectionTest {
    * Do not mock URL and URI at the same time because they are used inside ByteBuddy in order to locate class files,
    * which leads to strange exceptions thrown by ByteBuddy's class file locator such as:
    * <p></p>
-   * <code>IllegalStateException: Could not locate class file for dev.sarek.agent.aspect.HashCodeAspect</code>
+   * {@code IllegalStateException: Could not locate class file for dev.sarek.agent.aspect.HashCodeAspect}
    * <p></p>
    * If we mock them separately, we do not hit this problem, but this test might still fail in the future. Keep it as
    * a show case for more difficult situations and to document known edge cases.

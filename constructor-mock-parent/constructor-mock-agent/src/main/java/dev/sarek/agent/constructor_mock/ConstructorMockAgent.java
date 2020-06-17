@@ -8,11 +8,11 @@ public class ConstructorMockAgent {
   private static boolean active;// = true;  // TODO: remove default value ###
 
   /**
-   * Start agent via <code>-javaagent:/path/to/my-agent.jar=<i>configFile</i></code> JVM parameter
+   * Start agent via {@code -javaagent:/path/to/my-agent.jar=<i>configFile</i>} JVM parameter
    *
    * @param configFile path to configuration properties file for class
    *                   {@link ConstructorMockTransformer}. Add this parameter on the command line
-   *                   after the Java agent path via <code>=/path/to/my-config.properties</code>.
+   *                   after the Java agent path via {@code =/path/to/my-config.properties}.
    */
   public static void premain(String configFile, Instrumentation inst) throws Exception {
     transform(configFile, inst);
@@ -47,12 +47,12 @@ public class ConstructorMockAgent {
   }
 
   /**
-   * Report agent status. This method can be used e.g. by tests which should be ignored if
-   * the agent is inactive because then there would be unmockable target classes which only
-   * become mockable if the agent transforms the classes during class-loading.
+   * Report agent status. This method can be used e.g. by tests which should be ignored if the agent is inactive because
+   * then there would be unmockable target classes which only become mockable if the agent transforms the classes during
+   * class-loading.
    *
-   * @return <code>true</code> if agent was canonically started via <code>premain</code> or
-   * <code>agentmain</code> methods; <code>false</code> otherwise
+   * @return {@code true} if agent was canonically started via {@code premain} or {@code agentmain} methods;
+   * {@code false} otherwise
    */
   public static boolean isActive() {
     return active;

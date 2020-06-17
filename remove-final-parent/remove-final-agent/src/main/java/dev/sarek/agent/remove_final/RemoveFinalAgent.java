@@ -28,7 +28,7 @@ public class RemoveFinalAgent extends Agent {
    *
    * @param options path to configuration properties file for class
    *                {@link RemoveFinalTransformer}. Add this parameter on the command line
-   *                after the Java agent path via <code>=/path/to/my-config.properties</code>.
+   *                after the Java agent path via {@code =/path/to/my-config.properties}.
    */
   public static void agentmain(String options, Instrumentation instrumentation)
     throws ReflectiveOperationException, AgentAlreadyRegisteredException, IllegalTransformerFactoryMethodException,
@@ -42,7 +42,7 @@ public class RemoveFinalAgent extends Agent {
    *
    * @param options path to configuration properties file for class
    *                {@link RemoveFinalTransformer}. Add this parameter on the command line
-   *                after the Java agent path via <code>=/path/to/my-config.properties</code>.
+   *                after the Java agent path via {@code =/path/to/my-config.properties}.
    */
   public static void premain(String options, Instrumentation instrumentation)
     throws AgentAlreadyRegisteredException, ReflectiveOperationException, IllegalTransformerFactoryMethodException,
