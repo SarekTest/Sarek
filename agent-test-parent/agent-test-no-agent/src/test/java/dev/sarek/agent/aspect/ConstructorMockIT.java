@@ -46,7 +46,20 @@ public class ConstructorMockIT {
     // Important: The JAR needs to contain Javassist too, so it should be the '-all' or '-all-special' artifact.
     JarFile sarekAllJar = new JarFile(System.getProperty("sarek-all.jar"));
     // Inject constructor mock agent JAR into bootstrap classloader
-    INSTRUMENTATION.appendToBootstrapClassLoaderSearch(constructorMockAgentJar);
+    INSTRUMENTATION.appendToBootstrapClassLoaderSearch(sarekAllJar);
+
+//    ConstructorMockTransformer.LOG_CONSTRUCTOR_MOCK = true;
+//    ConstructorMockTransformer.DUMP_CLASS_FILES = true;
+
+    // Create global transformer without white list in order to test if there is any problem with transforming
+    // additional JRE bootstrap classes with dormant constructor mocking code.
+    constructorMockTransformer = new ConstructorMockTransformer();
+    // Alternatively just mock target classes incl. parents
+    //constructorMockTransformer = new ConstructorMockTransformer(TRANSFORMATION_TARGETS);
+
+    // Important: set 'canRetransform' parameter to true
+    INSTRUMENTATION.addTransformer(constructorMockTransformer, true);
+    INSTRUMENTATION.retransformClasses(TRANSFORMATION_TARGETS);
   }
 
   @AfterClass

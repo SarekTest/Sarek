@@ -3,6 +3,7 @@ package dev.sarek.agent.mock;
 import dev.sarek.agent.Agent;
 import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;
 import dev.sarek.agent.test.SeparateJVM;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -28,6 +29,15 @@ import static org.junit.Assert.*;
 )
 @Category(SeparateJVM.class)
 public class MockWithBootstrapInjectionTest {
+  @BeforeClass
+  public static void beforeClass() {
+//    ConstructorMockTransformer.LOG_CONSTRUCTOR_MOCK = true;
+  }
+
+  @AfterClass
+  public static void afterClass() {
+    ConstructorMockTransformer.LOG_CONSTRUCTOR_MOCK = false;
+  }
 
   @BeforeClass
   public static void addDependenciesToBootClassPath() throws IOException {

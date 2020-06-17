@@ -5,6 +5,8 @@ import dev.sarek.agent.test.SeparateJVM;
 import dev.sarek.app.Base;
 import dev.sarek.app.FinalClass;
 import dev.sarek.app.Sub;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -15,6 +17,18 @@ import static org.junit.Assert.*;
 
 @Category(SeparateJVM.class)
 public class MockTest {
+  @BeforeClass
+  public static void beforeClass() {
+//    ConstructorMockTransformer.LOG_CONSTRUCTOR_MOCK = true;
+//    ConstructorMockTransformer.DUMP_CLASS_FILES = true;
+  }
+
+  @AfterClass
+  public static void afterClass() {
+    ConstructorMockTransformer.LOG_CONSTRUCTOR_MOCK = false;
+    ConstructorMockTransformer.DUMP_CLASS_FILES = false;
+  }
+
   @Test
   public void canMockApplicationClasses() throws IOException {
     // Try with resources works for Mock because it implements AutoCloseable
