@@ -1,4 +1,4 @@
-package dev.sarek.agent.aspect;
+package dev.sarek.agent.remove_final;
 
 import dev.sarek.agent.test.SimpleMock;
 import dev.sarek.app.FinalClass;
@@ -26,8 +26,7 @@ import static org.junit.Assert.assertFalse;
  * Otherwise you will see a NoClassDefFoundError when running the tests for the bootstrap JRE classes because
  * boot class loader injection for the Java agent does not work as expected.
  */
-public class RemoveFinalWithAspectAgentIT {
-  //  private static final Instrumentation INSTRUMENTATION =
+public class RemoveFinalAgentIT {
   @Test
   public void checkDefinaliser() throws NoSuchMethodException {
     // Final application class has been definalised

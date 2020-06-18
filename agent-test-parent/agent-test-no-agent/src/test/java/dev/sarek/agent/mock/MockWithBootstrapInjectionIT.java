@@ -1,11 +1,8 @@
 package dev.sarek.agent.mock;
 
-import dev.sarek.agent.aspect.InstanceMethodAroundAdvice;
+import dev.sarek.agent.Agent;
 import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;
 import dev.sarek.agent.test.SeparateJVM;
-import dev.sarek.app.Base;
-import dev.sarek.app.FinalClass;
-import dev.sarek.app.Sub;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -16,47 +13,46 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.instrument.Instrumentation;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Random;
 import java.util.UUID;
+import java.util.jar.JarFile;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static org.junit.Assert.*;
 
+@SuppressWarnings(
+  { "ConstantConditions", "StringBufferReplaceableByString", "StringBufferMayBeStringBuilder", "unused" }
+)
 @Category(SeparateJVM.class)
-public class MockIT {
+public class MockWithBootstrapInjectionIT {
   @BeforeClass
   public static void beforeClass() {
-//    ConstructorMockTransformer.LOG_CONSTRUCTOR_MOCK = true;
-//    ConstructorMockTransformer.DUMP_CLASS_FILES = true;
+    ConstructorMockTransformer.LOG_CONSTRUCTOR_MOCK = true;
   }
 
   @AfterClass
   public static void afterClass() {
     ConstructorMockTransformer.LOG_CONSTRUCTOR_MOCK = false;
-    ConstructorMockTransformer.DUMP_CLASS_FILES = false;
   }
 
-  @Test
-  public void canMockApplicationClasses() throws IOException {
-    // Try with resources works for Mock because it implements AutoCloseable
-    try (
-      MockFactory<FinalClass> mockFactory1 = MockFactory.forClass(FinalClass.class).global().addGlobalInstance().build();
-      MockFactory<Sub> mockFactory2 = MockFactory.forClass(Sub.class).global().build();
-      MockFactory<Base> mockFactory3 = MockFactory.forClass(Base.class).global().build()
-    )
-    {
-      assertEquals(0, new FinalClass().add(2, 3));
-      assertEquals(0, new Base(11).getId());
-      assertNull(new Sub("foo").getName());
-    }
+  @BeforeClass
+  public static void addDependenciesToBootClassPath() throws IOException {
+    Instrumentation INSTRUMENTATION = Agent.getInstrumentation();
 
-    // After auto-close, class transformations have been reverted
-    assertEquals(5, new FinalClass().add(2, 3));
-    assertEquals(11, new Base(11).getId());
-    assertEquals("foo", new Sub("foo").getName());
+    // This property is usually set in Maven in order to tell us the path to the constructor mock agent.
+    // Important: The JAR needs to contain Javassist too, so it should be the '-all' or '-all-special' artifact.
+    JarFile sarekAllJar = new JarFile(System.getProperty("sarek-all.jar"));
+    // Inject constructor mock agent JAR into bootstrap classloader
+    INSTRUMENTATION.appendToBootstrapClassLoaderSearch(sarekAllJar);
+    assertNull(
+      "Agent library classes must be loaded by the bootstrap class loader, which is not the case here. " +
+        "This indicates that you did not run this test in a separate JVM.",
+      ConstructorMockTransformer.class.getClassLoader()
+    );
   }
 
   @Test
@@ -156,25 +152,15 @@ public class MockIT {
       assertNull(stringBuffer.toString());
     }
 
-    // Try with resources works for Mock because it implements AutoCloseable
-    try (
-      MockFactory<StringBuilder> mockFactory2 = MockFactory
-        .forClass(StringBuilder.class)
-        .spy()
-        // This only works if all libraries are loaded from the bootstrap class loader
-        .addAdvice(InstanceMethodAroundAdvice.MOCK, named("toString"))
-        .addAdvice(InstanceMethodAroundAdvice.MOCK, named("substring"))
-        .build()
-    )
-    {
-      StringBuilder stringBuilder = new StringBuilder("dummy");
-      mockFactory2.addTarget(stringBuilder);
-      stringBuilder.append(42);
-      stringBuilder.append("foo");
-      assertNull(stringBuilder.toString());
-      assertNull(stringBuilder.substring(2));
-      assertNull(stringBuilder.substring(2, 3));
-    }
+    // Do not try mocking StringBuilder here because that only works if all libraries are loaded from the bootstrap
+    // class loader. (See 'MockIT' in 'agent-test-use-agent' module for how to do that.) Otherwise the result would be
+    // LinkageErrors caused by the same test framework classes loaded by both the application and the bootstrap class
+    // loaders, making them incompatible:
+    //   LinkageError: loader constraint violation: when resolving method
+    //   'MockFactory$Builder MockFactory$Builder.addAdvice(...)'
+    //   the class loader 'app' of the current class, MockWithBootstrapInjectionTest,
+    //   and the class loader 'bootstrap' for the method's defining class, MockFactory$Builder,
+    //   have different Class objects for the type AroundAdvice (...)
   }
 
   /**

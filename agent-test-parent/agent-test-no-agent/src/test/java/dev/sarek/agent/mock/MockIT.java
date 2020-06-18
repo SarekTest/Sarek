@@ -16,7 +16,7 @@ import java.util.UUID;
 import static org.junit.Assert.*;
 
 @Category(SeparateJVM.class)
-public class MockTest {
+public class MockIT {
   @BeforeClass
   public static void beforeClass() {
 //    ConstructorMockTransformer.LOG_CONSTRUCTOR_MOCK = true;

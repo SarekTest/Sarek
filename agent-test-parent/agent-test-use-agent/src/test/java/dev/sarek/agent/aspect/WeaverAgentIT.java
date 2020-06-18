@@ -25,7 +25,7 @@ import static org.junit.Assert.*;
  * Otherwise you will see a NoClassDefFoundError when running the tests for the bootstrap JRE classes because
  * boot class loader injection for the Java agent does not work as expected.
  */
-public class CommandLineAgentIT {
+public class WeaverAgentIT {
   private Weaver weaver;
 
   @After

@@ -1,75 +1,46 @@
-package dev.sarek.agent.aspect;
+package dev.sarek.agent.constructor_mock;
 
 import dev.sarek.agent.constructor_mock.ConstructorMockRegistry;
 import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;
-import dev.sarek.agent.test.SeparateJVM;
 import dev.sarek.app.*;
 import net.bytebuddy.agent.ByteBuddyAgent;
-import org.junit.*;
-import org.junit.experimental.categories.Category;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
-import java.util.jar.JarFile;
 
 import static org.junit.Assert.*;
 
-/**
- * This test runs without a Java agent set via command line. It attaches it dynamically after adding it to the
- * bootstrap class loader's search path. The latter is only necessary if we want to mock constructors of classes which
- * are either bootstrap classes themselves or have bootstrap classes in their ancestry (direct or indirect parent
- * classes).
- * <p></p>
- * Furthermore, the test demonstrates how to retransform an already loaded class (in this case also a bootstrap class)
- * in order to add constructor mock functionality to it. This proves that the constructor mock transformation does not
- * change the class structure but only instruments constructor bodies. I.e. that this is more flexible than e.g.
- * removing 'final' modifiers because the latter change class/method signatures and are not permitted in
- * retransformations, so they have to be done during class-loading.
- */
-@Category(SeparateJVM.class)
-public class ConstructorMockIT {
+public class ConstructorMockAgentIT {
   private static final Instrumentation INSTRUMENTATION = ByteBuddyAgent.install();
-  private static final Class<?>[] TRANSFORMATION_TARGETS = {
-    Sub.class, Base.class,
-    UUID.class,
-    SubWithComplexConstructor.class, BaseWithComplexConstructor.class
-  };
-  private static ConstructorMockTransformer constructorMockTransformer;
+  private ConstructorMockTransformer constructorMockTransformer;
 
   @BeforeClass
-  public static void beforeClass() throws IOException, UnmodifiableClassException {
-    // This property is usually set in Maven in order to tell us the path to the constructor mock agent.
-    // Important: The JAR needs to contain Javassist too, so it should be the '-all' or '-all-special' artifact.
-    JarFile sarekAllJar = new JarFile(System.getProperty("sarek-all.jar"));
-    // Inject constructor mock agent JAR into bootstrap classloader
-    INSTRUMENTATION.appendToBootstrapClassLoaderSearch(sarekAllJar);
-
-//    ConstructorMockTransformer.LOG_CONSTRUCTOR_MOCK = true;
-//    ConstructorMockTransformer.DUMP_CLASS_FILES = true;
-
-    // Create global transformer without white list in order to test if there is any problem with transforming
-    // additional JRE bootstrap classes with dormant constructor mocking code.
-    constructorMockTransformer = new ConstructorMockTransformer();
-    // Alternatively just mock target classes incl. parents
-    //constructorMockTransformer = new ConstructorMockTransformer(TRANSFORMATION_TARGETS);
-
-    // Important: set 'canRetransform' parameter to true
-    INSTRUMENTATION.addTransformer(constructorMockTransformer, true);
-    INSTRUMENTATION.retransformClasses(TRANSFORMATION_TARGETS);
+  public static void beforeClass() {
+    useBootstrapClassBeforeInstrumentation();
   }
 
-  @AfterClass
-  public static void afterClass() throws IOException, UnmodifiableClassException {
-    INSTRUMENTATION.removeTransformer(constructorMockTransformer);
-    INSTRUMENTATION.retransformClasses(TRANSFORMATION_TARGETS);
-    constructorMockTransformer = null;
+  private static void useBootstrapClassBeforeInstrumentation() {
+    new UUID(0xABBA, 0xCAFE);
+  }
 
-    ConstructorMockTransformer.LOG_CONSTRUCTOR_MOCK = false;
-    ConstructorMockTransformer.DUMP_CLASS_FILES = false;
+  @Before
+  public void beforeTest() {
+    constructorMockTransformer = new ConstructorMockTransformer();
+    // Important: set 'canRetransform' parameter to true
+    INSTRUMENTATION.addTransformer(constructorMockTransformer, true);
+  }
+
+  @After
+  public void afterTest() {
+    INSTRUMENTATION.removeTransformer(constructorMockTransformer);
+    constructorMockTransformer = null;
   }
 
   Base base;

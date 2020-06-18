@@ -1,9 +1,8 @@
-package dev.sarek.agent.aspect;
+package dev.sarek.agent.remove_final;
 
 import dev.sarek.agent.Agent;
 import dev.sarek.agent.Agent.TransformerFactoryMethod.IllegalTransformerFactoryMethodException;
 import dev.sarek.agent.AgentRegistry.AgentAlreadyRegisteredException;
-import dev.sarek.agent.remove_final.RemoveFinalTransformer;
 import dev.sarek.agent.test.SeparateJVM;
 import dev.sarek.app.FinalClass;
 import org.junit.Test;
@@ -23,7 +22,7 @@ import static org.junit.Assert.assertTrue;
  * So we do not need a Java agent here.
  */
 @Category(SeparateJVM.class)
-public class NoAgentRemoveFinalIT {
+public class RemoveFinalIT {
   private static final Instrumentation INSTRUMENTATION = Agent.getInstrumentation();
 
   @Test

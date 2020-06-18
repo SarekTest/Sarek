@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
  * </ul>
  */
 @Category(SeparateJVM.class)
-public class NoAgentWeaverIT {
+public class WeaverIT {
   private Weaver weaver;
 
   @After

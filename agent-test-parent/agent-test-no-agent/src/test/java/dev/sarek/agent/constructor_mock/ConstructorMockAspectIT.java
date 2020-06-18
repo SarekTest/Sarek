@@ -1,8 +1,10 @@
-package dev.sarek.agent.aspect;
+package dev.sarek.agent.constructor_mock;
 
 import dev.sarek.agent.Agent;
-import dev.sarek.agent.constructor_mock.ConstructorMockRegistry;
-import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;
+import dev.sarek.agent.aspect.GlobalInstance;
+import dev.sarek.agent.aspect.InstanceMethodAroundAdvice;
+import dev.sarek.agent.aspect.StaticMethodAroundAdvice;
+import dev.sarek.agent.aspect.Weaver;
 import dev.sarek.agent.test.SeparateJVM;
 import dev.sarek.app.FinalClass;
 import org.junit.After;
@@ -29,7 +31,7 @@ import static org.junit.Assert.*;
  * are not permitted in retransformations, so they have to be done during class-loading.
  */
 @Category(SeparateJVM.class)
-public class MockFinalWithBehaviourIT {
+public class ConstructorMockAspectIT {
   private ConstructorMockTransformer constructorMockTransformer;
   private Weaver weaver;
 
