@@ -179,9 +179,9 @@ public class CommandLineAgentIT {
     weaver = Weaver
       .forTypes(is(System.class))
       .addAdvice(
-        new InstanceMethodAroundAdvice(
-          (target, method, args) -> false,
-          (target, method, args, proceedMode, returnValue, throwable) -> 123
+        new StaticMethodAroundAdvice(
+          (method, args) -> false,
+          (method, args, proceedMode, returnValue, throwable) -> 123
         ),
         named("currentTimeMillis").or(named("nanoTime"))
       )
