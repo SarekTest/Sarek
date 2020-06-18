@@ -92,7 +92,7 @@ public class MockFinalWithBehaviourIT {
         StaticMethodAroundAdvice.MOCK,
         not(nameEndsWith("InstanceCounter"))
       )
-      .addTargets(FinalClass.class)
+      .addTargets(FinalClass.class, GlobalInstance.of(FinalClass.class))
       .build();
 
     // (3) After mocking was activated, class under test behaves like a mock

@@ -33,7 +33,7 @@ public class MockTest {
   public void canMockApplicationClasses() throws IOException {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
-      MockFactory<FinalClass> mockFactory1 = MockFactory.forClass(FinalClass.class).global().build();
+      MockFactory<FinalClass> mockFactory1 = MockFactory.forClass(FinalClass.class).global().addGlobalInstance().build();
       MockFactory<Sub> mockFactory2 = MockFactory.forClass(Sub.class).global().build();
       MockFactory<Base> mockFactory3 = MockFactory.forClass(Base.class).global().build()
     )
@@ -71,7 +71,7 @@ public class MockTest {
   public void createInstance() throws IOException {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
-      MockFactory<FinalClass> mockFactory = MockFactory.forClass(FinalClass.class).global().build()
+      MockFactory<FinalClass> mockFactory = MockFactory.forClass(FinalClass.class).build()
     )
     {
       // Create mock and automatically register it as an active target

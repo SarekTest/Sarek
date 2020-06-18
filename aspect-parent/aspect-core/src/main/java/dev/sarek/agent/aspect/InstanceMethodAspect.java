@@ -92,17 +92,18 @@ public abstract class InstanceMethodAspect extends Aspect<Method> {
    */
   public static synchronized InstanceMethodAroundAdvice getAroundAdvice(Object target, Method method) {
     InstanceMethodAroundAdvice advice = null;
-    advice = doGetAdvice(target, method, true);
-    // Static method or no instance advice? -> search for class advice
+    advice = doGetAdvice(target, method);
+    // No instance advice? -> search for global instance advice based on target class
     if (advice == null)
-      advice = doGetAdvice(method.getDeclaringClass(), method, false);
+//      advice = doGetAdvice(GlobalInstance.of(method.getDeclaringClass()), method, false);
+      advice = doGetAdvice(GlobalInstance.of(target.getClass()), method);
     return advice;
   }
 
   // TODO: make thread-safe, maybe use ThreadLocal<Stack<Object>>
   private final static Stack<Object> targets = new Stack<>();
 
-  private static InstanceMethodAroundAdvice doGetAdvice(Object target, Method method, boolean instanceMode) {
+  private static InstanceMethodAroundAdvice doGetAdvice(Object target, Method method) {
     // Detect endless (direct) recursion leading to stack overflow, such as (schematically simplified):
     // getAroundAdvice(target) → adviceRegistry.get(target) → target.hashCode() → getAroundAdvice(target)
     if (!targets.empty() && targets.peek() == target) {
@@ -125,16 +126,9 @@ public abstract class InstanceMethodAspect extends Aspect<Method> {
         )
         .findFirst()
         .orElse(null);
-      if (adviceDescription == null)
-        return null;
-      InstanceMethodAroundAdvice advice = (InstanceMethodAroundAdvice) adviceDescription.advice;
-      if (instanceMode)
-        return advice;
-      boolean instancesRegistered = adviceRegistry
-        .getKeys(adviceDescription)
-        .stream()
-        .anyMatch(adviceTarget -> !(adviceTarget instanceof Class));
-      return instancesRegistered ? null : advice;
+      return adviceDescription == null
+        ? null
+        : (InstanceMethodAroundAdvice) adviceDescription.advice;
     }
     finally {
       targets.pop();

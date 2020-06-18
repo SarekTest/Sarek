@@ -331,18 +331,26 @@ public class NoAgentWeaverIT {
     assertEquals(55, underTestUnregistered.add(2, 3));
     assertEquals(5, new UnderTest().add(2, 3));
 
-    // Caveat: If there no more registered instances but still the class is registered, all instances will be advised
+    // If no more instances are registered but still the class is registered, no instances will be advised
     weaver.removeTarget(underTest);
     weaver.removeTarget(underTestUnregistered);
-    assertEquals(55, underTest.add(2, 3));
-    assertEquals(55, underTestUnregistered.add(2, 3));
-    assertEquals(55, new UnderTest().add(2, 3));
+    assertEquals(5, underTest.add(2, 3));
+    assertEquals(5, underTestUnregistered.add(2, 3));
+    assertEquals(5, new UnderTest().add(2, 3));
 
-    // If the class target is also removed, there no instances are advised, but also no static methods and constructors
+    // If the class target is also removed, no static methods and constructors will be advised either
     weaver.removeTarget(UnderTest.class);
     assertEquals(5, underTest.add(2, 3));
     assertEquals(5, underTestUnregistered.add(2, 3));
     assertEquals(5, new UnderTest().add(2, 3));
+    assertEquals("Hello Sir", UnderTest.greet("Sir"));
+    assertEquals("whatever", new UnderTest("whatever").getName());
+
+    // If a global instance target is registered, all instances are advised, but no static methods or constructors
+    weaver.addTarget(GlobalInstance.of(UnderTest.class));
+    assertEquals(55, underTest.add(2, 3));
+    assertEquals(55, underTestUnregistered.add(2, 3));
+    assertEquals(55, new UnderTest().add(2, 3));
     assertEquals("Hello Sir", UnderTest.greet("Sir"));
     assertEquals("whatever", new UnderTest("whatever").getName());
   }

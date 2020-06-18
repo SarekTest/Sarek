@@ -1,10 +1,7 @@
 package dev.sarek.agent.mock;
 
 import dev.sarek.agent.Agent;
-import dev.sarek.agent.aspect.AroundAdvice;
-import dev.sarek.agent.aspect.InstanceMethodAroundAdvice;
-import dev.sarek.agent.aspect.StaticMethodAroundAdvice;
-import dev.sarek.agent.aspect.Weaver;
+import dev.sarek.agent.aspect.*;
 import dev.sarek.agent.constructor_mock.ConstructorMockRegistry;
 import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;
 import net.bytebuddy.description.method.MethodDescription;
@@ -96,6 +93,11 @@ public class MockFactory<T> implements AutoCloseable {
       return this;
     }
 
+    public Builder<T> addGlobalInstance() {
+      weaverBuilder.addTargets(GlobalInstance.of(targetClass));
+      return this;
+    }
+
     public MockFactory<T> build() throws IOException {
       return new MockFactory<T>(this);
     }
@@ -133,8 +135,9 @@ public class MockFactory<T> implements AutoCloseable {
           not(builder.excludedMethods)
         );
     }
-    if (builder.global)
+    if (builder.global || mockStaticMethods) {
       builder.weaverBuilder.addTargets(targetClass);
+    }
     weaver = builder.weaverBuilder.build();
   }
 
@@ -147,6 +150,16 @@ public class MockFactory<T> implements AutoCloseable {
   public MockFactory<T> removeTarget(Object target) throws IllegalArgumentException {
     verifyTarget(target);
     weaver.removeTarget(target);
+    return this;
+  }
+
+  public MockFactory<T> addGlobalInstance() {
+    addTarget(GlobalInstance.of(targetClass));
+    return this;
+  }
+
+  public MockFactory<T> removeGlobalInstance() {
+    removeTarget(GlobalInstance.of(targetClass));
     return this;
   }
 
