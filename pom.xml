@@ -297,10 +297,13 @@
           </executions>
         </plugin>
 
+        <!-- TODO: upgrade to 3.2.0 as soon as available on Maven Central -->
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
-          <version>3.1.0</version>
+          <!-- Version 3.2.0 fixes goal 'rootlocation' -->
+<!--          <version>3.2.0</version>-->
+          <version>3.1.1-SNAPSHOT</version>
         </plugin>
 
         <plugin>
@@ -348,9 +351,25 @@
     </pluginManagement>
 
     <plugins>
+
       <plugin>
         <artifactId>maven-enforcer-plugin</artifactId>
       </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>set-project-root-dir</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>rootlocation</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
 
   </build>
