@@ -87,7 +87,7 @@ public class RemoveFinalTransformer extends ClassVisitor {
   }
 
   /**
-   * TODO: make black/white list of class and package names configurable
+   * TODO: make include/exclude list of class and package names configurable
    */
 //  @Override
   public boolean shouldTransform() {

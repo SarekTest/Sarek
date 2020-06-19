@@ -87,14 +87,14 @@ public class OptionParser {
    *     {@code ""}.
    *   </li>
    *   <li>
-   *     The options parser tries to handle whitespace outside of option values gracefully, i.e. it would ignore it in
-   *     instances such as {@code name1 , name2 =value2, name3,name4 =value4} or
+   *     The options parser tries to handle space characters outside of option values gracefully, i.e. it would ignore
+   *     them in instances such as {@code name1 , name2 =value2, name3,name4 =value4} or
    *     {@code agentId1 { name1,name2 =value2, name3,name4=value4} ; agentId2 { name1, name2 =value2}}.
    *   </li>
    *   <li>
-   *     Whitespace characters inside option values are being preserved, also leading and trailing ones, just in case
-   *     they have a special meaning for the corresponding agent, such as {@code indent=  } (value consists of two
-   *     spaces) or {@code logPrefix=[Special Agent] }.
+   *     Space characters inside option values are being preserved, also leading and trailing ones, just in case they
+   *     have a special meaning for the corresponding agent, such as {@code indent=  } (value consists of two spaces) or
+   *     {@code logPrefix=[Special Agent] }.
    *   </li>
    *   <li>
    *     If the same agent ID or option name (per agent) occurs multiple times, no error is raised but no specific

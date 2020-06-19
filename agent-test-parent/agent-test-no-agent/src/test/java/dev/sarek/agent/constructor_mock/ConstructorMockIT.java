@@ -51,7 +51,7 @@ public class ConstructorMockIT {
 //    ConstructorMockTransformer.LOG_CONSTRUCTOR_MOCK = true;
 //    ConstructorMockTransformer.DUMP_CLASS_FILES = true;
 
-    // Create global transformer without white list in order to test if there is any problem with transforming
+    // Create global transformer without includes list in order to test if there is any problem with transforming
     // additional JRE bootstrap classes with dormant constructor mocking code.
     constructorMockTransformer = new ConstructorMockTransformer();
     // Alternatively just mock target classes incl. parents

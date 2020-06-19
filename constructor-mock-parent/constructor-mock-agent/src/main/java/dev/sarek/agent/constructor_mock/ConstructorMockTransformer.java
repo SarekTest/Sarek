@@ -46,7 +46,7 @@ public class ConstructorMockTransformer implements ClassFileTransformer {
 
   private ClassPool classPool = ClassPool.getDefault();
   private File configFile;
-  private final Set<String> classWhiteList;
+  private final Set<String> targetClasses;
 
   /**
    * Default constructor used by static transformer which injects its configuration via
@@ -57,21 +57,21 @@ public class ConstructorMockTransformer implements ClassFileTransformer {
     this((File) null);
   }
 
-  public ConstructorMockTransformer(String... classWhiteList) {
-    this.classWhiteList = Arrays
-      .stream(classWhiteList)
+  public ConstructorMockTransformer(String... targetClasses) {
+    this.targetClasses = Arrays
+      .stream(targetClasses)
       .collect(Collectors.toSet());
   }
 
-  public ConstructorMockTransformer(Class<?>... classWhiteList) {
-    this.classWhiteList = Arrays
-      .stream(classWhiteList)
+  public ConstructorMockTransformer(Class<?>... targetClasses) {
+    this.targetClasses = Arrays
+      .stream(targetClasses)
       .map(Class::getName)
       .collect(Collectors.toSet());
   }
 
-  public ConstructorMockTransformer(Set<Class<?>> classWhiteList) {
-    this.classWhiteList = classWhiteList
+  public ConstructorMockTransformer(Set<Class<?>> targetClasses) {
+    this.targetClasses = targetClasses
       .stream()
       .map(Class::getName)
       .collect(Collectors.toSet());
@@ -82,15 +82,15 @@ public class ConstructorMockTransformer implements ClassFileTransformer {
    * configuration properties file
    */
   public ConstructorMockTransformer(File configFile) {
-    this.classWhiteList = null;
+    this.targetClasses = null;
     this.configFile = configFile;
 //    URL url = getClass().getClassLoader().getResource(configFile);
 //    new File()
 //    new Properties().
   }
 
-  public boolean hasClassWhiteList() {
-    return classWhiteList != null;
+  public boolean hasTargetClasses() {
+    return targetClasses != null;
   }
 
   @Override
@@ -234,18 +234,18 @@ public class ConstructorMockTransformer implements ClassFileTransformer {
   }
 
   /**
-   * TODO: make black/white list of class and package names configurable
+   * TODO: make include/exclude list of class and package names configurable
    */
   public boolean shouldTransform(String className) {
 
-    // TODO: Which white-listing method is better? A gives more power to the user, but is also more dangerous.
+    // TODO: Which include/exclude method is better? A gives more power to the user, but is also more dangerous.
 
-    // (A) If there is a white list, ignore the global black list
-    // if (hasClassWhiteList())
+    // (A) If there is a target class list, ignore the global ignore list
+    // if (hasTargetClasses())
     //   return classNames.contains(className);
 
-    // (B) If there is a white list and a class is on it, still exclude it if it is on the black list too
-    if (hasClassWhiteList() && !classWhiteList.contains(className))
+    // (B) If there is a target class list and a class is on it, still exclude it if it is on the ignore list too
+    if (hasTargetClasses() && !targetClasses.contains(className))
       return false;
 
     // Default exclude list for transformation
