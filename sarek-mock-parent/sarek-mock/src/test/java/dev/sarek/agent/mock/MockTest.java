@@ -1,7 +1,6 @@
 package dev.sarek.agent.mock;
 
 import dev.sarek.agent.aspect.InstanceMethodAroundAdvice;
-import dev.sarek.agent.aspect.StaticMethodAroundAdvice;
 import dev.sarek.app.UnderTest;
 import org.junit.Test;
 
@@ -181,13 +180,11 @@ public class MockTest {
     try (
       MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST)
         .spy()
-        .addAdvice(named("multiply"), InstanceMethodAroundAdvice.MOCK)
-        .addAdvice(
+        .mock(named("multiply"), InstanceMethodAroundAdvice.MOCK)
+        .mock(
           named("getName"),
-          new InstanceMethodAroundAdvice(
-            (target, method, args) -> true,
-            (target, method, args, proceedMode, returnValue, throwable) -> ((String) returnValue).toUpperCase()
-          )
+          (target, method, args) -> true,
+          (target, method, args, proceedMode, returnValue, throwable) -> ((String) returnValue).toUpperCase()
         )
         .build()
     )
@@ -220,24 +217,20 @@ public class MockTest {
     try (
       MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST)
         .spy().global().addGlobalInstance()
-        .addAdvice(named("multiply"), InstanceMethodAroundAdvice.MOCK)
-        .addAdvice(
+        .mock(named("multiply"), InstanceMethodAroundAdvice.MOCK)
+        .mock(
           named("getName"),
-          new InstanceMethodAroundAdvice(
-            (target, method, args) -> true,
-            (target, method, args, proceedMode, returnValue, throwable) -> ((String) returnValue).toUpperCase()
-          )
+          (target, method, args) -> true,
+          (target, method, args, proceedMode, returnValue, throwable) -> ((String) returnValue).toUpperCase()
         )
         // Off-topic: just because we can, let us also stub a static method
-        .addAdvice(
+        .mockStatic(
           named("greet"),
-          new StaticMethodAroundAdvice(
-            (method, args) -> {
-              args[0] = "foo bar";
-              return true;
-            },
-            (method, args, proceedMode, returnValue, throwable) -> ((String) returnValue).toUpperCase()
-          )
+          (method, args) -> {
+            args[0] = "foo bar";
+            return true;
+          },
+          (method, args, proceedMode, returnValue, throwable) -> ((String) returnValue).toUpperCase()
         )
         .build()
     )

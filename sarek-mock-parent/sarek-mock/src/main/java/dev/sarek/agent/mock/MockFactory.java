@@ -68,6 +68,38 @@ public class MockFactory<T> implements AutoCloseable {
       return this;
     }
 
+    public Builder<T> mock(
+      ElementMatcher.Junction<MethodDescription> methodMatcher,
+      InstanceMethodAroundAdvice.Before before,
+      InstanceMethodAroundAdvice.After after
+    ) {
+      return mock(methodMatcher, new InstanceMethodAroundAdvice(before, after));
+    }
+
+    public Builder<T> mock(
+      ElementMatcher.Junction<MethodDescription> methodMatcher,
+      InstanceMethodAroundAdvice advice
+    ) {
+      weaverBuilder.addAdvice(methodMatcher, advice);
+      return this;
+    }
+
+    public Builder<T> mockStatic(
+      ElementMatcher.Junction<MethodDescription> methodMatcher,
+      StaticMethodAroundAdvice.Before before,
+      StaticMethodAroundAdvice.After after
+    ) {
+      return mockStatic(methodMatcher, new StaticMethodAroundAdvice(before, after));
+    }
+
+    public Builder<T> mockStatic(
+      ElementMatcher.Junction<MethodDescription> methodMatcher,
+      StaticMethodAroundAdvice advice
+    ) {
+      weaverBuilder.addAdvice(methodMatcher, advice);
+      return this;
+    }
+
     public Builder<T> addAdvice(ElementMatcher.Junction<MethodDescription> methodMatcher, AroundAdvice<?> advice) {
       weaverBuilder.addAdvice(methodMatcher, advice);
       return this;
