@@ -68,8 +68,8 @@ public class MockFactory<T> implements AutoCloseable {
       return this;
     }
 
-    public Builder<T> addAdvice(AroundAdvice<?> advice, ElementMatcher.Junction<MethodDescription> methodMatcher) {
-      weaverBuilder.addAdvice(advice, methodMatcher);
+    public Builder<T> addAdvice(ElementMatcher.Junction<MethodDescription> methodMatcher, AroundAdvice<?> advice) {
+      weaverBuilder.addAdvice(methodMatcher, advice);
       return this;
     }
 
@@ -125,14 +125,14 @@ public class MockFactory<T> implements AutoCloseable {
       }
       if (mockInstanceMethods) {
         builder.weaverBuilder.addAdvice(
-          InstanceMethodAroundAdvice.MOCK,
-          not(builder.excludedMethods)
+          not(builder.excludedMethods),
+          InstanceMethodAroundAdvice.MOCK
         );
       }
       if (mockStaticMethods)
         builder.weaverBuilder.addAdvice(
-          StaticMethodAroundAdvice.MOCK,
-          not(builder.excludedMethods)
+          not(builder.excludedMethods),
+          StaticMethodAroundAdvice.MOCK
         );
     }
     if (builder.global || mockStaticMethods) {

@@ -181,13 +181,13 @@ public class MockTest {
     try (
       MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST)
         .spy()
-        .addAdvice(InstanceMethodAroundAdvice.MOCK, named("multiply"))
+        .addAdvice(named("multiply"), InstanceMethodAroundAdvice.MOCK)
         .addAdvice(
+          named("getName"),
           new InstanceMethodAroundAdvice(
             (target, method, args) -> true,
             (target, method, args, proceedMode, returnValue, throwable) -> ((String) returnValue).toUpperCase()
-          ),
-          named("getName")
+          )
         )
         .build()
     )
@@ -220,24 +220,24 @@ public class MockTest {
     try (
       MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST)
         .spy().global().addGlobalInstance()
-        .addAdvice(InstanceMethodAroundAdvice.MOCK, named("multiply"))
+        .addAdvice(named("multiply"), InstanceMethodAroundAdvice.MOCK)
         .addAdvice(
+          named("getName"),
           new InstanceMethodAroundAdvice(
             (target, method, args) -> true,
             (target, method, args, proceedMode, returnValue, throwable) -> ((String) returnValue).toUpperCase()
-          ),
-          named("getName")
+          )
         )
         // Off-topic: just because we can, let us also stub a static method
         .addAdvice(
+          named("greet"),
           new StaticMethodAroundAdvice(
             (method, args) -> {
               args[0] = "foo bar";
               return true;
             },
             (method, args, proceedMode, returnValue, throwable) -> ((String) returnValue).toUpperCase()
-          ),
-          named("greet")
+          )
         )
         .build()
     )

@@ -162,8 +162,8 @@ public class MockAgentIT {
         .forClass(StringBuilder.class)
         .spy()
         // This only works if all libraries are loaded from the bootstrap class loader
-        .addAdvice(InstanceMethodAroundAdvice.MOCK, named("toString"))
-        .addAdvice(InstanceMethodAroundAdvice.MOCK, named("substring"))
+        .addAdvice(named("toString"), InstanceMethodAroundAdvice.MOCK)
+        .addAdvice(named("substring"), InstanceMethodAroundAdvice.MOCK)
         .build()
     )
     {

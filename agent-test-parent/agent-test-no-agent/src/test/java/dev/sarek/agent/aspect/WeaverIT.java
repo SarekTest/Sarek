@@ -52,11 +52,11 @@ public class WeaverIT {
     weaver = Weaver
       .forTypes(named(CLASS_NAME))
       .addAdvice(
+        named("add"),
         new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
-        ),
-        named("add")
+        )
       )
       .addTargets(underTest)
       .build();
@@ -78,11 +78,11 @@ public class WeaverIT {
       .forTypes(named(CLASS_NAME))
       .addAdvice(
         // No-op advice just passing through results and exceptions
+        named("toString"),
         new InstanceMethodAroundAdvice(
           (target, method, args) -> false,
           (target, method, args, proceedMode, returnValue, throwable) -> false
-        ),
-        named("toString")
+        )
       )
       .build();
 
@@ -108,11 +108,11 @@ public class WeaverIT {
       .forTypes(named(CLASS_NAME))
       .addAdvice(
         // No-op advice just passing through results and exceptions
+        named("replaceAll").and(takesArguments(String.class, String.class)),
         new InstanceMethodAroundAdvice(
           (target, method, args) -> false,
           (target, method, args, proceedMode, returnValue, throwable) -> false
-        ),
-        named("replaceAll").and(takesArguments(String.class, String.class))
+        )
       )
       .build();
 
@@ -131,8 +131,8 @@ public class WeaverIT {
     Weaver weaver = Weaver
       .forTypes(is(StringWrapper.class))
       .addAdvice(
-        replaceAllAdvice(),
-        named("replaceAll").and(takesArguments(String.class, String.class))
+        named("replaceAll").and(takesArguments(String.class, String.class)),
+        replaceAllAdvice()
       )
       .build();
 
@@ -198,11 +198,11 @@ public class WeaverIT {
     weaver = Weaver
       .forTypes(is(UnderTest.class))
       .addAdvice(
+        named("greet"),
         new StaticMethodAroundAdvice(
           null,
           (method, args, proceedMode, returnValue, throwable) -> "Hi world!"
-        ),
-        named("greet")
+        )
       )
       .addTargets(UnderTest.class)
       .build();
@@ -221,14 +221,14 @@ public class WeaverIT {
     weaver = Weaver
       .forTypes(is(UnderTest.class))
       .addAdvice(
+        isMethod(),
         new StaticMethodAroundAdvice(
           null,
           (method, args, proceedMode, returnValue, throwable) ->
             returnValue instanceof Integer
               ? ((int) returnValue) * 11
               : "Welcome, dear " + args[0]
-        ),
-        isMethod()
+        )
       )
       .addTargets(UnderTest.class)
       .build();
@@ -256,14 +256,14 @@ public class WeaverIT {
     weaver = Weaver
       .forTypes(is(UnderTest.class))
       .addAdvice(
+        takesArguments(String.class),
         new ConstructorAroundAdvice(
           (constructor, args) -> {
             args[0] = "ADVISED";
             callCount.set(callCount.get() + 1);
           },
           null
-        ),
-        takesArguments(String.class)
+        )
       )
       .addTargets(UnderTest.class)
       .build();
@@ -286,32 +286,32 @@ public class WeaverIT {
     weaver = Weaver
       .forTypes(is(UnderTest.class))
       .addAdvice(
+        named("add"),
         new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
-        ),
-        named("add")
+        )
       )
       .addAdvice(
+        named("multiply"),
         new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) / 5
-        ),
-        named("multiply")
+        )
       )
       .addAdvice(
+        named("greet"),
         new StaticMethodAroundAdvice(
           null,
           (method, args, proceedMode, returnValue, throwable) -> "Hi world!"
-        ),
-        named("greet")
+        )
       )
       .addAdvice(
+        takesArguments(String.class),
         new ConstructorAroundAdvice(
           (constructor, args) -> args[0] = "ADVISED",
           null
-        ),
-        takesArguments(String.class)
+        )
       )
       .addTargets(underTest, UnderTest.class)
       .build();
@@ -364,29 +364,29 @@ public class WeaverIT {
     weaver = Weaver
       .forTypes(is(UnderTest.class))
       .addAdvice(
+        named("add"),
         new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
-        ),
-        named("add")
+        )
       )
       .addAdvice(
+        takesArguments(int.class, int.class),
         new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) / 5
-        ),
-        takesArguments(int.class, int.class)
+        )
       )
       .addAdvice(
+        returns(int.class),
         new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> 42
-        ),
-        returns(int.class)
+        )
       )
       .addAdvice(
-        InstanceMethodAroundAdvice.MOCK,
-        any()
+        any(),
+        InstanceMethodAroundAdvice.MOCK
       )
       .addTargets(underTest)
       .build();
@@ -409,29 +409,29 @@ public class WeaverIT {
     weaver = Weaver
       .forTypes(is(UnderTest.class))
       .addAdvice(
+        named("add"),
         new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
-        ),
-        named("add")
+        )
       )
       .addAdvice(
+        returns(int.class),
         new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> 42
-        ),
-        returns(int.class)
+        )
       )
       .addAdvice(
+        takesArguments(int.class, int.class),
         new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) / 5
-        ),
-        takesArguments(int.class, int.class)
+        )
       )
       .addAdvice(
-        InstanceMethodAroundAdvice.MOCK,
-        any()
+        any(),
+        InstanceMethodAroundAdvice.MOCK
       )
       .addTargets(underTest)
       .build();
@@ -448,29 +448,29 @@ public class WeaverIT {
     weaver = Weaver
       .forTypes(is(UnderTest.class))
       .addAdvice(
+        returns(int.class),
         new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> 42
-        ),
-        returns(int.class)
+        )
       )
       .addAdvice(
+        named("add"),
         new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
-        ),
-        named("add")
+        )
       )
       .addAdvice(
+        takesArguments(int.class, int.class),
         new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) / 5
-        ),
-        takesArguments(int.class, int.class)
+        )
       )
       .addAdvice(
-        InstanceMethodAroundAdvice.MOCK,
-        any()
+        any(),
+        InstanceMethodAroundAdvice.MOCK
       )
       .addTargets(underTest)
       .build();
@@ -487,29 +487,29 @@ public class WeaverIT {
     weaver = Weaver
       .forTypes(is(UnderTest.class))
       .addAdvice(
-        InstanceMethodAroundAdvice.MOCK,
-        any()
+        any(),
+        InstanceMethodAroundAdvice.MOCK
       )
       .addAdvice(
+        named("add"),
         new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
-        ),
-        named("add")
+        )
       )
       .addAdvice(
+        takesArguments(int.class, int.class),
         new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) / 5
-        ),
-        takesArguments(int.class, int.class)
+        )
       )
       .addAdvice(
+        returns(int.class),
         new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> 42
-        ),
-        returns(int.class)
+        )
       )
       .addTargets(underTest)
       .build();

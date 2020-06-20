@@ -46,11 +46,11 @@ public class WeaverAgentIT {
     weaver = Weaver
       .forTypes(named(CLASS_NAME))
       .addAdvice(
+        isMethod().and(not(named("greet"))),
         new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
-        ),
-        isMethod().and(not(named("greet")))
+        )
       )
       .addTargets(underTest)
       .build();
@@ -78,11 +78,11 @@ public class WeaverAgentIT {
       .forTypes(named(CLASS_NAME))
       .addAdvice(
         // Skip target method and return fixed result -> a classical stub
+        named("toString"),
         new InstanceMethodAroundAdvice(
           (target, method, args) -> false,
           (target, method, args, proceedMode, returnValue, throwable) -> UUID_TEXT_STUB
-        ),
-        named("toString")
+        )
       )
       .build();
 
@@ -123,8 +123,8 @@ public class WeaverAgentIT {
     weaver = Weaver
       .forTypes(named(CLASS_NAME))
       .addAdvice(
-        replaceAllAdvice(),
-        named("replaceAll").and(takesArguments(String.class, String.class))
+        named("replaceAll").and(takesArguments(String.class, String.class)),
+        replaceAllAdvice()
       )
       .build();
 
@@ -158,11 +158,11 @@ public class WeaverAgentIT {
     weaver = Weaver
       .forTypes(is(System.class))
       .addAdvice(
+        named("getProperty"),
         new StaticMethodAroundAdvice(
           (method, args) -> !args[0].equals("java.version"),
           (method, args, proceedMode, returnValue, throwable) -> proceedMode ? returnValue : "42"
-        ),
-        named("getProperty")
+        )
       )
       .addTargets(System.class)
       .build();
@@ -179,11 +179,11 @@ public class WeaverAgentIT {
     weaver = Weaver
       .forTypes(is(System.class))
       .addAdvice(
+        named("currentTimeMillis").or(named("nanoTime")),
         new StaticMethodAroundAdvice(
           (method, args) -> false,
           (method, args, proceedMode, returnValue, throwable) -> 123
-        ),
-        named("currentTimeMillis").or(named("nanoTime"))
+        )
       )
       .addTargets(System.class)
       .build();
@@ -235,6 +235,7 @@ public class WeaverAgentIT {
     weaver = Weaver
       .forTypes(is(File.class))
       .addAdvice(
+        any(),
         new ConstructorAroundAdvice(
           (constructor, args) -> {
             if (args[0] instanceof String)
@@ -242,8 +243,7 @@ public class WeaverAgentIT {
             callCount.set(callCount.get() + 1);
           },
           null
-        ),
-        any()
+        )
       )
       .addTargets(File.class)
       .build();

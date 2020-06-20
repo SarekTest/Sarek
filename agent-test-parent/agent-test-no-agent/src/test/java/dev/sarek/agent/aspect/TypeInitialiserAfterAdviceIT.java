@@ -39,6 +39,7 @@ public class TypeInitialiserAfterAdviceIT {
     weaver = Weaver
       .forTypes(is(UnderTest.class))
       .addAdvice(
+        null,
         new TypeInitialiserAroundAdvice(
           clazz -> {
             System.out.println("Before type initialiser advice #" + ++UnderTest.typeInitialiserAdviceCounter);
@@ -51,8 +52,7 @@ public class TypeInitialiserAfterAdviceIT {
             System.out.println("After type initialiser advice #" + UnderTest.typeInitialiserAdviceCounter);
             UnderTest.staticBlockCounter *= 11;
           }
-        ),
-        null
+        )
       )
       .addTargets(UnderTest.class)
       .build();

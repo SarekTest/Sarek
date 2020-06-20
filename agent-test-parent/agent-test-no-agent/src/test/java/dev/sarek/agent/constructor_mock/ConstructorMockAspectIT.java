@@ -87,12 +87,12 @@ public class ConstructorMockAspectIT {
     weaver = Weaver
       .forTypes(is(FinalClass.class))
       .addAdvice(
-        InstanceMethodAroundAdvice.MOCK,
-        null
+        null,
+        InstanceMethodAroundAdvice.MOCK
       )
       .addAdvice(
-        StaticMethodAroundAdvice.MOCK,
-        not(nameEndsWith("InstanceCounter"))
+        not(nameEndsWith("InstanceCounter")),
+        StaticMethodAroundAdvice.MOCK
       )
       .addTargets(FinalClass.class, GlobalInstance.of(FinalClass.class))
       .build();

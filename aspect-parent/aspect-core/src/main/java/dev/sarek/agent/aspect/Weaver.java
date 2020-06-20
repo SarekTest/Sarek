@@ -78,8 +78,8 @@ public class Weaver {
       this.typeMatcher = typeMatcher == null ? any() : typeMatcher;
     }
 
-    public Builder addAdvice(AroundAdvice<?> advice, Junction<MethodDescription> methodMatcher) {
-      adviceDescriptions.add(new AdviceDescription(advice, methodMatcher));
+    public Builder addAdvice(Junction<MethodDescription> methodMatcher, AroundAdvice<?> advice) {
+      adviceDescriptions.add(new AdviceDescription(methodMatcher, advice));
       return this;
     }
 
@@ -107,7 +107,7 @@ public class Weaver {
       public final AroundAdvice<?> advice;
       public Aspect.AdviceType adviceType;
 
-      public AdviceDescription(AroundAdvice<?> advice, Junction<MethodDescription> methodMatcher) {
+      public AdviceDescription(Junction<MethodDescription> methodMatcher, AroundAdvice<?> advice) {
         if (advice == null)
           throw new IllegalArgumentException("advice must not be null");
         this.advice = advice;
