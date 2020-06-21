@@ -3,6 +3,7 @@ package dev.sarek.agent.mock;
 import dev.sarek.agent.aspect.InstanceMethodAroundAdvice;
 import dev.sarek.app.Sub;
 import dev.sarek.app.UnderTest;
+import dev.sarek.app.UnderTestSub;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -279,16 +280,25 @@ public class MockTest {
       assertEquals(new UnderTest().hashCode(), mockFactory.createInstance().hashCode());
     }
 
+    // If there are hashCode/equals methods not directly in the target class but somewhere in the super class hierarchy,
+    // overriding them like in the first scenario also works because super class methods are also subject to mocking or
+    // stubbing by default, because that is what a user expects from mock behaviour. This not only applies to regular
+    // methods but also to hashCode/equals.
+    try (
+      MockFactory<UnderTestSub> mockFactory = forClass(UnderTestSub.class)
+        .global()
+        .addGlobalInstance()
+        .build()
+    ) {
+      assertNotEquals(mockFactory.createInstance().hashCode(), mockFactory.createInstance().hashCode());
+      assertNotEquals(new UnderTestSub("John", 25).hashCode(), new UnderTestSub("John", 25).hashCode());
+      assertNotEquals(new UnderTestSub("John", 25).hashCode(), mockFactory.createInstance().hashCode());
+    }
+
     // If the target class does not have any hashCode/equals methods, nothing is overridden, even if explicitly
     // requested. This is because the Sarek framework avoids structural class changes during (re)transformation in order
     // to also be applicable to already loaded classes (even JRE bootstrap classes). Thus, the user cannot expect any
     // methods to be added.
-    //
-    // Caveat: If there are hashCode/equals methods somewhere in the super class hierarchy and they cause problems when
-    // called upon uninitialised (mock) objects, the user must take care of them being stubbed individually. Currently
-    // this is impossible using the MockFactory API, only using the low level Weaver API.
-    //
-    // TODO: Extend the MockFactory API to support super class method mocking/stubbing.
     try (
       MockFactory<Sub> mockFactory = forClass(Sub.class)
         .global()
@@ -299,6 +309,10 @@ public class MockTest {
       assertNotEquals(mockFactory.createInstance().hashCode(), mockFactory.createInstance().hashCode());
       assertNotEquals(new Sub("test").hashCode(), new Sub("test").hashCode());
       assertNotEquals(new Sub("test").hashCode(), mockFactory.createInstance().hashCode());
+
+      assertEquals(0, new Sub("test").getId());
+      assertNull(new Sub("test").getName());
+      assertNull(new Sub("test").toString());
     }
   }
 
