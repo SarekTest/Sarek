@@ -12,6 +12,12 @@ import static dev.sarek.agent.mock.MockFactory.forClass;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static org.junit.Assert.*;
 
+// TODO: better test coverage:
+//   - super type method mocking/stubbing
+//   - excludeSuperTypes()
+//   - excludeMethods()
+//   - addAdvice() for constructor and type initialiser advices
+
 @SuppressWarnings("ConstantConditions")
 public class MockTest {
 
