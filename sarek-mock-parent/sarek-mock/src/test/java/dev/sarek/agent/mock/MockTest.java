@@ -13,11 +13,10 @@ import static org.junit.Assert.*;
 
 @SuppressWarnings("ConstantConditions")
 public class MockTest {
-  private static final Class<UnderTest> UNDER_TEST = UnderTest.class;
 
   @Test
   public void defaultMockIsNotGlobal() throws IOException {
-    try (MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST).build()) {
+    try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).build()) {
       UnderTest underTest = new UnderTest();
       assertEquals("default", underTest.getName());
       assertEquals(3, underTest.add(1, 2));
@@ -26,7 +25,7 @@ public class MockTest {
 
   @Test
   public void createInstance() throws IOException {
-    try (MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST).build()) {
+    try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).build()) {
       UnderTest underTest;
 
       underTest = mockFactory.createInstance();
@@ -57,17 +56,17 @@ public class MockTest {
   @Test
   public void defaultMockOnlyStubsInstanceMethods() throws IOException {
     // Static methods not stubbed by default
-    try (MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST).build()) {
+    try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).build()) {
       assertEquals("Hello world", UnderTest.greet("world"));
     }
 
     // Static methods stubbed explicitly
-    try (MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST).mockStaticMethods(true).build()) {
+    try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).mockStaticMethods(true).build()) {
       assertNull(UnderTest.greet("world"));
     }
 
     // Instance methods not stubbed explicitly -> also cannot add as targets
-    try (MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST).mockInstanceMethods(false).build()) {
+    try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).mockInstanceMethods(false).build()) {
       // Cannot add/remove target because mock factory is configured to ignore instance methods
       assertThrows(IllegalArgumentException.class, () -> mockFactory.addTarget(new UnderTest()));
       assertThrows(IllegalArgumentException.class, () -> mockFactory.removeTarget(new UnderTest()));
@@ -93,7 +92,7 @@ public class MockTest {
     // byte code transformations manually.
     MockFactory<UnderTest> mockFactory = null;
     try {
-      mockFactory = forClass(UNDER_TEST).build();
+      mockFactory = forClass(UnderTest.class).build();
       assertEquals(0, mockFactory.createInstance().add(1, 2));
     }
     finally {
@@ -105,7 +104,7 @@ public class MockTest {
   @Test
   public void closeMockFactoryTwice() throws IOException {
     // Close mock factory twice, once explicitly and again implicitly via AutoCloseable -> nothing bad happens
-    try (MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST).build()) {
+    try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).build()) {
       UnderTest underTest = mockFactory.createInstance();
       assertEquals(0, underTest.add(1, 2));
       mockFactory.close();
@@ -115,7 +114,7 @@ public class MockTest {
 
   @Test
   public void globalMock() throws IOException {
-    try (MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST).global().build()) {
+    try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).global().build()) {
       // Global mock → instance methods are stubbed even for objects created via constructor call if we add them as
       // mock targets
       UnderTest underTest = new UnderTest();
@@ -143,7 +142,7 @@ public class MockTest {
 
   @Test
   public void globalMockGlobalInstance() throws IOException {
-    try (MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST).global().addGlobalInstance().build()) {
+    try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).global().addGlobalInstance().build()) {
       // Global mock + global instance → instance methods are stubbed even for objects created via constructor. We do
       // not even need to register them as mock targets
       UnderTest underTest = new UnderTest();
@@ -156,7 +155,7 @@ public class MockTest {
   @Test
   public void spyWithoutStubbing() throws IOException {
     // Create spy instance the normal way, using a constructor
-    try (MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST).spy().addGlobalInstance().build()) {
+    try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).spy().addGlobalInstance().build()) {
       // Spy → instance methods are not stubbed by default
       UnderTest underTest = new UnderTest("John Doe");
       assertEquals(3, underTest.add(1, 2));
@@ -166,7 +165,7 @@ public class MockTest {
     }
 
     // Create spy instance by avoiding constructor execution, which is a rather exotic use case
-    try (MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST).spy().addGlobalInstance().build()) {
+    try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).spy().addGlobalInstance().build()) {
       // Spy → instance methods are not stubbed by default
       UnderTest underTest = mockFactory.createInstance();
       assertEquals(3, underTest.add(1, 2));
@@ -179,7 +178,7 @@ public class MockTest {
   @Test
   public void spyWithStubbing() throws IOException {
     try (
-      MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST)
+      MockFactory<UnderTest> mockFactory = forClass(UnderTest.class)
         .spy()
         .mock(named("multiply"), InstanceMethodAroundAdvice.MOCK)
         .mock(
@@ -203,7 +202,7 @@ public class MockTest {
 
   @Test
   public void globalSpyWithoutStubbing() throws IOException {
-    try (MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST).spy().global().build()) {
+    try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).spy().global().build()) {
       // Global spy → instance methods are not stubbed by default
       UnderTest underTest = new UnderTest();
       mockFactory.addTarget(underTest);
@@ -216,7 +215,7 @@ public class MockTest {
   @Test
   public void globalSpyWithStubbing() throws IOException {
     try (
-      MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST)
+      MockFactory<UnderTest> mockFactory = forClass(UnderTest.class)
         .spy().global().addGlobalInstance()
         .mock(named("multiply"), InstanceMethodAroundAdvice.MOCK)
         .mock(
@@ -255,7 +254,7 @@ public class MockTest {
     // HashCodeAspect and EqualsAspect. Otherwise, the original methods might throw exceptions due to uninitialised
     // fields, because no constructors were executed during object creation.
     try (
-      MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST)
+      MockFactory<UnderTest> mockFactory = forClass(UnderTest.class)
         .global()
         .addGlobalInstance()
         .build()
@@ -269,7 +268,7 @@ public class MockTest {
     // with uninitialised fields. If they can, fine. Otherwise - uh oh! In the latter case however, we still have the
     // option to manually stub/advise those methods.
     try (
-      MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST)
+      MockFactory<UnderTest> mockFactory = forClass(UnderTest.class)
         .global()
         .addGlobalInstance()
         .provideHashCodeEquals(false)
@@ -301,7 +300,6 @@ public class MockTest {
       assertNotEquals(new Sub("test").hashCode(), new Sub("test").hashCode());
       assertNotEquals(new Sub("test").hashCode(), mockFactory.createInstance().hashCode());
     }
-
   }
 
 }
