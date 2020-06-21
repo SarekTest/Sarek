@@ -3,8 +3,8 @@ package dev.sarek.agent.util;
 import java.util.*;
 
 public class BiMultiMap<K, V> {
-  private final Map<K, List<V>> keyToValue = new HashMap<>();
-  private final Map<V, List<K>> valueToKey = new HashMap<>();
+  private final Map<K, List<V>> keyToValue = new IdentityHashMap<>();
+  private final Map<V, List<K>> valueToKey = new IdentityHashMap<>();
 
   public synchronized BiMultiMap<K, V> add(K key, V value) {
     initLists(key, value);
@@ -52,8 +52,8 @@ public class BiMultiMap<K, V> {
   }
 
   private void initLists(K key, V value) {
-    keyToValue.computeIfAbsent(key, k -> new ArrayList<>());
-    valueToKey.computeIfAbsent(value, v -> new ArrayList<>());
+    keyToValue.computeIfAbsent(key, k -> new IdentityArrayList<>());
+    valueToKey.computeIfAbsent(value, v -> new IdentityArrayList<>());
   }
 
   public static class KeyValueCollisionException extends RuntimeException {

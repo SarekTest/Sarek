@@ -46,6 +46,7 @@ public class MockFactory<T> implements AutoCloseable {
       this.targetClass = targetClass;
       weaverBuilder = Weaver.forTypes(
         is(targetClass).or(isSuperTypeOf(targetClass).and(not(is(Object.class)))));
+      weaverBuilder.provideHashCodeEquals(true);
     }
 
     public Builder<T> mockInstanceMethods(boolean active) {
@@ -105,8 +106,8 @@ public class MockFactory<T> implements AutoCloseable {
       return this;
     }
 
-    public Builder<T> provideHashCodeMethod() {
-      weaverBuilder.provideHashCodeMethod();
+    public Builder<T> provideHashCodeEquals(boolean value) {
+      weaverBuilder.provideHashCodeEquals(value);
       return this;
     }
 

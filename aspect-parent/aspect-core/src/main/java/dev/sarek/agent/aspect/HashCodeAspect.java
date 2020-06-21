@@ -8,7 +8,7 @@ import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAM
 
 /**
  * This advice is specifically designed to override the {@link #hashCode()} method for an advised (usually mocked)
- * class. This can be helpful in order to
+ * class. It is meant to be used together with {@link EqualsAspect}. This can be helpful in order to
  * <ul>
  *   <li>
  *     avoid recursions such as {@code getAroundAdvice(target)} → {@code adviceRegistry.get(target)} →
@@ -42,6 +42,7 @@ public abstract class HashCodeAspect extends Aspect<Method> {
     @Advice.Return(readOnly = false, typing = DYNAMIC) Object returnValue
   )
   {
+    System.out.println("HashCodeAspect");
     returnValue = System.identityHashCode(target);
   }
 }

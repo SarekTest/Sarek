@@ -1,12 +1,19 @@
 package dev.sarek.agent.aspect;
 
-import java.util.Objects;
+import java.util.*;
 
 public class GlobalInstance<T> {
+  private static final Map<Class<?>, GlobalInstance<?>> GLOBAL_INSTANCE_CACHE = new HashMap<>();
+
   private final Class<T> targetClass;
 
   public static <T> GlobalInstance<T> of(Class<T> targetClass) {
-    return new GlobalInstance<>(targetClass);
+    GlobalInstance<T> globalInstance = (GlobalInstance<T>) GLOBAL_INSTANCE_CACHE.get(targetClass);
+    if (globalInstance == null) {
+      globalInstance = new GlobalInstance<>(targetClass);
+      GLOBAL_INSTANCE_CACHE.put(targetClass, globalInstance);
+    }
+    return globalInstance;
   }
 
   private GlobalInstance(Class<T> targetClass) {

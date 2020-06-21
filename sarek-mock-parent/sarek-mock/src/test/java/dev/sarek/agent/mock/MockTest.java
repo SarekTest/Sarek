@@ -1,6 +1,7 @@
 package dev.sarek.agent.mock;
 
 import dev.sarek.agent.aspect.InstanceMethodAroundAdvice;
+import dev.sarek.app.Sub;
 import dev.sarek.app.UnderTest;
 import org.junit.Test;
 
@@ -246,6 +247,61 @@ public class MockTest {
       // Off-topic: in global mode we can also mock static methods
       assertEquals("HELLO FOO BAR", UnderTest.greet("world"));
     }
+  }
+
+  @Test
+  public void provideHashCodeEquals() throws IOException {
+    // By default, existing hashCode/equals are overridden by versions based on object identity as defined in
+    // HashCodeAspect and EqualsAspect. Otherwise, the original methods might throw exceptions due to uninitialised
+    // fields, because no constructors were executed during object creation.
+    try (
+      MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST)
+        .global()
+        .addGlobalInstance()
+        .build()
+    ) {
+      assertNotEquals(mockFactory.createInstance().hashCode(), mockFactory.createInstance().hashCode());
+      assertNotEquals(new UnderTest().hashCode(), new UnderTest().hashCode());
+      assertNotEquals(new UnderTest().hashCode(), mockFactory.createInstance().hashCode());
+    }
+
+    // Optionally, we can avoid existing hashCode/equals methods from being overridden. But then they will have to deal
+    // with uninitialised fields. If they can, fine. Otherwise - uh oh! In the latter case however, we still have the
+    // option to manually stub/advise those methods.
+    try (
+      MockFactory<UnderTest> mockFactory = forClass(UNDER_TEST)
+        .global()
+        .addGlobalInstance()
+        .provideHashCodeEquals(false)
+        .build()
+    ) {
+      assertEquals(mockFactory.createInstance().hashCode(), mockFactory.createInstance().hashCode());
+      assertEquals(new UnderTest().hashCode(), new UnderTest().hashCode());
+      assertEquals(new UnderTest().hashCode(), mockFactory.createInstance().hashCode());
+    }
+
+    // If the target class does not have any hashCode/equals methods, nothing is overridden, even if explicitly
+    // requested. This is because the Sarek framework avoids structural class changes during (re)transformation in order
+    // to also be applicable to already loaded classes (even JRE bootstrap classes). Thus, the user cannot expect any
+    // methods to be added.
+    //
+    // Caveat: If there are hashCode/equals methods somewhere in the super class hierarchy and they cause problems when
+    // called upon uninitialised (mock) objects, the user must take care of them being stubbed individually. Currently
+    // this is impossible using the MockFactory API, only using the low level Weaver API.
+    //
+    // TODO: Extend the MockFactory API to support super class method mocking/stubbing.
+    try (
+      MockFactory<Sub> mockFactory = forClass(Sub.class)
+        .global()
+        .addGlobalInstance()
+        .provideHashCodeEquals(true) // This is the default anyway, but just to make it clear...
+        .build()
+    ) {
+      assertNotEquals(mockFactory.createInstance().hashCode(), mockFactory.createInstance().hashCode());
+      assertNotEquals(new Sub("test").hashCode(), new Sub("test").hashCode());
+      assertNotEquals(new Sub("test").hashCode(), mockFactory.createInstance().hashCode());
+    }
+
   }
 
 }

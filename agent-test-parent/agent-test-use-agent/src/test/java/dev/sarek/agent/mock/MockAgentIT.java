@@ -66,7 +66,6 @@ public class MockAgentIT {
       MockFactory<UUID> mockFactory = MockFactory
         .forClass(UUID.class)
         .mockStaticMethods(true)  // include static methods, too
-        .provideHashCodeMethod()
         .global()
         .addGlobalInstance()
         .build()
@@ -102,7 +101,7 @@ public class MockAgentIT {
   public void canMockBootstrapClass_FileInputStream() throws IOException {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
-      MockFactory<File> mockFactory1 = MockFactory.forClass(File.class).provideHashCodeMethod().global().addGlobalInstance().build()
+      MockFactory<File> mockFactory1 = MockFactory.forClass(File.class).global().addGlobalInstance().build()
     )
     {
       File file = new File("CTeWTxRxRTmdf8JtvzmC");
@@ -195,7 +194,7 @@ public class MockAgentIT {
   public void canMockBootstrapClass_URL() throws IOException, URISyntaxException {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
-      MockFactory<URL> mockFactory = MockFactory.forClass(URL.class).provideHashCodeMethod().global().addGlobalInstance().build();
+      MockFactory<URL> mockFactory = MockFactory.forClass(URL.class).global().addGlobalInstance().build();
     )
     {
       URL url = new URL("invalid URL, no problem");
@@ -205,7 +204,7 @@ public class MockAgentIT {
 
     // Try with resources works for Mock because it implements AutoCloseable
     try (
-      MockFactory<URI> mockFactory = MockFactory.forClass(URI.class).provideHashCodeMethod().addGlobalInstance().global().build()
+      MockFactory<URI> mockFactory = MockFactory.forClass(URI.class).addGlobalInstance().global().build()
     )
     {
       URI uri = new URI("invalid URI, no problem");
@@ -251,7 +250,6 @@ public class MockAgentIT {
       MockFactory<UUID> mockFactory = MockFactory
         .forClass(UUID.class)
         .mockStaticMethods(true)  // include static methods, too
-        .provideHashCodeMethod()
         .build()
     )
     {

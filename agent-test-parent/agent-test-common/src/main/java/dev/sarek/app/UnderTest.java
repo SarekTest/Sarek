@@ -1,5 +1,7 @@
 package dev.sarek.app;
 
+import java.util.Objects;
+
 public class UnderTest {
   public static int staticBlockCounter;
   public static int typeInitialiserAdviceCounter;
@@ -45,6 +47,23 @@ public class UnderTest {
   public int negate(int a) {
 //    System.out.println("instance method 'negate' with parameters: " + a);
     return -a;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+//    System.out.println("instance method 'equals' with parameters: " + o);
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+    UnderTest underTest = (UnderTest) o;
+    return Objects.equals(name, underTest.name);
+  }
+
+  @Override
+  public int hashCode() {
+//    System.out.println("instance method 'hashCode'");
+    return Objects.hash(name);
   }
 
   public static String greet(String recipient) {

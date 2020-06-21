@@ -73,7 +73,9 @@ public abstract class ConstructorAspect extends Aspect<Constructor<?>> {
     return doGetAdvice(constructor.getDeclaringClass(), constructor);
   }
 
-  // TODO: make thread-safe, maybe use ThreadLocal<Stack<Object>>
+  // TODO: Check if the whole recursion detection code can be removed after the advice registry is now based on object
+  //       identity rather than object equality.
+  // TODO: Alternatively, make recursion detection thread-safe, maybe use ThreadLocal<Stack<Object>>.
   private final static Stack<Object> targets = new Stack<>();
 
   private static ConstructorAroundAdvice doGetAdvice(Object target, Constructor<?> constructor) {

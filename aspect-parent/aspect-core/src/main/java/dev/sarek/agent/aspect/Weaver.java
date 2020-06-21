@@ -24,6 +24,12 @@ public class Weaver {
     .and(isPublic()).and(not(isStatic()))
     .and(named("hashCode")).and(takesNoArguments())
     .and(returns(int.class));
+  // Caveat: Do not expect the argument to be of type Object, cleanly overriding 'Object.equals'. It is also possible to
+  // define 'equals' methods with more limiting argument types.
+  private static final Junction<MethodDescription> EQUALS_METHOD = isMethod()
+    .and(isPublic()).and(not(isStatic()))
+    .and(named("equals")).and(takesArguments(1))
+    .and(returns(boolean.class));
 
   /**
    * TODO: make thread-safe
@@ -71,7 +77,7 @@ public class Weaver {
   public static class Builder {
     private Junction<TypeDescription> typeMatcher;
     private final List<AdviceDescription> adviceDescriptions = new ArrayList<>();
-    private boolean provideHashCodeMethod = false;
+    private boolean provideHashCodeEquals = false;
     private final List<Object> targets = new ArrayList<>();
 
     private Builder(Junction<TypeDescription> typeMatcher) {
@@ -83,8 +89,8 @@ public class Weaver {
       return this;
     }
 
-    public Builder provideHashCodeMethod() {
-      provideHashCodeMethod = true;
+    public Builder provideHashCodeEquals(boolean value) {
+      provideHashCodeEquals = value;
       return this;
     }
 
@@ -99,7 +105,7 @@ public class Weaver {
     }
 
     public Weaver build() throws IOException {
-      return new Weaver(typeMatcher, adviceDescriptions, provideHashCodeMethod, targets.toArray());
+      return new Weaver(typeMatcher, adviceDescriptions, provideHashCodeEquals, targets.toArray());
     }
 
     public static class AdviceDescription {
@@ -122,21 +128,21 @@ public class Weaver {
   private final Junction<TypeDescription> typeMatcher;
   private final List<Builder.AdviceDescription> adviceDescriptions;
   private final ResettableClassFileTransformer transformer;
-  private final boolean provideHashCodeMethod;
+  private final boolean provideHashCodeEquals;
   // TODO: maybe replace by a Set<WeakReference>
   private final Set<Object> targets = Collections.synchronizedSet(new HashSet<>());
 
   private Weaver(
     Junction<TypeDescription> typeMatcher,
     List<Builder.AdviceDescription> adviceDescriptions,
-    boolean provideHashCodeMethod,
+    boolean provideHashCodeEquals,
     Object... targets
   ) throws IOException
   {
 //    System.out.println("Creating new weaver " + this);
     this.typeMatcher = typeMatcher;
     this.adviceDescriptions = adviceDescriptions;
-    this.provideHashCodeMethod = provideHashCodeMethod;
+    this.provideHashCodeEquals = provideHashCodeEquals;
 
     try {
       for (Object target : targets)
@@ -237,13 +243,20 @@ public class Weaver {
 
     AgentBuilder.Identified identified = narrowable;
 
-    if (provideHashCodeMethod) {
+    if (provideHashCodeEquals) {
       identified = identified
         .transform((builder, typeDescription, classLoader, module) ->
           builder.visit(
             Advice
               .to(HashCodeAspect.class, CLASS_FILE_LOCATOR)
               .on(HASH_CODE_METHOD)
+          )
+        )
+        .transform((builder, typeDescription, classLoader, module) ->
+          builder.visit(
+            Advice
+              .to(EqualsAspect.class, CLASS_FILE_LOCATOR)
+              .on(EQUALS_METHOD)
           )
         );
     }
@@ -254,8 +267,8 @@ public class Weaver {
             builder.visit(
               adviceDescription.adviceType.getAdvice().on(
                 adviceDescription.adviceType.getMethodType()
-                  // Exclude public int hashCode() from user-defined weaving if overridden by HashCodeAspect
-                  .and(provideHashCodeMethod ? not(HASH_CODE_METHOD) : any())
+                  // Exclude hashCode/equals from user-defined weaving if overridden by HashCodeAspect/EqualsAspect
+                  .and(provideHashCodeEquals ? not(HASH_CODE_METHOD.or(EQUALS_METHOD)) : any())
                   .and(adviceDescription.methodMatcher)
                   .and(methodDescription -> {
                       boolean woven = wovenMethodRegistry.isWoven(methodDescription);
