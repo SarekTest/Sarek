@@ -280,21 +280,6 @@ public class MockTest {
       assertEquals(new UnderTest().hashCode(), mockFactory.createInstance().hashCode());
     }
 
-    // If there are hashCode/equals methods not directly in the target class but somewhere in the super class hierarchy,
-    // overriding them like in the first scenario also works because super class methods are also subject to mocking or
-    // stubbing by default, because that is what a user expects from mock behaviour. This not only applies to regular
-    // methods but also to hashCode/equals.
-    try (
-      MockFactory<UnderTestSub> mockFactory = forClass(UnderTestSub.class)
-        .global()
-        .addGlobalInstance()
-        .build()
-    ) {
-      assertNotEquals(mockFactory.createInstance().hashCode(), mockFactory.createInstance().hashCode());
-      assertNotEquals(new UnderTestSub("John", 25).hashCode(), new UnderTestSub("John", 25).hashCode());
-      assertNotEquals(new UnderTestSub("John", 25).hashCode(), mockFactory.createInstance().hashCode());
-    }
-
     // If the target class does not have any hashCode/equals methods, nothing is overridden, even if explicitly
     // requested. This is because the Sarek framework avoids structural class changes during (re)transformation in order
     // to also be applicable to already loaded classes (even JRE bootstrap classes). Thus, the user cannot expect any
@@ -313,6 +298,21 @@ public class MockTest {
       assertEquals(0, new Sub("test").getId());
       assertNull(new Sub("test").getName());
       assertNull(new Sub("test").toString());
+    }
+
+    // If there are hashCode/equals methods not directly in the target class but somewhere in the super class hierarchy,
+    // overriding them like in the first scenario also works because super class methods are also subject to mocking or
+    // stubbing by default, because that is what a user expects from mock behaviour. This not only applies to regular
+    // methods but also to hashCode/equals.
+    try (
+      MockFactory<UnderTestSub> mockFactory = forClass(UnderTestSub.class)
+        .global()
+        .addGlobalInstance()
+        .build()
+    ) {
+      assertNotEquals(mockFactory.createInstance().hashCode(), mockFactory.createInstance().hashCode());
+      assertNotEquals(new UnderTestSub("John", 25).hashCode(), new UnderTestSub("John", 25).hashCode());
+      assertNotEquals(new UnderTestSub("John", 25).hashCode(), mockFactory.createInstance().hashCode());
     }
   }
 
