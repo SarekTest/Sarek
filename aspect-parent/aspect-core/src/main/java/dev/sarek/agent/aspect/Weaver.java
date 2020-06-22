@@ -104,7 +104,7 @@ public class Weaver {
       return this;
     }
 
-    public Weaver build() throws IOException {
+    public Weaver build() {
       return new Weaver(typeMatcher, adviceDescriptions, provideHashCodeEquals, targets.toArray());
     }
 
@@ -137,7 +137,7 @@ public class Weaver {
     List<Builder.AdviceDescription> adviceDescriptions,
     boolean provideHashCodeEquals,
     Object... targets
-  ) throws IOException
+  )
   {
 //    System.out.println("Creating new weaver " + this);
     this.typeMatcher = typeMatcher;
@@ -149,7 +149,7 @@ public class Weaver {
         addTarget(target);
       this.transformer = registerTransformer();
     }
-    catch (Exception exceptionDuringRegistration) {
+    catch (RuntimeException exceptionDuringRegistration) {
       try {
         // First unregister targets, then unregister transformer
         unregisterTransformer();
@@ -173,7 +173,7 @@ public class Weaver {
     return this;
   }
 
-  protected ResettableClassFileTransformer registerTransformer() throws IOException {
+  protected ResettableClassFileTransformer registerTransformer() {
     return createAgentBuilder().installOn(Agent.getInstrumentation());
   }
 
@@ -199,7 +199,7 @@ public class Weaver {
 //    System.out.println("[Aspect Agent] Resetting transformer for weaver " + this + " finished");
   }
 
-  protected AgentBuilder createAgentBuilder() throws IOException {
+  protected AgentBuilder createAgentBuilder() {
     AgentBuilder.Identified.Narrowable narrowable = new AgentBuilder.Default()
       .disableClassFormatChanges()
       .ignore(none())

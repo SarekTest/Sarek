@@ -131,7 +131,7 @@ public class MockFactory<T> implements AutoCloseable {
       return this;
     }
 
-    public MockFactory<T> build() throws IOException {
+    public MockFactory<T> build() {
       return new MockFactory<T>(this);
     }
 
@@ -139,7 +139,7 @@ public class MockFactory<T> implements AutoCloseable {
 
   public enum MockType {MOCK, SPY}
 
-  private MockFactory(Builder<T> builder) throws IOException {
+  private MockFactory(Builder<T> builder) {
     targetClass = builder.targetClass;
     mockInstanceMethods = builder.mockInstanceMethods;
     mockStaticMethods = builder.mockStaticMethods;

@@ -35,7 +35,7 @@ public class WeaverAgentIT {
   }
 
   @Test
-  public void weaveLoadedApplicationClass() throws IOException {
+  public void weaveLoadedApplicationClass() {
     final String CLASS_NAME = "dev.sarek.app.UnderTest";
 
     // Create application class instance
@@ -70,7 +70,7 @@ public class WeaverAgentIT {
   }
 
   @Test
-  public void weaveJREUtilityBootstrapClass() throws IOException {
+  public void weaveJREUtilityBootstrapClass() {
     final String CLASS_NAME = "java.util.UUID";
     final String UUID_TEXT_STUB = "111-222-333-444";
 
@@ -114,7 +114,7 @@ public class WeaverAgentIT {
   }
 
   @Test
-  public void weaveJRECoreBootstrapClass() throws IOException {
+  public void weaveJRECoreBootstrapClass() {
     final String CLASS_NAME = "java.lang.String";
     final String TEXT = "To be, or not to be, that is the question";
 
@@ -154,7 +154,7 @@ public class WeaverAgentIT {
   }
 
   @Test
-  public void weaveStaticJREMethods() throws IOException {
+  public void weaveStaticJREMethods() {
     weaver = Weaver
       .forTypes(is(System.class))
       .addAdvice(
@@ -175,7 +175,7 @@ public class WeaverAgentIT {
   }
 
   @Test
-  public void weavingNativeMethodsHasNoEffect() throws IOException {
+  public void weavingNativeMethodsHasNoEffect() {
     weaver = Weaver
       .forTypes(is(System.class))
       .addAdvice(
@@ -224,7 +224,7 @@ public class WeaverAgentIT {
   }
 
   @Test
-  public void createFile() throws IOException, URISyntaxException {
+  public void createFile() throws URISyntaxException {
     final ThreadLocal<Integer> callCount = ThreadLocal.withInitial(() -> 0);
 
     // Before registering the transformer, the class is unaffected by the aspect

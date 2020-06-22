@@ -41,7 +41,7 @@ public class WeaverIT {
   }
 
   @Test
-  public void weaveLoadedApplicationClass() throws IOException {
+  public void weaveLoadedApplicationClass() {
     final String CLASS_NAME = "dev.sarek.app.UnderTest";
 
     // Load application class
@@ -71,7 +71,7 @@ public class WeaverIT {
   }
 
   @Test
-  public void cannotWeaveJREUtilityBootstrapClass() throws IOException {
+  public void cannotWeaveJREUtilityBootstrapClass() {
     final String CLASS_NAME = "java.util.UUID";
 
     weaver = Weaver
@@ -99,7 +99,7 @@ public class WeaverIT {
   }
 
   @Test
-  public void cannotWeaveJRECoreBootstrapClass() throws IOException {
+  public void cannotWeaveJRECoreBootstrapClass() {
     final String CLASS_NAME = "java.lang.String";
 
     // Create weaver *after* bootstrap class is loaded (should not make a difference, but check anyway)
@@ -125,7 +125,7 @@ public class WeaverIT {
   }
 
   @Test
-  public void complexAroundAdvice() throws IOException {
+  public void complexAroundAdvice() {
     StringWrapper TEXT = new StringWrapper("To be, or not to be, that is the question");
 
     Weaver weaver = Weaver
@@ -193,7 +193,7 @@ public class WeaverIT {
   }
 
   @Test
-  public void staticMethodCall() throws IOException {
+  public void staticMethodCall() {
     // Create weaver, directly registering a target class in the constructor
     weaver = Weaver
       .forTypes(is(UnderTest.class))
@@ -216,7 +216,7 @@ public class WeaverIT {
   }
 
   @Test
-  public void perClassAdvice() throws IOException {
+  public void perClassAdvice() {
     // Create weaver, directly registering a target class in the constructor
     weaver = Weaver
       .forTypes(is(UnderTest.class))
@@ -245,7 +245,7 @@ public class WeaverIT {
   }
 
   @Test
-  public void constructorAdvice() throws IOException {
+  public void constructorAdvice() {
     // Create weaver, directly registering a target class in the constructor
     final ThreadLocal<Integer> callCount = ThreadLocal.withInitial(() -> 0);
 
@@ -280,7 +280,7 @@ public class WeaverIT {
   }
 
   @Test
-  public void multiAdvice() throws IOException {
+  public void multiAdvice() {
     UnderTest underTest = new UnderTest();
     UnderTest underTestUnregistered = new UnderTest();
     weaver = Weaver
@@ -356,7 +356,7 @@ public class WeaverIT {
   }
 
   @Test
-  public void multiAdvicePrecedence() throws IOException {
+  public void multiAdvicePrecedence() {
     UnderTest underTest = new UnderTest("John Doe");
     UnderTest underTestUnregistered = new UnderTest("Nobody");
 

@@ -25,7 +25,7 @@ import static org.junit.Assert.*;
 public class MockTest {
 
   @Test
-  public void defaultMockIsNotGlobal() throws IOException {
+  public void defaultMockIsNotGlobal() {
     try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).build()) {
       UnderTest underTest = new UnderTest();
       assertEquals("default", underTest.getName());
@@ -34,7 +34,7 @@ public class MockTest {
   }
 
   @Test
-  public void createInstance() throws IOException {
+  public void createInstance() {
     try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).build()) {
       UnderTest underTest;
 
@@ -64,7 +64,7 @@ public class MockTest {
   }
 
   @Test
-  public void defaultMockOnlyStubsInstanceMethods() throws IOException {
+  public void defaultMockOnlyStubsInstanceMethods() {
     // Static methods not stubbed by default
     try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).build()) {
       assertEquals("Hello world", UnderTest.greet("world"));
@@ -97,7 +97,7 @@ public class MockTest {
 
   @Test
   @SuppressWarnings({ "TryFinallyCanBeTryWithResources" })
-  public void closeMockFactoryExplicitly() throws IOException {
+  public void closeMockFactoryExplicitly() {
     // Instead of try with resources via AutoCloseable, we can also close (and thus reset) the mock factory and its
     // byte code transformations manually.
     MockFactory<UnderTest> mockFactory = null;
@@ -112,7 +112,7 @@ public class MockTest {
   }
 
   @Test
-  public void closeMockFactoryTwice() throws IOException {
+  public void closeMockFactoryTwice() {
     // Close mock factory twice, once explicitly and again implicitly via AutoCloseable -> nothing bad happens
     try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).build()) {
       UnderTest underTest = mockFactory.createInstance();
@@ -123,7 +123,7 @@ public class MockTest {
   }
 
   @Test
-  public void globalMock() throws IOException {
+  public void globalMock() {
     try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).global().build()) {
       // Global mock → instance methods are stubbed even for objects created via constructor call if we add them as
       // mock targets
@@ -151,7 +151,7 @@ public class MockTest {
   }
 
   @Test
-  public void globalMockGlobalInstance() throws IOException {
+  public void globalMockGlobalInstance() {
     try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).global().addGlobalInstance().build()) {
       // Global mock + global instance → instance methods are stubbed even for objects created via constructor. We do
       // not even need to register them as mock targets
@@ -163,7 +163,7 @@ public class MockTest {
   }
 
   @Test
-  public void spyWithoutStubbing() throws IOException {
+  public void spyWithoutStubbing() {
     // Create spy instance the normal way, using a constructor
     try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).spy().addGlobalInstance().build()) {
       // Spy → instance methods are not stubbed by default
@@ -186,7 +186,7 @@ public class MockTest {
   }
 
   @Test
-  public void spyWithStubbing() throws IOException {
+  public void spyWithStubbing() {
     try (
       MockFactory<UnderTest> mockFactory = forClass(UnderTest.class)
         .spy()
@@ -211,7 +211,7 @@ public class MockTest {
   }
 
   @Test
-  public void globalSpyWithoutStubbing() throws IOException {
+  public void globalSpyWithoutStubbing() {
     try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).spy().global().build()) {
       // Global spy → instance methods are not stubbed by default
       UnderTest underTest = new UnderTest();
@@ -223,7 +223,7 @@ public class MockTest {
   }
 
   @Test
-  public void globalSpyWithStubbing() throws IOException {
+  public void globalSpyWithStubbing() {
     try (
       MockFactory<UnderTest> mockFactory = forClass(UnderTest.class)
         .spy().global().addGlobalInstance()
@@ -259,7 +259,7 @@ public class MockTest {
   }
 
   @Test
-  public void mockAncestorClassMethods() throws IOException {
+  public void mockAncestorClassMethods() {
     try (MockFactory<ExtendsSub> mockFactory = forClass(ExtendsSub.class).build()) {
       ExtendsSub extendsSub = mockFactory.createInstance();
       assertNull(extendsSub.getDate());     // target class ExtendsSub
@@ -279,7 +279,7 @@ public class MockTest {
   }
 
   @Test
-  public void provideHashCodeEquals() throws IOException {
+  public void provideHashCodeEquals() {
     // By default, existing hashCode/equals are overridden by versions based on object identity as defined in
     // HashCodeAspect and EqualsAspect. Otherwise, the original methods might throw exceptions due to uninitialised
     // fields, because no constructors were executed during object creation.
@@ -288,7 +288,8 @@ public class MockTest {
         .global()
         .addGlobalInstance()
         .build()
-    ) {
+    )
+    {
       assertNotEquals(mockFactory.createInstance().hashCode(), mockFactory.createInstance().hashCode());
       assertNotEquals(new UnderTest().hashCode(), new UnderTest().hashCode());
       assertNotEquals(new UnderTest().hashCode(), mockFactory.createInstance().hashCode());
@@ -303,7 +304,8 @@ public class MockTest {
         .addGlobalInstance()
         .provideHashCodeEquals(false)
         .build()
-    ) {
+    )
+    {
       assertEquals(mockFactory.createInstance().hashCode(), mockFactory.createInstance().hashCode());
       assertEquals(new UnderTest().hashCode(), new UnderTest().hashCode());
       assertEquals(new UnderTest().hashCode(), mockFactory.createInstance().hashCode());
@@ -319,7 +321,8 @@ public class MockTest {
         .addGlobalInstance()
         .provideHashCodeEquals(true) // This is the default anyway, but just to make it clear...
         .build()
-    ) {
+    )
+    {
       assertNotEquals(mockFactory.createInstance().hashCode(), mockFactory.createInstance().hashCode());
       assertNotEquals(new Sub("test").hashCode(), new Sub("test").hashCode());
       assertNotEquals(new Sub("test").hashCode(), mockFactory.createInstance().hashCode());
@@ -338,7 +341,8 @@ public class MockTest {
         .global()
         .addGlobalInstance()
         .build()
-    ) {
+    )
+    {
       assertNotEquals(mockFactory.createInstance().hashCode(), mockFactory.createInstance().hashCode());
       assertNotEquals(new UnderTestSub("John", 25).hashCode(), new UnderTestSub("John", 25).hashCode());
       assertNotEquals(new UnderTestSub("John", 25).hashCode(), mockFactory.createInstance().hashCode());

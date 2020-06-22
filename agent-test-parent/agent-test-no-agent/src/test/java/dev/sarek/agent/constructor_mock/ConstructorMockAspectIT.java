@@ -61,7 +61,7 @@ public class ConstructorMockAspectIT {
   }
 
   @Test
-  public void mockAndStubFinalClass() throws IOException {
+  public void mockAndStubFinalClass() {
 
     // (1) Before mocking is active, class under test behaves normally
 

@@ -27,7 +27,7 @@ public class RemoveFinalIT {
 
   @Test
   public void hotAttachDefinaliser()
-    throws ReflectiveOperationException, AgentAlreadyRegisteredException, IllegalTransformerFactoryMethodException
+    throws ReflectiveOperationException
   {
     // Ensure classes under test have not been loaded yet
     assertFalse(

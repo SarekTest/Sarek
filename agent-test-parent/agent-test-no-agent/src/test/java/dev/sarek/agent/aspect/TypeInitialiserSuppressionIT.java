@@ -28,7 +28,7 @@ public class TypeInitialiserSuppressionIT {
   }
 
   @Test
-  public void typeInitialiser() throws IOException {
+  public void typeInitialiser() {
     assertFalse(
       "This test needs to run in its own JVM, otherwise the type initialiser (static block) " +
         "for the class under test could have run before already",

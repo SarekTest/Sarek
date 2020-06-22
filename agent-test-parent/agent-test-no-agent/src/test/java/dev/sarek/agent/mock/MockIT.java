@@ -30,7 +30,7 @@ public class MockIT {
   }
 
   @Test
-  public void canMockApplicationClasses() throws IOException {
+  public void canMockApplicationClasses() {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
       MockFactory<FinalClass> mockFactory1 = MockFactory.forClass(FinalClass.class).global().addGlobalInstance().build();
@@ -50,7 +50,7 @@ public class MockIT {
   }
 
   @Test
-  public void cannotMockBootstrapClasses() throws IOException {
+  public void cannotMockBootstrapClasses() {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
       MockFactory<UUID> mockFactory = MockFactory.forClass(UUID.class).global().build()
@@ -68,7 +68,7 @@ public class MockIT {
   }
 
   @Test
-  public void createInstance() throws IOException {
+  public void createInstance() {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
       MockFactory<FinalClass> mockFactory = MockFactory.forClass(FinalClass.class).build()

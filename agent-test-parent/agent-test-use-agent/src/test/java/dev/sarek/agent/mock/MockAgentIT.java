@@ -43,7 +43,7 @@ public class MockAgentIT {
   }
 
   @Test
-  public void canMockApplicationClasses() throws IOException {
+  public void canMockApplicationClasses() {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
       MockFactory<FinalClass> mockFactory1 = MockFactory.forClass(FinalClass.class).global().addGlobalInstance().build();
@@ -63,7 +63,7 @@ public class MockAgentIT {
   }
 
   @Test
-  public void canMockBootstrapClass_UUID() throws IOException {
+  public void canMockBootstrapClass_UUID() {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
       MockFactory<UUID> mockFactory = MockFactory
@@ -84,7 +84,7 @@ public class MockAgentIT {
   }
 
   @Test
-  public void canMockBootstrapClass_GregorianCalendar() throws IOException {
+  public void canMockBootstrapClass_GregorianCalendar() {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
       MockFactory<GregorianCalendar> mockFactory = forClass(GregorianCalendar.class)
@@ -164,7 +164,7 @@ public class MockAgentIT {
   }
 
   @Test
-  public void canMockBootstrapClass_StringBuffer() throws IOException, ClassNotFoundException {
+  public void canMockBootstrapClass_StringBuffer() {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
       MockFactory<StringBuffer> mockFactory1 = MockFactory
@@ -249,7 +249,7 @@ public class MockAgentIT {
   }
 
   @Test
-  public void canMockBootstrapClass_Random() throws IOException {
+  public void canMockBootstrapClass_Random() {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
       MockFactory<Random> mockFactory = MockFactory.forClass(Random.class).global().addGlobalInstance().build()

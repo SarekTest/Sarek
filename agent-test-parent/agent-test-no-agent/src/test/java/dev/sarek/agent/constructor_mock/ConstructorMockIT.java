@@ -63,7 +63,7 @@ public class ConstructorMockIT {
   }
 
   @AfterClass
-  public static void afterClass() throws IOException, UnmodifiableClassException {
+  public static void afterClass() throws UnmodifiableClassException {
     INSTRUMENTATION.removeTransformer(constructorMockTransformer);
     INSTRUMENTATION.retransformClasses(TRANSFORMATION_TARGETS);
     constructorMockTransformer = null;

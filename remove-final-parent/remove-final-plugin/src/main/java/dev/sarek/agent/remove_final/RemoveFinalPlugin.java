@@ -37,7 +37,7 @@ public class RemoveFinalPlugin implements Plugin {
   }
 
   @Override
-  public void close() throws IOException { }
+  public void close() { }
 
   @Override
   public boolean matches(TypeDescription target) {

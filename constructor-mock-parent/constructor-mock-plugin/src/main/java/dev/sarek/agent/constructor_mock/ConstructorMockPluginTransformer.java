@@ -19,17 +19,17 @@ public class ConstructorMockPluginTransformer extends ClassTransformer {
   ConstructorMockTransformer constructorMockTransformer = new ConstructorMockTransformer();
 
   @Override
-  public void applyTransformations(CtClass ctClass) throws JavassistBuildException {
+  public void applyTransformations(CtClass ctClass) {
     constructorMockTransformer.applyTransformations(ctClass);
   }
 
   @Override
-  public boolean shouldTransform(CtClass ctClass) throws JavassistBuildException {
+  public boolean shouldTransform(CtClass ctClass) {
     return constructorMockTransformer.shouldTransform(ctClass);
   }
 
   @Override
-  public void configure(Properties properties) throws Exception {
+  public void configure(Properties properties) {
     constructorMockTransformer.configure(properties);
   }
 }
