@@ -65,7 +65,7 @@
     </dependency>
     <dependency>
       <groupId>dev.sarek</groupId>
-      <artifactId>aspect-core</artifactId>
+      <artifactId>sarek-aspect</artifactId>
 <!--      <optional>true</optional>-->
     </dependency>
     <dependency>

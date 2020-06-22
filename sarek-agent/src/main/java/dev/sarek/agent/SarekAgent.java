@@ -105,7 +105,7 @@ public class SarekAgent {
     File jarFile;
     if (resourceURL.contains("/target/classes/")) {
       // Try to fix the phenomenon that in IntelliJ IDEA when running the test via run configuration,
-      // the runner insists on referring to the 'aspect-core' module locally via 'target/classes'
+      // the runner insists on referring to the 'sarek-aspect' module locally via 'target/classes'
       // instead of to the JAR in the local Maven repository or in the module's 'target' directory.
       File targetDir = new File(resourceURL.replaceFirst("(/target)/classes/.*", "$1"));
       jarFile = Arrays
