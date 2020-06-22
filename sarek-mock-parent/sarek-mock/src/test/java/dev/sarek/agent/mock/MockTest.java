@@ -1,14 +1,17 @@
 package dev.sarek.agent.mock;
 
 import dev.sarek.agent.aspect.InstanceMethodAroundAdvice;
+import dev.sarek.app.ExtendsSub;
 import dev.sarek.app.Sub;
 import dev.sarek.app.UnderTest;
 import dev.sarek.app.UnderTestSub;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.GregorianCalendar;
 
 import static dev.sarek.agent.mock.MockFactory.forClass;
+import static java.util.Calendar.MAY;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static org.junit.Assert.*;
 
@@ -252,6 +255,26 @@ public class MockTest {
 
       // Off-topic: in global mode we can also mock static methods
       assertEquals("HELLO FOO BAR", UnderTest.greet("world"));
+    }
+  }
+
+  @Test
+  public void mockAncestorClassMethods() throws IOException {
+    try (MockFactory<ExtendsSub> mockFactory = forClass(ExtendsSub.class).build()) {
+      ExtendsSub extendsSub = mockFactory.createInstance();
+      assertNull(extendsSub.getDate());     // target class ExtendsSub
+      assertNull(extendsSub.getName());     // parent class Sub
+      assertEquals(0, extendsSub.getId());  // grandparent class Base
+
+      // Slightly off-topic: How to turn a real, fully initialised instance into a mock (not just into a spy) ex post
+      extendsSub = new ExtendsSub(11, "John Doe", new GregorianCalendar(1971, MAY, 8).getTime());
+      assertEquals(new GregorianCalendar(1971, MAY, 8).getTime(), extendsSub.getDate());
+      assertEquals("John Doe", extendsSub.getName());
+      assertEquals(11, extendsSub.getId());
+      mockFactory.addTarget(extendsSub);
+      assertNull(extendsSub.getDate());
+      assertNull(extendsSub.getName());
+      assertEquals(0, extendsSub.getId());
     }
   }
 
