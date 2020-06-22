@@ -43,7 +43,7 @@ public class TypeInitialiserSuppressionIT {
             System.out.println("Before type initialiser advice #" + ++UnderTest.typeInitialiserAdviceCounter);
             // false = suppress type initialiser
             // true = initialiser runs, sets static property and prints something on the console
-            return true;
+            return false;
           },
           // Set static property to a value different from the one set by the type initialiser
           (clazz, proceedMode, throwable) -> {
@@ -58,7 +58,7 @@ public class TypeInitialiserSuppressionIT {
     // Caveat: Even though there are 3 static blocks in the target class, only one advice pair is being triggered.
     assertEquals(1, UnderTest.typeInitialiserAdviceCounter);
     // 3 static blocks suppressed -> 0. The after advice multiplies by 11 -> 0.
-    assertEquals(33, UnderTest.staticBlockCounter);
+    assertEquals(0, UnderTest.staticBlockCounter);
   }
 
 }
