@@ -7,7 +7,6 @@ import dev.sarek.app.UnderTest;
 import dev.sarek.app.UnderTestSub;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.GregorianCalendar;
 
 import static dev.sarek.agent.mock.MockFactory.forClass;

@@ -1,8 +1,6 @@
 package dev.sarek.agent.remove_final;
 
 import dev.sarek.agent.Agent;
-import dev.sarek.agent.Agent.TransformerFactoryMethod.IllegalTransformerFactoryMethodException;
-import dev.sarek.agent.AgentRegistry.AgentAlreadyRegisteredException;
 import dev.sarek.agent.test.SeparateJVM;
 import dev.sarek.app.FinalClass;
 import org.junit.Test;

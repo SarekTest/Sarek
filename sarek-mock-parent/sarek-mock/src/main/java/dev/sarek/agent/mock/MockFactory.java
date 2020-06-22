@@ -10,7 +10,6 @@ import net.bytebuddy.matcher.ElementMatcher;
 import org.objenesis.ObjenesisStd;
 import org.objenesis.instantiator.ObjectInstantiator;
 
-import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 

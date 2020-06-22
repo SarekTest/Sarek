@@ -12,8 +12,6 @@ import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.jar.asm.ClassVisitor;
 import net.bytebuddy.pool.TypePool;
 
-import java.io.IOException;
-
 public class RemoveFinalPlugin implements Plugin {
   @Override
   public DynamicType.Builder<?> apply(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassFileLocator classFileLocator) {

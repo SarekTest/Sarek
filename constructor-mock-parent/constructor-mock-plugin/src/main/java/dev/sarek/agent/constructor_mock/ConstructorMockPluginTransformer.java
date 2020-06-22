@@ -2,7 +2,6 @@ package dev.sarek.agent.constructor_mock;
 
 import de.icongmbh.oss.maven.plugin.javassist.ClassTransformer;
 import javassist.CtClass;
-import javassist.build.JavassistBuildException;
 
 import java.util.Properties;
 
