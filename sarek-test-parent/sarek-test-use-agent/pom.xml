@@ -5,11 +5,11 @@
 
   <parent>
     <groupId>dev.sarek</groupId>
-    <artifactId>agent-test-parent</artifactId>
+    <artifactId>sarek-test-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>agent-test-use-agent</artifactId>
+  <artifactId>sarek-test-use-agent</artifactId>
 
   <!--
   Caveat: Automatic, JDK-based profile activation can *not* be inherited from a parent POM
@@ -105,13 +105,13 @@
     <!-- Classes under test & test tool classes -->
     <dependency>
       <groupId>dev.sarek</groupId>
-      <artifactId>agent-test-common</artifactId>
+      <artifactId>sarek-test-common</artifactId>
       <scope>test</scope>
     </dependency>
     <!-- Needed on the bootstrap class path in Maven Surefire/Failsafe -->
     <dependency>
       <groupId>dev.sarek</groupId>
-      <artifactId>agent-test-instrument-jre</artifactId>
+      <artifactId>sarek-test-instrument-jre</artifactId>
       <scope>test</scope>
     </dependency>
 

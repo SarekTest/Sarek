@@ -53,7 +53,7 @@
       ${projectRootDir}/remove-final-parent/remove-final-agent/target/remove-final-agent-${project.version}-all.jar
     </remove-final-agent.jar>
     <instrumented-jre.jar>
-      ${projectRootDir}/agent-test-parent/agent-test-instrument-jre/target/agent-test-instrument-jre-${project.version}.jar
+      ${projectRootDir}/sarek-test-parent/sarek-test-instrument-jre/target/sarek-test-instrument-jre-${project.version}.jar
     </instrumented-jre.jar>
 
   </properties>
@@ -475,13 +475,13 @@
       </dependency>
       <dependency>
         <groupId>dev.sarek</groupId>
-        <artifactId>agent-test-common</artifactId>
+        <artifactId>sarek-test-common</artifactId>
         <version>${project.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>dev.sarek</groupId>
-        <artifactId>agent-test-instrument-jre</artifactId>
+        <artifactId>sarek-test-instrument-jre</artifactId>
         <version>${project.version}</version>
         <scope>test</scope>
       </dependency>
@@ -523,7 +523,7 @@
     <module>aspect-parent</module>
     <module>remove-final-parent</module>
     <module>constructor-mock-parent</module>
-    <module>agent-test-parent</module>
+    <module>sarek-test-parent</module>
 
     <module>sarek-constructor-mock-parent</module>
     <module>sarek-aspect-parent</module>

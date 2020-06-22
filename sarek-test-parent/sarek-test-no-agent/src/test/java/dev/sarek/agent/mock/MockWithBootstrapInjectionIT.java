@@ -152,7 +152,7 @@ public class MockWithBootstrapInjectionIT {
     }
 
     // Do not try mocking StringBuilder here because that only works if all libraries are loaded from the bootstrap
-    // class loader. (See 'MockIT' in 'agent-test-use-agent' module for how to do that.) Otherwise the result would be
+    // class loader. (See 'MockIT' in 'sarek-test-use-agent' module for how to do that.) Otherwise the result would be
     // LinkageErrors caused by the same test framework classes loaded by both the application and the bootstrap class
     // loaders, making them incompatible:
     //   LinkageError: loader constraint violation: when resolving method

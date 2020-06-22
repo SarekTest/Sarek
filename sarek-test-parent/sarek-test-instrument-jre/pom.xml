@@ -5,11 +5,11 @@
 
   <parent>
     <groupId>dev.sarek</groupId>
-    <artifactId>agent-test-parent</artifactId>
+    <artifactId>sarek-test-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>agent-test-instrument-jre</artifactId>
+  <artifactId>sarek-test-instrument-jre</artifactId>
 
   <!--
     Caveat: Automatic, JDK-based profile activation can *not* be inherited from a parent POM
@@ -239,7 +239,7 @@
 
     <dependency>
       <groupId>dev.sarek</groupId>
-      <artifactId>agent-test-common</artifactId>
+      <artifactId>sarek-test-common</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

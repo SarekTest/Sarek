@@ -9,14 +9,14 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>agent-test-parent</artifactId>
+  <artifactId>sarek-test-parent</artifactId>
   <packaging>pom</packaging>
 
   <modules>
-    <module>agent-test-common</module>
-    <module>agent-test-instrument-jre</module>
-    <module>agent-test-use-agent</module>
-    <module>agent-test-no-agent</module>
+    <module>sarek-test-common</module>
+    <module>sarek-test-instrument-jre</module>
+    <module>sarek-test-use-agent</module>
+    <module>sarek-test-no-agent</module>
   </modules>
 
   <!--

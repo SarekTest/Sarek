@@ -5,11 +5,11 @@
 
   <parent>
     <groupId>dev.sarek</groupId>
-    <artifactId>agent-test-parent</artifactId>
+    <artifactId>sarek-test-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>agent-test-no-agent</artifactId>
+  <artifactId>sarek-test-no-agent</artifactId>
 
   <properties>
     <maven-failsafe.argLine>-Xbootclasspath/a:${sarek-all.jar}</maven-failsafe.argLine>
@@ -37,7 +37,7 @@
 
     <dependency>
       <groupId>dev.sarek</groupId>
-      <artifactId>agent-test-common</artifactId>
+      <artifactId>sarek-test-common</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
