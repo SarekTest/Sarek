@@ -20,7 +20,6 @@ public class MockFactory<T> implements AutoCloseable {
   private Weaver weaver;
   private ConstructorMockTransformer constructorMockTransformer;
   private final boolean mockInstanceMethods;
-  private final boolean mockStaticMethods;
   private boolean closed = false;
   private ObjectInstantiator<T> instantiator;
 
@@ -39,6 +38,7 @@ public class MockFactory<T> implements AutoCloseable {
     private boolean mockInstanceMethods = true;
     private boolean mockStaticMethods = false;
     private boolean global = false;
+    private boolean needsTargetClassTarget = false;
     private MockType mockType = MockType.MOCK;
 
     private Builder(Class<T> targetClass) {
@@ -102,6 +102,8 @@ public class MockFactory<T> implements AutoCloseable {
 
     public Builder<T> addAdvice(ElementMatcher.Junction<MethodDescription> methodMatcher, AroundAdvice<?> advice) {
       weaverBuilder.addAdvice(methodMatcher, advice);
+      if (advice instanceof ConstructorAroundAdvice || advice instanceof TypeInitialiserAroundAdvice)
+        needsTargetClassTarget = true;
       return this;
     }
 
@@ -141,7 +143,6 @@ public class MockFactory<T> implements AutoCloseable {
   private MockFactory(Builder<T> builder) {
     targetClass = builder.targetClass;
     mockInstanceMethods = builder.mockInstanceMethods;
-    mockStaticMethods = builder.mockStaticMethods;
     if (builder.mockType == MockType.MOCK) {
       if (builder.global) {
         Set<Class<?>> classHierarchy = new LinkedHashSet<>();
@@ -161,13 +162,13 @@ public class MockFactory<T> implements AutoCloseable {
           InstanceMethodAroundAdvice.MOCK
         );
       }
-      if (mockStaticMethods)
+      if (builder.mockStaticMethods)
         builder.weaverBuilder.addAdvice(
           not(builder.excludedMethods),
           StaticMethodAroundAdvice.MOCK
         );
     }
-    if (builder.global || mockStaticMethods) {
+    if (builder.global || builder.mockStaticMethods || builder.needsTargetClassTarget) {
       builder.weaverBuilder.addTargets(targetClass);
     }
     weaver = builder.weaverBuilder.build();

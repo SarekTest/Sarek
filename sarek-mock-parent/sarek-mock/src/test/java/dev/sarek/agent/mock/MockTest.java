@@ -7,18 +7,14 @@ import dev.sarek.app.UnderTest;
 import dev.sarek.app.UnderTestSub;
 import org.junit.Test;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 import static dev.sarek.agent.mock.MockFactory.forClass;
 import static java.util.Calendar.MAY;
-import static net.bytebuddy.matcher.ElementMatchers.named;
+import static net.bytebuddy.matcher.ElementMatchers.*;
 import static org.junit.Assert.*;
-
-// TODO: better test coverage:
-//   - super type method mocking/stubbing
-//   - excludeSuperTypes()
-//   - excludeMethods()
-//   - addAdvice() for constructor and type initialiser advices
 
 @SuppressWarnings("ConstantConditions")
 public class MockTest {
@@ -278,6 +274,126 @@ public class MockTest {
   }
 
   @Test
+  public void excludeSuperTypes() {
+    try (
+      MockFactory<UnderTestSub> mockFactory = forClass(UnderTestSub.class)
+        // Exclude super type UnderTest from mocking
+        .excludeSuperTypes(is(UnderTest.class))
+        .build()
+    )
+    {
+      // Slightly off-topic: How to turn a real, fully initialised instance into a mock (not just into a spy) ex post
+      UnderTestSub underTestSub = new UnderTestSub("Jane Doe", 33);
+      mockFactory.addTarget(underTestSub);
+      assertEquals(0, underTestSub.getAge());            // target class UnderTestSub -> mocked
+      assertEquals(3, underTestSub.add(1, 2));           // parent class UnderTest -> not mocked
+      assertEquals("Jane Doe", underTestSub.getName());  // parent class UnderTest -> not mocked
+      assertEquals(20, underTestSub.multiply(4, 5));     // parent class UnderTest -> not mocked
+    }
+
+    try (
+      MockFactory<ExtendsSub> mockFactory = forClass(ExtendsSub.class)
+        // Exclude super type Sub from mocking (but not Base)
+        .excludeSuperTypes(is(Sub.class))
+        .build()
+    )
+    {
+      // Slightly off-topic: How to turn a real, fully initialised instance into a mock (not just into a spy) ex post
+      ExtendsSub extendsSub = new ExtendsSub(11, "John Doe", new GregorianCalendar(1971, MAY, 8).getTime());
+      mockFactory.addTarget(extendsSub);
+      assertNull(extendsSub.getDate());                // target class ExtendsSub -> mocked
+      assertEquals("John Doe", extendsSub.getName());  // parent class Sub -> not mocked
+      assertEquals(0, extendsSub.getId());             // grandparent class Base -> mocked
+    }
+
+    try (
+      MockFactory<ExtendsSub> mockFactory = forClass(ExtendsSub.class)
+        // Exclude super type Sub from mocking (but not Base)
+        .excludeSuperTypes(is(Sub.class))
+        // But explicitly mock a method from the excluded class, too
+        .mock(
+          named("getName"),
+          (target, method, args) -> false,
+          (target, method, args, proceedMode, returnValue, throwable) -> "Who wins?"
+        )
+        .build()
+    )
+    {
+      // Slightly off-topic: How to turn a real, fully initialised instance into a mock (not just into a spy) ex post
+      ExtendsSub extendsSub = new ExtendsSub(11, "John Doe", new GregorianCalendar(1971, MAY, 8).getTime());
+      mockFactory.addTarget(extendsSub);
+      assertNull(extendsSub.getDate());                // target class ExtendsSub -> mocked
+      assertEquals(0, extendsSub.getId());             // grandparent class Base -> mocked
+
+      // Important to know: If a class is matched by an exclusion pattern and normally would not be mocked to return
+      // null-ish values (null, 0, false), but at the same time there is an explicit stub definition for a method in the
+      // excluded class, the stub definition loses and is not applied. Class exclusion trumps method stubbing!
+      assertEquals("John Doe", extendsSub.getName());
+    }
+
+  }
+
+  @Test
+  public void excludeMethods() {
+    try (
+      MockFactory<UnderTestSub> mockFactory = forClass(UnderTestSub.class)
+        // Exclude getters from mocking
+        .excludeMethods(nameStartsWith("get"))
+        .build()
+    )
+    {
+      // Slightly off-topic: How to turn a real, fully initialised instance into a mock (not just into a spy) ex post
+      UnderTestSub underTestSub = new UnderTestSub("Jane Doe", 33);
+      mockFactory.addTarget(underTestSub);
+      assertEquals(33, underTestSub.getAge());           // getter -> not mocked
+      assertEquals(0, underTestSub.add(1, 2));           // no getter -> mocked
+      assertEquals("Jane Doe", underTestSub.getName());  // getter -> not mocked
+      assertEquals(0, underTestSub.multiply(4, 5));      // no getter -> mocked
+      assertEquals(0, underTestSub.negate(42));          // no getter -> mocked
+    }
+
+    try (
+      MockFactory<ExtendsSub> mockFactory = forClass(ExtendsSub.class)
+        // Exclude methods with return type Date from mocking
+        .excludeMethods(returns(Date.class))
+        .build()
+    )
+    {
+      // Slightly off-topic: How to turn a real, fully initialised instance into a mock (not just into a spy) ex post
+      ExtendsSub extendsSub = new ExtendsSub(11, "John Doe", new GregorianCalendar(1971, MAY, 8).getTime());
+      mockFactory.addTarget(extendsSub);
+      assertNotNull(extendsSub.getDate());  // returns Date -> not mocked
+      assertNull(extendsSub.getName());     // does not return Date -> mocked
+      assertEquals(0, extendsSub.getId());  // does not return Date -> mocked
+    }
+
+    try (
+      MockFactory<ExtendsSub> mockFactory = forClass(ExtendsSub.class)
+        // Exclude methods with return type Date from mocking
+        .excludeMethods(returns(Date.class))
+        // But explicitly mock a method returning Date, too
+        .mock(
+          named("getDate"),
+          (target, method, args) -> false,
+          (target, method, args, proceedMode, returnValue, throwable) ->
+            new GregorianCalendar(2222, Calendar.FEBRUARY, 22).getTime()
+        )
+        .build()
+    )
+    {
+      // Slightly off-topic: How to turn a real, fully initialised instance into a mock (not just into a spy) ex post
+      ExtendsSub extendsSub = new ExtendsSub(11, "John Doe", new GregorianCalendar(1971, MAY, 8).getTime());
+      mockFactory.addTarget(extendsSub);
+      assertNull(extendsSub.getName());     // does not return Date -> mocked
+      assertEquals(0, extendsSub.getId());  // does not return Date -> mocked
+      // Important to know: If a method is matched by an exclusion pattern and normally would not be mocked to return
+      // null-ish values (null, 0, false), but at the same time there is an explicit stub definition for same method,
+      // the stub definition wins and overrides general mocking rules as well as exclusion rules.
+      assertEquals(new GregorianCalendar(2222, Calendar.FEBRUARY, 22).getTime(), extendsSub.getDate());
+    }
+  }
+
+  @Test
   public void provideHashCodeEquals() {
     // By default, existing hashCode/equals are overridden by versions based on object identity as defined in
     // HashCodeAspect and EqualsAspect. Otherwise, the original methods might throw exceptions due to uninitialised
@@ -348,4 +464,8 @@ public class MockTest {
     }
   }
 
+  @Test
+  public void addAdvice() {
+
+  }
 }
