@@ -19,9 +19,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.GregorianCalendar;
 import java.util.Random;
 import java.util.UUID;
 
+import static dev.sarek.agent.mock.MockFactory.forClass;
+import static java.util.Calendar.*;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static org.junit.Assert.*;
 
@@ -78,6 +81,38 @@ public class MockAgentIT {
     // After auto-close, class transformations have been reverted
     assertTrue(new UUID(0xABBA, 0xCAFE).toString().contains("abba"));
     assertTrue(UUID.randomUUID().toString().matches("\\p{XDigit}+(-\\p{XDigit}+){4}"));
+  }
+
+  @Test
+  public void canMockBootstrapClass_GregorianCalendar() throws IOException {
+    // Try with resources works for Mock because it implements AutoCloseable
+    try (
+      MockFactory<GregorianCalendar> mockFactory = forClass(GregorianCalendar.class)
+        .mock(
+          named("get"),
+          (target, method, args) -> false,
+          (target, method, args, proceedMode, returnValue, throwable) -> {
+            switch ((int) args[0]) {
+              case YEAR:
+                return 2001;
+              case DAY_OF_MONTH:
+                return 42;  // just because we can
+              case DAY_OF_WEEK:
+                return WEDNESDAY;
+              default:
+                return -99;  // just because we can
+            }
+          }
+        )
+        .build()
+    )
+    {
+      GregorianCalendar gregorianCalendar = mockFactory.createInstance();
+      assertEquals(2001, gregorianCalendar.get(YEAR));
+      assertEquals(-99, gregorianCalendar.get(MONTH));
+      assertEquals(42, gregorianCalendar.get(DAY_OF_MONTH));
+      assertEquals(WEDNESDAY, gregorianCalendar.get(DAY_OF_WEEK));
+    }
   }
 
   /**
@@ -227,7 +262,7 @@ public class MockAgentIT {
   }
 
   @Test
-  public void canMockBootstrapClasses_Swing() throws IOException {
+  public void canMockBootstrapClasses_Swing() {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
       MockFactory<JTable> mockFactory1 = MockFactory.forClass(JTable.class).global().addGlobalInstance().build();
@@ -244,7 +279,7 @@ public class MockAgentIT {
   }
 
   @Test
-  public void createInstance() throws IOException {
+  public void createInstance() {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
       MockFactory<UUID> mockFactory = MockFactory
