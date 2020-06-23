@@ -21,7 +21,7 @@ public class InstrumentedBootstrapClassesIT {
   @Test
   public void checkDefinaliser() throws NoSuchMethodException {
     // Final application class has *not* been definalised because it is not on the bootstrap class path and
-    // no remove final agent is active
+    // no unfinal agent is active
     assertTrue(Modifier.isFinal(FinalClass.class.getModifiers()));
     assertTrue(Modifier.isFinal(FinalClass.class.getDeclaredMethod("doSomething").getModifiers()));
 
@@ -38,7 +38,7 @@ public class InstrumentedBootstrapClassesIT {
   @Test
   public void checkMockability() throws ReflectiveOperationException {
     // Final application class *cannot* be mocked because it is not on the bootstrap class path and
-    // no remove final agent is active
+    // no unfinal agent is active
     assertThrows(
       IllegalArgumentException.class,
       () -> SimpleMock.of(FinalClass.class).getInstance()

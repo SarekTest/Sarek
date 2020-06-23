@@ -35,8 +35,8 @@ public class UnFinalTransformer extends ClassVisitor {
   private boolean logUnFinal;
 
   private final String LOG_PREFIX = AGENT_REGISTRY.isRegistered(UnFinalAgent.class)
-    ? "[Remove Final Agent] "
-    : "[Remove Final Transformer] ";
+    ? "[UnFinal Agent] "
+    : "[UnFinal Transformer] ";
 
   private String className;
 
