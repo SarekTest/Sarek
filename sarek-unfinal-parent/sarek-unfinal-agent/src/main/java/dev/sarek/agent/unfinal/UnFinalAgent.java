@@ -1,4 +1,4 @@
-package dev.sarek.agent.remove_final;
+package dev.sarek.agent.unfinal;
 
 import dev.sarek.agent.Agent;
 import dev.sarek.agent.Agent.TransformerFactoryMethod.IllegalTransformerFactoryMethodException;
@@ -8,15 +8,15 @@ import dev.sarek.agent.OptionParser.IllegalOptionNameException;
 
 import java.lang.instrument.Instrumentation;
 
-public class RemoveFinalAgent extends Agent {
-  public RemoveFinalAgent(String options, Instrumentation instrumentation)
+public class UnFinalAgent extends Agent {
+  public UnFinalAgent(String options, Instrumentation instrumentation)
     throws ReflectiveOperationException, AgentAlreadyRegisteredException, IllegalTransformerFactoryMethodException,
     IllegalOptionNameException, IllegalAgentIdException
   {
     super(options, instrumentation);
   }
 
-  public RemoveFinalAgent(String options)
+  public UnFinalAgent(String options)
     throws ReflectiveOperationException, AgentAlreadyRegisteredException, IllegalTransformerFactoryMethodException,
     IllegalOptionNameException, IllegalAgentIdException
   {
@@ -27,7 +27,7 @@ public class RemoveFinalAgent extends Agent {
    * Attach agent dynamically after JVM start-up
    *
    * @param options path to configuration properties file for class
-   *                {@link RemoveFinalTransformer}. Add this parameter on the command line
+   *                {@link UnFinalTransformer}. Add this parameter on the command line
    *                after the Java agent path via {@code =/path/to/my-config.properties}.
    */
   public static void agentmain(String options, Instrumentation instrumentation)
@@ -41,7 +41,7 @@ public class RemoveFinalAgent extends Agent {
    * Start agent via <code>-javaagent:/path/to/my-agent.jar=<i>options</i></code> JVM parameter
    *
    * @param options path to configuration properties file for class
-   *                {@link RemoveFinalTransformer}. Add this parameter on the command line
+   *                {@link UnFinalTransformer}. Add this parameter on the command line
    *                after the Java agent path via {@code =/path/to/my-config.properties}.
    */
   public static void premain(String options, Instrumentation instrumentation)
@@ -49,12 +49,12 @@ public class RemoveFinalAgent extends Agent {
     IllegalOptionNameException, IllegalAgentIdException
   {
     // TODO: Maybe catch exceptions + log errors instead so as to enable the system to start up anyway
-    new RemoveFinalAgent(options, instrumentation);
+    new UnFinalAgent(options, instrumentation);
   }
 
   @Override
   public String getAgentId() {
-    return "RemoveFinal";
+    return "UnFinal";
   }
 
   @Override
@@ -72,7 +72,7 @@ public class RemoveFinalAgent extends Agent {
     throws NoSuchMethodException, IllegalTransformerFactoryMethodException, ClassNotFoundException
   {
     return new TransformerFactoryMethod(
-      "dev.sarek.agent.remove_final.RemoveFinalTransformer",
+      "dev.sarek.agent.unfinal.UnFinalTransformer",
       "createTransformer",
       new Class<?>[] { boolean.class }
     );

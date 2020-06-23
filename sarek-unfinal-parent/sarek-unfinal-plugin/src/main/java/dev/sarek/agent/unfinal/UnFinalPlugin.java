@@ -1,4 +1,4 @@
-package dev.sarek.agent.remove_final;
+package dev.sarek.agent.unfinal;
 
 import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.build.Plugin;
@@ -12,7 +12,7 @@ import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.jar.asm.ClassVisitor;
 import net.bytebuddy.pool.TypePool;
 
-public class RemoveFinalPlugin implements Plugin {
+public class UnFinalPlugin implements Plugin {
   @Override
   public DynamicType.Builder<?> apply(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassFileLocator classFileLocator) {
     return builder
@@ -24,12 +24,12 @@ public class RemoveFinalPlugin implements Plugin {
 
         @Override
         public int mergeReader(int flags) {
-          return RemoveFinalTransformer.PARSING_FLAGS;
+          return UnFinalTransformer.PARSING_FLAGS;
         }
 
         @Override
         public ClassVisitor wrap(TypeDescription instrumentedType, ClassVisitor classVisitor, Implementation.Context implementationContext, TypePool typePool, FieldList<FieldDescription.InDefinedShape> fields, MethodList<?> methods, int writerFlags, int readerFlags) {
-          return new RemoveFinalTransformer(classVisitor, true);
+          return new UnFinalTransformer(classVisitor, true);
         }
       });
   }
@@ -39,6 +39,6 @@ public class RemoveFinalPlugin implements Plugin {
 
   @Override
   public boolean matches(TypeDescription target) {
-    return RemoveFinalTransformer.shouldTransform(target.getName());
+    return UnFinalTransformer.shouldTransform(target.getName());
   }
 }

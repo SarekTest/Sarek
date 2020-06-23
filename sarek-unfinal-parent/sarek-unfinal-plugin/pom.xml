@@ -11,4 +11,15 @@
 
   <artifactId>sarek-unfinal-plugin</artifactId>
 
+  <dependencies>
+    <dependency>
+      <groupId>dev.sarek</groupId>
+      <artifactId>sarek-unfinal-agent</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.bytebuddy</groupId>
+      <artifactId>byte-buddy</artifactId>
+    </dependency>
+  </dependencies>
+
 </project>

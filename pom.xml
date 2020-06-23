@@ -49,9 +49,9 @@
     <constructor-mock-agent.jar>
       ${projectRootDir}/constructor-mock-parent/constructor-mock-agent/target/constructor-mock-agent-${project.version}-all.jar
     </constructor-mock-agent.jar>
-    <remove-final-agent.jar>
-      ${projectRootDir}/remove-final-parent/remove-final-agent/target/remove-final-agent-${project.version}-all.jar
-    </remove-final-agent.jar>
+    <unfinal-agent.jar>
+      ${projectRootDir}/sarek-unfinal-parent/sarek-unfinal-agent/target/sarek-unfinal-agent-${project.version}-all.jar
+    </unfinal-agent.jar>
     <instrumented-jre.jar>
       ${projectRootDir}/sarek-test-parent/sarek-test-instrument-jre/target/sarek-test-instrument-jre-${project.version}.jar
     </instrumented-jre.jar>
@@ -91,7 +91,7 @@
               <aspect-agent.jar>${aspect-agent.jar}</aspect-agent.jar>
               <aspect-core.jar>${aspect-core.jar}</aspect-core.jar>
               <constructor-mock-agent.jar>${constructor-mock-agent.jar}</constructor-mock-agent.jar>
-              <remove-final-agent.jar>${remove-final-agent.jar}</remove-final-agent.jar>
+              <unfinal-agent.jar>${unfinal-agent.jar}</unfinal-agent.jar>
             </systemPropertyVariables>
           </configuration>
           <executions>
@@ -145,7 +145,7 @@
               <aspect-agent.jar>${aspect-agent.jar}</aspect-agent.jar>
               <aspect-core.jar>${aspect-core.jar}</aspect-core.jar>
               <constructor-mock-agent.jar>${constructor-mock-agent.jar}</constructor-mock-agent.jar>
-              <remove-final-agent.jar>${remove-final-agent.jar}</remove-final-agent.jar>
+              <unfinal-agent.jar>${unfinal-agent.jar}</unfinal-agent.jar>
             </systemPropertyVariables>
           </configuration>
           <executions>
@@ -422,12 +422,12 @@
       <!-- Internal dependencies -->
       <dependency>
         <groupId>dev.sarek</groupId>
-        <artifactId>remove-final-agent</artifactId>
+        <artifactId>sarek-unfinal-agent</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>dev.sarek</groupId>
-        <artifactId>remove-final-plugin</artifactId>
+        <artifactId>sarek-unfinal-plugin</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -520,10 +520,9 @@
   </pluginRepositories>
 
   <modules>
-    <module>remove-final-parent</module>
     <module>constructor-mock-parent</module>
-    <module>sarek-test-parent</module>
 
+    <module>sarek-test-parent</module>
     <module>sarek-constructor-mock-parent</module>
     <module>sarek-aspect-parent</module>
     <module>sarek-unfinal-parent</module>

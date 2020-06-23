@@ -26,7 +26,7 @@ public class SarekAgent {
   private static Instrumentation instrumentation;
 
   private static boolean verbose;
-  private static boolean removeFinalActive;
+  private static boolean unFinalActive;
   private static boolean aspectActive;
   private static boolean constructorMockActive;
   private static boolean mockActive;
@@ -49,7 +49,7 @@ public class SarekAgent {
     verbose = options.contains("verbose");
     if (verbose)
       System.out.println(AGENT_PREFIX + "command line options = " + commandLineOptions);
-    removeFinalActive = options.contains("removefinal");
+    unFinalActive = options.contains("unfinal");
     mockActive = options.contains("mock");
     aspectActive = mockActive || options.contains("aspect");
     constructorMockActive = mockActive || options.contains("constructormock");
@@ -60,8 +60,8 @@ public class SarekAgent {
     // Multiple agents could have been shaded into the same JAR file -> use a set of canonical file names
     Set<String> jarFileNames = new HashSet<>();
 
-    if (removeFinalActive)
-      jarFileNames.add(findJarFile("dev/sarek/agent/remove_final/RemoveFinalTransformer.class"));
+    if (unFinalActive)
+      jarFileNames.add(findJarFile("dev/sarek/agent/unfinal/UnFinalTransformer.class"));
     if (mockActive)
       jarFileNames.add(findJarFile("dev/sarek/agent/mock/MockFactory.class"));
     if (aspectActive)
@@ -81,8 +81,8 @@ public class SarekAgent {
       })
       .forEach(instrumentation::appendToBootstrapClassLoaderSearch);
 
-    if (removeFinalActive)
-      attachRemoveFinalTransformer(verbose);
+    if (unFinalActive)
+      attachUnFinalTransformer(verbose);
   }
 
   // TODO: optionally pack shaded JARs (all vs. all-special) into agent JAR, unpack and attach
@@ -128,13 +128,13 @@ public class SarekAgent {
     return jarFile.getCanonicalPath();
   }
 
-  private static void attachRemoveFinalTransformer(boolean logRemoveFinal) throws ReflectiveOperationException {
+  private static void attachUnFinalTransformer(boolean logUnFinal) throws ReflectiveOperationException {
     // TODO: refactor to use new Agent API
     instrumentation.addTransformer(
       (ClassFileTransformer) Class
-        .forName("dev.sarek.agent.remove_final.RemoveFinalTransformer")
+        .forName("dev.sarek.agent.unfinal.UnFinalTransformer")
         .getDeclaredMethod("createTransformer", boolean.class)
-        .invoke(null, logRemoveFinal),
+        .invoke(null, logUnFinal),
       false
     );
   }
@@ -151,8 +151,8 @@ public class SarekAgent {
     return verbose;
   }
 
-  public static boolean isRemoveFinalActive() {
-    return removeFinalActive;
+  public static boolean isUnFinalActive() {
+    return unFinalActive;
   }
 
   public static boolean isAspectActive() {

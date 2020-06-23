@@ -1,4 +1,4 @@
-package dev.sarek.agent.remove_final;
+package dev.sarek.agent.unfinal;
 
 import net.bytebuddy.jar.asm.ClassReader;
 import net.bytebuddy.jar.asm.ClassVisitor;
@@ -12,7 +12,7 @@ import java.security.ProtectionDomain;
 import static dev.sarek.agent.AgentRegistry.AGENT_REGISTRY;
 import static net.bytebuddy.jar.asm.Opcodes.ASM8;
 
-public class RemoveFinalTransformer extends ClassVisitor {
+public class UnFinalTransformer extends ClassVisitor {
   /*
     Formerly it was: PARSING_FLAGS = SKIP_DEBUG | SKIP_FRAMES.
     This worked flawlessly for all application classes, but when activating group filters in Maven Surefire,
@@ -32,15 +32,15 @@ public class RemoveFinalTransformer extends ClassVisitor {
   public final static int PARSING_FLAGS = 0;
 
   // TODO: make log level configurable
-  private boolean logRemoveFinal;
+  private boolean logUnFinal;
 
-  private final String LOG_PREFIX = AGENT_REGISTRY.isRegistered(RemoveFinalAgent.class)
+  private final String LOG_PREFIX = AGENT_REGISTRY.isRegistered(UnFinalAgent.class)
     ? "[Remove Final Agent] "
     : "[Remove Final Transformer] ";
 
   private String className;
 
-  public static ClassFileTransformer createTransformer(boolean logRemoveFinal) {
+  public static ClassFileTransformer createTransformer(boolean logUnFinal) {
     return new ClassFileTransformer() {
       @Override
       public byte[] transform(
@@ -53,15 +53,15 @@ public class RemoveFinalTransformer extends ClassVisitor {
       {
         ClassReader classReader = new ClassReader(classfileBuffer);
         ClassWriter classWriter = new ClassWriter(classReader, 0);
-        classReader.accept(new RemoveFinalTransformer(classWriter, logRemoveFinal), PARSING_FLAGS);
+        classReader.accept(new UnFinalTransformer(classWriter, logUnFinal), PARSING_FLAGS);
         return classWriter.toByteArray();
       }
     };
   }
 
-  public RemoveFinalTransformer(ClassVisitor cv, boolean logRemoveFinal) {
+  public UnFinalTransformer(ClassVisitor cv, boolean logUnFinal) {
     super(ASM8, cv);
-    this.logRemoveFinal = logRemoveFinal;
+    this.logUnFinal = logUnFinal;
   }
 
   @Override
@@ -71,7 +71,7 @@ public class RemoveFinalTransformer extends ClassVisitor {
       cv.visit(version, access, name, signature, superName, interfaces);
       return;
     }
-    if (logRemoveFinal && (access & Modifier.FINAL) != 0)
+    if (logUnFinal && (access & Modifier.FINAL) != 0)
       log("Removing final from class " + className);
     cv.visit(version, access & ~Modifier.FINAL, name, signature, superName, interfaces);
   }
@@ -80,7 +80,7 @@ public class RemoveFinalTransformer extends ClassVisitor {
   public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
     if (!shouldTransform())
       return super.visitMethod(access, name, desc, signature, exceptions);
-    if (logRemoveFinal && (access & Modifier.FINAL) != 0) {
+    if (logUnFinal && (access & Modifier.FINAL) != 0) {
       log("Removing final from method " + className + "." + name + desc);
     }
     return super.visitMethod(access & ~Modifier.FINAL, name, desc, signature, exceptions);

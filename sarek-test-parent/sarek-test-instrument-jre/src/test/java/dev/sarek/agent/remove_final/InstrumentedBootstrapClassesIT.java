@@ -1,4 +1,4 @@
-package dev.sarek.agent.remove_final;
+package dev.sarek.agent.unfinal;
 
 import dev.sarek.agent.test.SimpleMock;
 import dev.sarek.app.FinalClass;

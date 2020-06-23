@@ -1,4 +1,4 @@
-package dev.sarek.agent.remove_final;
+package dev.sarek.agent.unfinal;
 
 import dev.sarek.agent.Agent;
 import dev.sarek.agent.test.SeparateJVM;
@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
  * So we do not need a Java agent here.
  */
 @Category(SeparateJVM.class)
-public class RemoveFinalIT {
+public class UnFinalIT {
   private static final Instrumentation INSTRUMENTATION = Agent.getInstrumentation();
 
   @Test
@@ -30,17 +30,17 @@ public class RemoveFinalIT {
     // Ensure classes under test have not been loaded yet
     assertFalse(
       "This test needs to run in its own JVM, otherwise it could be too late for the" +
-        "'remove final' transformation already",
+        "'unfinal' transformation already",
       isClassLoaded("dev.sarek.app.FinalClass")
     );
     assertFalse(
       "This test needs to run in its own JVM, otherwise it could be too late for the" +
-        "'remove final' transformation already",
+        "'unfinal' transformation already",
       isClassLoaded("java.util.UUID")
     );
 
     // Activate definaliser
-    INSTRUMENTATION.addTransformer(RemoveFinalTransformer.createTransformer(true), false);
+    INSTRUMENTATION.addTransformer(UnFinalTransformer.createTransformer(true), false);
 
     // Final application class has been definalised
     assertFalse(Modifier.isFinal(FinalClass.class.getModifiers()));

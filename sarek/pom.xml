@@ -60,7 +60,7 @@
   <dependencies>
     <dependency>
       <groupId>dev.sarek</groupId>
-      <artifactId>remove-final-agent</artifactId>
+      <artifactId>sarek-unfinal-agent</artifactId>
 <!--      <optional>true</optional>-->
     </dependency>
     <dependency>

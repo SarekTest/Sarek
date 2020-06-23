@@ -33,7 +33,7 @@
         -->
         <maven-failsafe.argLine>
           -Xbootclasspath/p:${instrumented-jre.jar}
-          -javaagent:${sarek-agent.jar}=RemoveFinal,Mock,verXXXbose
+          -javaagent:${sarek-agent.jar}=UnFinal,Mock,verXXXbose
           <!-- -javaagent:${constructor-mock-agent.jar}-->
         </maven-failsafe.argLine>
       </properties>
@@ -56,7 +56,7 @@
         -->
         <maven-failsafe.argLine>
           --patch-module java.base=${instrumented-jre.jar}
-          -javaagent:${sarek-agent.jar}=RemoveFinal,Mock,verXXXbose
+          -javaagent:${sarek-agent.jar}=UnFinal,Mock,verXXXbose
           <!-- -javaagent:${constructor-mock-agent.jar}-->
           <!-- Needed for hot-attaching agents (e.g. PowerMock) on Java 9+ -->
           -Djdk.attach.allowAttachSelf=true

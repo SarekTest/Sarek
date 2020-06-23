@@ -209,14 +209,14 @@
           </initialization>
           <transformations>
             <transformation>
-              <plugin>dev.sarek.agent.remove_final.RemoveFinalPlugin</plugin>
+              <plugin>dev.sarek.agent.unfinal.UnFinalPlugin</plugin>
             </transformation>
           </transformations>
         </configuration>
         <dependencies>
           <dependency>
             <groupId>dev.sarek</groupId>
-            <artifactId>remove-final-plugin</artifactId>
+            <artifactId>sarek-unfinal-plugin</artifactId>
             <version>${project.version}</version>
           </dependency>
         </dependencies>
@@ -244,7 +244,7 @@
     </dependency>
     <dependency>
       <groupId>dev.sarek</groupId>
-      <artifactId>remove-final-plugin</artifactId>
+      <artifactId>sarek-unfinal-plugin</artifactId>
     </dependency>
 
   </dependencies>
