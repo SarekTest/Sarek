@@ -73,7 +73,7 @@
 
     <dependency>
       <groupId>dev.sarek</groupId>
-      <artifactId>constructor-mock-agent</artifactId>
+      <artifactId>sarek-constructor-mock-agent</artifactId>
     </dependency>
     <dependency>
       <groupId>dev.sarek</groupId>

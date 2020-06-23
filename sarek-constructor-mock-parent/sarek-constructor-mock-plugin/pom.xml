@@ -11,4 +11,15 @@
 
   <artifactId>sarek-constructor-mock-plugin</artifactId>
 
+  <dependencies>
+    <dependency>
+      <groupId>de.icongmbh.oss.maven.plugins</groupId>
+      <artifactId>javassist-maven-plugin</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>dev.sarek</groupId>
+      <artifactId>sarek-constructor-mock-agent</artifactId>
+    </dependency>
+  </dependencies>
+
 </project>

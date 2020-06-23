@@ -47,7 +47,7 @@
       ${projectRootDir}/sarek-aspect-parent/sarek-aspect/target/sarek-aspect-${project.version}-all.jar
     </aspect-core.jar>
     <constructor-mock-agent.jar>
-      ${projectRootDir}/constructor-mock-parent/constructor-mock-agent/target/constructor-mock-agent-${project.version}-all.jar
+      ${projectRootDir}/sarek-constructor-mock-parent/sarek-constructor-mock-agent/target/sarek-constructor-mock-agent-${project.version}-all.jar
     </constructor-mock-agent.jar>
     <unfinal-agent.jar>
       ${projectRootDir}/sarek-unfinal-parent/sarek-unfinal-agent/target/sarek-unfinal-agent-${project.version}-all.jar
@@ -442,7 +442,7 @@
       </dependency>
       <dependency>
         <groupId>dev.sarek</groupId>
-        <artifactId>constructor-mock-agent</artifactId>
+        <artifactId>sarek-constructor-mock-agent</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -520,16 +520,14 @@
   </pluginRepositories>
 
   <modules>
-    <module>constructor-mock-parent</module>
-
-    <module>sarek-test-parent</module>
-    <module>sarek-constructor-mock-parent</module>
-    <module>sarek-aspect-parent</module>
+    <module>sarek</module>
     <module>sarek-unfinal-parent</module>
+    <module>sarek-aspect-parent</module>
+    <module>sarek-constructor-mock-parent</module>
     <module>sarek-mock-parent</module>
     <module>sarek-agent-common</module>
-    <module>sarek</module>
     <module>sarek-agent</module>
+    <module>sarek-test-parent</module>
   </modules>
 
 </project>
