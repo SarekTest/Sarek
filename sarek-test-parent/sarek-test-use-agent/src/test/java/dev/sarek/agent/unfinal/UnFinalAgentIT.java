@@ -15,17 +15,6 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-/**
- * When running this test in an IDE like IntelliJ IDEA, please make sure that the JARs for both this module
- * ('bytebuddy-aspect-agent') and 'bytebuddy-aspect' have been created. Just run 'mvn package' first. In IDEA
- * you can also edit the run configuration for this test or a group of tests and add a "before launch" action,
- * select "run Maven goal" and then add goal 'package'.
- * de.icongmbh.oss.maven.plugin.javassist.ClassTransformer
- * Furthermore, make sure add this to the Maven Failsafe condiguration:
- * <argLine>-javaagent:target/sarek-aspect-agent-1.0-SNAPSHOT.jar</argLine>
- * Otherwise you will see a NoClassDefFoundError when running the tests for the bootstrap JRE classes because
- * boot class loader injection for the Java agent does not work as expected.
- */
 public class UnFinalAgentIT {
   @Test
   public void checkDefinaliser() throws NoSuchMethodException {

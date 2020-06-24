@@ -37,18 +37,12 @@
     <sarek-all.jar>
       ${projectRootDir}/sarek/target/sarek-${project.version}-all.jar
     </sarek-all.jar>
-    <mock-all.jar>
+    <mock.jar>
       ${projectRootDir}/sarek-mock-parent/sarek-mock/target/sarek-mock-${project.version}-all.jar
-    </mock-all.jar>
-    <aspect-agent.jar>
-      ${projectRootDir}/sarek-aspect-parent/sarek-aspect-agent/target/sarek-aspect-agent-${project.version}.jar
-    </aspect-agent.jar>
-    <aspect-core.jar>
-      ${projectRootDir}/sarek-aspect-parent/sarek-aspect/target/sarek-aspect-${project.version}-all.jar
-    </aspect-core.jar>
-    <constructor-mock-agent.jar>
-      ${projectRootDir}/sarek-constructor-mock-parent/sarek-constructor-mock-agent/target/sarek-constructor-mock-agent-${project.version}-all.jar
-    </constructor-mock-agent.jar>
+    </mock.jar>
+    <aspect.jar>
+      ${projectRootDir}/sarek-aspect/target/sarek-aspect-${project.version}-all.jar
+    </aspect.jar>
     <unfinal-agent.jar>
       ${projectRootDir}/sarek-unfinal-parent/sarek-unfinal-agent/target/sarek-unfinal-agent-${project.version}-all.jar
     </unfinal-agent.jar>
@@ -87,10 +81,8 @@
             <systemPropertyVariables>
               <sarek-agent.jar>${sarek-agent.jar}</sarek-agent.jar>
               <sarek-all.jar>${sarek-all.jar}</sarek-all.jar>
-              <mock-all.jar>${mock-all.jar}</mock-all.jar>
-              <aspect-agent.jar>${aspect-agent.jar}</aspect-agent.jar>
-              <aspect-core.jar>${aspect-core.jar}</aspect-core.jar>
-              <constructor-mock-agent.jar>${constructor-mock-agent.jar}</constructor-mock-agent.jar>
+              <mock.jar>${mock.jar}</mock.jar>
+              <aspect.jar>${aspect.jar}</aspect.jar>
               <unfinal-agent.jar>${unfinal-agent.jar}</unfinal-agent.jar>
             </systemPropertyVariables>
           </configuration>
@@ -141,10 +133,8 @@
             <systemPropertyVariables>
               <sarek-agent.jar>${sarek-agent.jar}</sarek-agent.jar>
               <sarek-all.jar>${sarek-all.jar}</sarek-all.jar>
-              <mock-all.jar>${mock-all.jar}</mock-all.jar>
-              <aspect-agent.jar>${aspect-agent.jar}</aspect-agent.jar>
-              <aspect-core.jar>${aspect-core.jar}</aspect-core.jar>
-              <constructor-mock-agent.jar>${constructor-mock-agent.jar}</constructor-mock-agent.jar>
+              <mock.jar>${mock.jar}</mock.jar>
+              <aspect.jar>${aspect.jar}</aspect.jar>
               <unfinal-agent.jar>${unfinal-agent.jar}</unfinal-agent.jar>
             </systemPropertyVariables>
           </configuration>
@@ -435,11 +425,6 @@
       </dependency>
       <dependency>
         <groupId>dev.sarek</groupId>
-        <artifactId>sarek-aspect-agent</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>dev.sarek</groupId>
         <artifactId>sarek-constructor-mock-agent</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -520,7 +505,7 @@
   <modules>
     <module>sarek</module>
     <module>sarek-unfinal-parent</module>
-    <module>sarek-aspect-parent</module>
+    <module>sarek-aspect</module>
     <module>sarek-constructor-mock-parent</module>
     <module>sarek-mock-parent</module>
     <module>sarek-agent-common</module>
