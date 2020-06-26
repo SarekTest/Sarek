@@ -189,7 +189,7 @@
                 <artifact>dev.sarek:sarek-agent-common</artifact>
                 <includes>
                   <include>dev/sarek/agent/**</include>
-                  <!-- Includes copies of ByteBuddy, ASM and Javassist licences in module sarek-agent-common -->
+                  <!-- Includes copies of ByteBuddy, ASM and Objenesis licences in module sarek-agent-common -->
                   <include>META-INF/license/**</include>
                 </includes>
               </filter>
@@ -207,12 +207,6 @@
               </filter>
               <filter>
                 <artifact>net.bytebuddy:*</artifact>
-                <excludes>
-                  <exclude>META-INF/**</exclude>
-                </excludes>
-              </filter>
-              <filter>
-                <artifact>org.javassist:*</artifact>
                 <excludes>
                   <exclude>META-INF/**</exclude>
                 </excludes>
@@ -248,10 +242,6 @@
               <relocation>
                 <pattern>net.bytebuddy</pattern>
                 <shadedPattern>dev.sarek.jar.bytebuddy</shadedPattern>
-              </relocation>
-              <relocation>
-                <pattern>javassist</pattern>
-                <shadedPattern>dev.sarek.jar.javassist</shadedPattern>
               </relocation>
               <relocation>
                 <pattern>org.objenesis</pattern>
