@@ -152,9 +152,8 @@ public class MockFactory<T> implements AutoCloseable {
           classHierarchy.add(superClass);
           superClass = superClass.getSuperclass();
         }
-        constructorMockTransformer = new ConstructorMockTransformer(classHierarchy);
-        Agent.getInstrumentation().addTransformer(constructorMockTransformer, true);
-        ConstructorMockRegistry.activate(targetClass.getName());
+        // TODO: option to exclude super types also for constructor mocking
+        constructorMockTransformer = ConstructorMockTransformer.forClass(targetClass).build();
       }
       if (mockInstanceMethods) {
         builder.weaverBuilder.addAdvice(
@@ -171,7 +170,12 @@ public class MockFactory<T> implements AutoCloseable {
     if (builder.global || builder.mockStaticMethods || builder.needsTargetClassTarget) {
       builder.weaverBuilder.addTargets(targetClass);
     }
+
+    // Important: First build weaver, then activate constructor mock targets. Otherwise the weaver builder might call
+    // already mocked constructors during setup.
     weaver = builder.weaverBuilder.build();
+    if (constructorMockTransformer != null)
+      ConstructorMockRegistry.activate(targetClass.getName());
   }
 
   public MockFactory<T> addTarget(Object target) throws IllegalArgumentException {
@@ -228,16 +232,16 @@ public class MockFactory<T> implements AutoCloseable {
       return;
     try {
       System.out.println("Closing Mock");
+      // Important: First deactivate constructor mock targets, then shut down weaver. Otherwise the weaver might call
+      // mocked constructors during shutdown.
       ConstructorMockRegistry.deactivate(targetClass.getName());
       targetClass = null;
+      weaver.unregisterTransformer();
+      weaver = null;
       if (constructorMockTransformer != null) {
-        Agent.getInstrumentation().removeTransformer(constructorMockTransformer);
+        constructorMockTransformer.close();
         constructorMockTransformer = null;
       }
-      // Automatically retransforms, thus also unapplies constructorMockTransformer -> TODO: test!
-      weaver.unregisterTransformer();
-      // INSTRUMENTATION.retransformClasses(classes);
-      weaver = null;
       System.out.println("Mock closed");
     }
     catch (Exception e) {

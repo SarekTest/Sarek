@@ -3,6 +3,7 @@ package dev.sarek.agent.constructor_mock;
 import dev.sarek.agent.test.SeparateJVM;
 import dev.sarek.app.*;
 import net.bytebuddy.agent.ByteBuddyAgent;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -30,8 +31,14 @@ import static org.junit.Assert.*;
  * retransformations, so they have to be done during class-loading.
  */
 @Category(SeparateJVM.class)
-public class ConstructorMockIT {
+public class JavassistConstructorMockIT {
   private static final Instrumentation INSTRUMENTATION = ByteBuddyAgent.install();
+  private static final Class<?>[] TRANSFORMATION_TARGETS = {
+    Sub.class, Base.class,
+    UUID.class,
+    SubWithComplexConstructor.class, BaseWithComplexConstructor.class
+  };
+  private static ConstructorMockJavassistTransformer constructorMockTransformer;
 
   @BeforeClass
   public static void beforeClass() throws IOException, UnmodifiableClassException {
@@ -40,6 +47,29 @@ public class ConstructorMockIT {
     JarFile sarekAllJar = new JarFile(System.getProperty("sarek-all.jar"));
     // Inject constructor mock agent JAR into bootstrap classloader
     INSTRUMENTATION.appendToBootstrapClassLoaderSearch(sarekAllJar);
+
+//    ConstructorMockJavassistTransformer.LOG_CONSTRUCTOR_MOCK = true;
+//    ConstructorMockJavassistTransformer.DUMP_CLASS_FILES = true;
+
+    // Create global transformer without includes list in order to test if there is any problem with transforming
+    // additional JRE bootstrap classes with dormant constructor mocking code.
+    constructorMockTransformer = new ConstructorMockJavassistTransformer();
+    // Alternatively just mock target classes incl. parents
+    //constructorMockTransformer = new ConstructorMockJavassistTransformer(TRANSFORMATION_TARGETS);
+
+    // Important: set 'canRetransform' parameter to true
+    INSTRUMENTATION.addTransformer(constructorMockTransformer, true);
+    INSTRUMENTATION.retransformClasses(TRANSFORMATION_TARGETS);
+  }
+
+  @AfterClass
+  public static void afterClass() throws UnmodifiableClassException {
+    INSTRUMENTATION.removeTransformer(constructorMockTransformer);
+    INSTRUMENTATION.retransformClasses(TRANSFORMATION_TARGETS);
+    constructorMockTransformer = null;
+
+    ConstructorMockJavassistTransformer.LOG_CONSTRUCTOR_MOCK = false;
+    ConstructorMockJavassistTransformer.DUMP_CLASS_FILES = false;
   }
 
   Base base;
@@ -76,7 +106,7 @@ public class ConstructorMockIT {
     // (2a) Retransform already loaded application class (incl. all ancestors) in order to make constructor mockable
     // TODO: make this easier by just providing Sub and letting the framework take care of the ancestors
     // TODO: Multiple retransformations work fine, buy will byte code be inserted multiple times? -> check & improve
-//    INSTRUMENTATION.retransformClasses(Sub.class, Base.class);
+    INSTRUMENTATION.retransformClasses(Sub.class, Base.class);
 
     // (2b) After activating constructor mock mode for class Sub,
     //   - fields should be uninitialised for Sub instances,
@@ -84,43 +114,37 @@ public class ConstructorMockIT {
     //   - When instantiating child classes of Sub, their own constructors will not be mocked either, but the
     //     parent constructors from Sub upwards (i.e. Sub, Base) will be.
 
-    try (
-      ConstructorMockTransformer<Sub> constructorMockTransformer =
-        ConstructorMockTransformer.forClass(Sub.class).build()
-    ) {
-      // TODO: add auto activation/cleanup features to ConstructorMockTransformer
-      ConstructorMockRegistry.activate(className_Sub);
-      assertTrue(ConstructorMockRegistry.isMock(className_Sub));
-      initialiseSubjectsUnderTest();
-      // No change in behaviour for base class Base
-      assertEquals(11, base.getId());
-      // Constructor mock effect for target class Sub
-      assertEquals(0, sub.getId());
-      assertNull(sub.getName());
-      // No change in behaviour for sibling class AnotherSub
-      assertEquals(33, anotherSub.getId());
-      assertEquals("bar", anotherSub.getName());
-      // ExtendsSub extends Sub is unaffected because it is not a target class but only a sub class
-      assertEquals(44, extendsSub.getId());
-      assertEquals("zot", extendsSub.getName());
-      assertNotNull(extendsSub.getDate());
+    ConstructorMockRegistry.activate(className_Sub);
+    assertTrue(ConstructorMockRegistry.isMock(className_Sub));
+    initialiseSubjectsUnderTest();
+    // No change in behaviour for base class Base
+    assertEquals(11, base.getId());
+    // Constructor mock effect for target class Sub
+    assertEquals(0, sub.getId());
+    assertNull(sub.getName());
+    // No change in behaviour for sibling class AnotherSub
+    assertEquals(33, anotherSub.getId());
+    assertEquals("bar", anotherSub.getName());
+    // ExtendsSub extends Sub is unaffected because it is not a target class but only a sub class
+    assertEquals(44, extendsSub.getId());
+    assertEquals("zot", extendsSub.getName());
+    assertNotNull(extendsSub.getDate());
 
-      System.out.println("-----");
+    System.out.println("-----");
 
-      // (3) After deactivating constructor mock mode for class Sub, everything is normal again
+    // (3) After deactivating constructor mock mode for class Sub, everything is normal again
 
-      ConstructorMockRegistry.deactivate(className_Sub);
-      assertFalse(ConstructorMockRegistry.isMock(className_Sub));
-      initialiseSubjectsUnderTest();
-      assertEquals(11, base.getId());
-      assertEquals(22, sub.getId());
-      assertEquals("foo", sub.getName());
-      assertEquals(33, anotherSub.getId());
-      assertEquals("bar", anotherSub.getName());
-      assertEquals(44, extendsSub.getId());
-      assertEquals("zot", extendsSub.getName());
-      assertNotNull(extendsSub.getDate());
-    }
+    ConstructorMockRegistry.deactivate(className_Sub);
+    assertFalse(ConstructorMockRegistry.isMock(className_Sub));
+    initialiseSubjectsUnderTest();
+    assertEquals(11, base.getId());
+    assertEquals(22, sub.getId());
+    assertEquals("foo", sub.getName());
+    assertEquals(33, anotherSub.getId());
+    assertEquals("bar", anotherSub.getName());
+    assertEquals(44, extendsSub.getId());
+    assertEquals("zot", extendsSub.getName());
+    assertNotNull(extendsSub.getDate());
   }
 
   @Test
@@ -130,22 +154,17 @@ public class ConstructorMockIT {
     assertEquals("00000000-0000-abba-0000-00000000cafe", new UUID(0xABBA, 0xCAFE).toString());
 
     // (2a) Retransform already loaded (bootstrap) class UUID in order to make constructors mockable
-//    INSTRUMENTATION.retransformClasses(UUID.class);
+    INSTRUMENTATION.retransformClasses(UUID.class);
 
     // (2b) Make UUID constructor mockable
-    try (
-      ConstructorMockTransformer<UUID> constructorMockTransformer =
-        ConstructorMockTransformer.forClass(UUID.class).build()
-    ) {
-      ConstructorMockRegistry.activate(UUID.class.getName());
-      assertTrue(ConstructorMockRegistry.isMock(UUID.class.getName()));
-      assertEquals("00000000-0000-0000-0000-000000000000", new UUID(0xABBA, 0xCAFE).toString());
+    ConstructorMockRegistry.activate(UUID.class.getName());
+    assertTrue(ConstructorMockRegistry.isMock(UUID.class.getName()));
+    assertEquals("00000000-0000-0000-0000-000000000000", new UUID(0xABBA, 0xCAFE).toString());
 
-      // (3) After deactivating constructor mock mode for class UUID, everything is normal again
-      ConstructorMockRegistry.deactivate(UUID.class.getName());
-      assertFalse(ConstructorMockRegistry.isMock(UUID.class.getName()));
-      assertEquals("00000000-0000-abba-0000-00000000cafe", new UUID(0xABBA, 0xCAFE).toString());
-    }
+    // (3) After deactivating constructor mock mode for class UUID, everything is normal again
+    ConstructorMockRegistry.deactivate(UUID.class.getName());
+    assertFalse(ConstructorMockRegistry.isMock(UUID.class.getName()));
+    assertEquals("00000000-0000-abba-0000-00000000cafe", new UUID(0xABBA, 0xCAFE).toString());
   }
 
   /**
@@ -157,24 +176,18 @@ public class ConstructorMockIT {
   @Test
   public void constructorMockComplexConstructor() {
     String className = SubWithComplexConstructor.class.getName();
-    try (
-      ConstructorMockTransformer<SubWithComplexConstructor> constructorMockTransformer =
-        ConstructorMockTransformer.forClass(SubWithComplexConstructor.class).build()
-    ) {
-      ConstructorMockRegistry.activate(className);
-      assertTrue(
-        new SubWithComplexConstructor(
-          (byte) 123, '@', 123.45, 67.89f,
-          123, 123, (short) 123, true,
-          "foo", new int[][] { { 12, 34 }, { 56, 78 } }
-        ).toString().contains(
-          "aByte=0, aChar=\0, aDouble=0.0, aFloat=0.0, " +
-            "anInt=0, aLong=0, aShort=0, aBoolean=false, " +
-            "string='null', ints=null"
-        )
-      );
-      ConstructorMockRegistry.deactivate(className);
-    }
+    ConstructorMockRegistry.activate(className);
+    assertTrue(
+      new SubWithComplexConstructor(
+        (byte) 123, '@', 123.45, 67.89f,
+        123, 123, (short) 123, true,
+        "foo", new int[][] { { 12, 34 }, { 56, 78 } }
+      ).toString().contains(
+        "aByte=0, aChar=\0, aDouble=0.0, aFloat=0.0, " +
+          "anInt=0, aLong=0, aShort=0, aBoolean=false, " +
+          "string='null', ints=null"
+      )
+    );
+    ConstructorMockRegistry.deactivate(className);
   }
-
 }

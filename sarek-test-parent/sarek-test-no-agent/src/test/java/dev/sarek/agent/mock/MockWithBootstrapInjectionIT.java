@@ -30,16 +30,6 @@ import static org.junit.Assert.*;
 @Category(SeparateJVM.class)
 public class MockWithBootstrapInjectionIT {
   @BeforeClass
-  public static void beforeClass() {
-    ConstructorMockTransformer.LOG_CONSTRUCTOR_MOCK = true;
-  }
-
-  @AfterClass
-  public static void afterClass() {
-    ConstructorMockTransformer.LOG_CONSTRUCTOR_MOCK = false;
-  }
-
-  @BeforeClass
   public static void addDependenciesToBootClassPath() throws IOException {
     Instrumentation INSTRUMENTATION = Agent.getInstrumentation();
 
@@ -77,19 +67,17 @@ public class MockWithBootstrapInjectionIT {
   }
 
   /**
-   * Do not mock File and FileInputStream at the same time because at least under Java 8 it causes exceptions during
+   * Do not mock File and FileInputStream at the same time because it causes ByteBuddy/ASM exceptions during
    * FileInputStream transformation:
    * <p></p>
-   * <pre>{@code RuntimeException: Cannot make constructors mockable for class FileInputStream
-   * ...
-   * Caused by: java.lang.NullPointerException
-   *   at java.io.FilePermission.init
-   *   ...
-   *   at javassist.CtClassType.getConstructors
-   *   at dev.sarek.agent.constructor_mock.ConstructorMockTransformer.getSuperCall}</pre>
+   * <pre>{@code [Byte Buddy] ERROR java.io.FileInputStream [null, module java.base, loaded=true]
+   * java.lang.IllegalStateException: Could not locate class file for dev.sarek.agent.aspect.HashCodeAspect
+   * 	at net.bytebuddy.dynamic.ClassFileLocator$Resolution$Illegal.resolve(ClassFileLocator.java:118)
+   * 	at net.bytebuddy.asm.Advice.to(Advice.java:351)}</pre>
    * <p></p>
-   * If we mock them separately, we do not hit this problem, but this test might still fail in the future. Keep it as
-   * a show case for more difficult situations and to document known edge cases.
+   * If we mock them separately, we do not hit this problem, but this test might still fail in the future because
+   * file-related classes like the ones under test are being used by ByteBuddy in order to do class file location.
+   * Keep the test as a show case for more difficult situations and to document known edge cases.
    *
    * @throws IOException
    */

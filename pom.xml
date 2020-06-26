@@ -21,7 +21,6 @@
 
     <bytebuddy.version>1.10.11</bytebuddy.version>
     <javassist.version>3.27.0-GA</javassist.version>
-    <javassist-maven-plugin.version>2.0.0</javassist-maven-plugin.version>
     <objenesis.version>3.1</objenesis.version>
 
     <!--
@@ -304,37 +303,6 @@
           <version>3.0.0</version>
         </plugin>
 
-        <plugin>
-          <groupId>de.icongmbh.oss.maven.plugins</groupId>
-          <artifactId>javassist-maven-plugin</artifactId>
-          <version>2.0.0</version>
-          <configuration>
-            <includeTestClasses>false</includeTestClasses>
-            <!-- TODO: create demo test module weaving constructor mock code into JRE bootstrap classes -->
-            <!--
-            <transformerClasses>
-              <transformerClass>
-                <className>ConstructorMockPluginTransformer</className>
-                <properties>
-                  <property>
-                    <name>append.value</name>
-                    <value>and ToStringTransformer</value>
-                  </property>
-                </properties>
-              </transformerClass>
-            </transformerClasses>
-            -->
-          </configuration>
-          <executions>
-            <execution>
-              <phase>process-classes</phase>
-              <goals>
-                <goal>javassist</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-
       </plugins>
     </pluginManagement>
 
@@ -388,17 +356,6 @@
         <artifactId>javassist</artifactId>
         <version>${javassist.version}</version>
       </dependency>
-      <dependency>
-        <groupId>de.icongmbh.oss.maven.plugins</groupId>
-        <artifactId>javassist-maven-plugin</artifactId>
-        <version>${javassist-maven-plugin.version}</version>
-      </dependency>
-      <!-- Resolve version conflict inside javassist-maven-plugin -->
-      <dependency>
-        <groupId>org.codehaus.plexus</groupId>
-        <artifactId>plexus-utils</artifactId>
-        <version>3.2.0</version>
-      </dependency>
 
       <!-- Objenesis, used for creating injectable mocks for  final classes  -->
       <dependency>
@@ -425,7 +382,12 @@
       </dependency>
       <dependency>
         <groupId>dev.sarek</groupId>
-        <artifactId>sarek-constructor-mock-agent</artifactId>
+        <artifactId>sarek-constructor-mock</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>dev.sarek</groupId>
+        <artifactId>sarek-constructor-mock-javassist</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -441,6 +403,11 @@
       <dependency>
         <groupId>dev.sarek</groupId>
         <artifactId>sarek-agent</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>dev.sarek</groupId>
+        <artifactId>sarek-common</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -504,9 +471,11 @@
 
   <modules>
     <module>sarek</module>
+    <module>sarek-common</module>
     <module>sarek-unfinal-parent</module>
     <module>sarek-aspect</module>
-    <module>sarek-constructor-mock-parent</module>
+    <module>sarek-constructor-mock</module>
+    <module>sarek-constructor-mock-javassist</module>
     <module>sarek-mock-parent</module>
     <module>sarek-agent-common</module>
     <module>sarek-agent</module>

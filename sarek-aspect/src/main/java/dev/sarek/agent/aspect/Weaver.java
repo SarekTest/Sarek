@@ -144,9 +144,9 @@ public class Weaver {
     this.provideHashCodeEquals = provideHashCodeEquals;
 
     try {
+      this.transformer = registerTransformer();
       for (Object target : targets)
         addTarget(target);
-      this.transformer = registerTransformer();
     }
     catch (RuntimeException exceptionDuringRegistration) {
       try {

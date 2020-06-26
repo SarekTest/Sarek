@@ -16,18 +16,6 @@ import static org.junit.Assert.*;
 
 @Category(SeparateJVM.class)
 public class MockIT {
-  @BeforeClass
-  public static void beforeClass() {
-//    ConstructorMockTransformer.LOG_CONSTRUCTOR_MOCK = true;
-//    ConstructorMockTransformer.DUMP_CLASS_FILES = true;
-  }
-
-  @AfterClass
-  public static void afterClass() {
-    ConstructorMockTransformer.LOG_CONSTRUCTOR_MOCK = false;
-    ConstructorMockTransformer.DUMP_CLASS_FILES = false;
-  }
-
   @Test
   public void canMockApplicationClasses() {
     // Try with resources works for Mock because it implements AutoCloseable

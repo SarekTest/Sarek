@@ -31,13 +31,12 @@ public class UnFinalTransformer extends ClassVisitor {
   */
   public final static int PARSING_FLAGS = 0;
 
-  // TODO: make log level configurable
-  private boolean logUnFinal;
-
-  private final String LOG_PREFIX = AGENT_REGISTRY.isRegistered(UnFinalAgent.class)
+  private final static String LOG_PREFIX = AGENT_REGISTRY.isRegistered(UnFinalAgent.class)
     ? "[UnFinal Agent] "
     : "[UnFinal Transformer] ";
 
+  // TODO: make log level configurable
+  private boolean logUnFinal;
   private String className;
 
   public static ClassFileTransformer createTransformer(boolean logUnFinal) {

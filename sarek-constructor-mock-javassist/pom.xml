@@ -9,21 +9,40 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>sarek-aspect</artifactId>
+  <artifactId>sarek-constructor-mock-javassist</artifactId>
+
+  <build>
+    <plugins>
+
+      <!-- Note that here we use Surefire, not Failsafe, i.e. no agent JARs -->
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+
+    </plugins>
+  </build>
 
   <dependencies>
 
     <dependency>
-      <groupId>net.bytebuddy</groupId>
-      <artifactId>byte-buddy</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>dev.sarek</groupId>
-      <artifactId>sarek-common</artifactId>
+      <groupId>org.javassist</groupId>
+      <artifactId>javassist</artifactId>
     </dependency>
     <dependency>
       <groupId>dev.sarek</groupId>
       <artifactId>sarek-agent-common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>dev.sarek</groupId>
+      <artifactId>sarek-constructor-mock</artifactId>
+    </dependency>
+
+    <!-- Test dependencies -->
+
+    <dependency>
+      <groupId>dev.sarek</groupId>
+      <artifactId>sarek-test-common</artifactId>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>

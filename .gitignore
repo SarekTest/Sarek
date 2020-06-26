@@ -11,5 +11,5 @@
 # Maven
 target/
 
-# Class files dumped by TransformedClassFileWriter
+# Class files dumped by TransformedClassFileWriter, ASMifier or ByteBuddy
 *.class

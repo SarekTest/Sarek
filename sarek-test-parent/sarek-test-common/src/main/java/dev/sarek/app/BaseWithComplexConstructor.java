@@ -40,7 +40,7 @@ public class BaseWithComplexConstructor {
       ", aShort=" + aShort +
       ", aBoolean=" + aBoolean +
       ", string='" + string + '\'' +
-      ", ints=" + Arrays.toString(ints) +
+      ", ints=" + Arrays.deepToString(ints) +
       ')';
   }
 }

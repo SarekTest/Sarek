@@ -44,14 +44,12 @@ public class ConstructorMockAspectIT {
 
   @Before
   public void beforeTest() {
-    constructorMockTransformer = new ConstructorMockTransformer(FinalClass.class);
-    // Important: set 'canRetransform' parameter to true
-    Agent.getInstrumentation().addTransformer(constructorMockTransformer, true);
+    constructorMockTransformer = ConstructorMockTransformer.forClass(FinalClass.class).build();
   }
 
   @After
   public void afterTest() {
-    Agent.getInstrumentation().removeTransformer(constructorMockTransformer);
+    constructorMockTransformer.close();
     constructorMockTransformer = null;
     if (weaver != null)
       weaver.unregisterTransformer();

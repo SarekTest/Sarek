@@ -19,46 +19,6 @@
         <artifactId>maven-surefire-plugin</artifactId>
       </plugin>
 
-      <!-- Include dependencies -->
-      <plugin>
-        <artifactId>maven-shade-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>shade</id>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <minimizeJar>false</minimizeJar>
-              <createDependencyReducedPom>false</createDependencyReducedPom>
-              <shadedArtifactAttached>true</shadedArtifactAttached>
-              <shadedClassifierName>all</shadedClassifierName>
-              <relocations>
-                <relocation>
-                  <excludes>
-                    <exclude>*</exclude>
-                  </excludes>
-                </relocation>
-              </relocations>
-            </configuration>
-          </execution>
-          <execution>
-            <id>shade-relocate</id>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <minimizeJar>false</minimizeJar>
-              <createDependencyReducedPom>false</createDependencyReducedPom>
-              <shadedArtifactAttached>true</shadedArtifactAttached>
-              <shadedClassifierName>all-special</shadedClassifierName>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
     </plugins>
   </build>
 
@@ -73,7 +33,7 @@
 
     <dependency>
       <groupId>dev.sarek</groupId>
-      <artifactId>sarek-constructor-mock-agent</artifactId>
+      <artifactId>sarek-constructor-mock</artifactId>
     </dependency>
     <dependency>
       <groupId>dev.sarek</groupId>

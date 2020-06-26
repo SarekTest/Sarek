@@ -464,8 +464,4 @@ public class MockTest {
     }
   }
 
-  @Test
-  public void addAdvice() {
-
-  }
 }
