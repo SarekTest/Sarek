@@ -1,6 +1,5 @@
 package dev.sarek.agent.mock;
 
-import dev.sarek.agent.Agent;
 import dev.sarek.agent.aspect.*;
 import dev.sarek.agent.constructor_mock.ConstructorMockRegistry;
 import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;

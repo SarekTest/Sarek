@@ -30,10 +30,6 @@
     </dependency>
     <dependency>
       <groupId>dev.sarek</groupId>
-      <artifactId>sarek-agent-common</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>dev.sarek</groupId>
       <artifactId>sarek-constructor-mock</artifactId>
     </dependency>
 
@@ -42,6 +38,11 @@
     <dependency>
       <groupId>dev.sarek</groupId>
       <artifactId>sarek-test-common</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.bytebuddy</groupId>
+      <artifactId>byte-buddy-agent</artifactId>
       <scope>test</scope>
     </dependency>
 

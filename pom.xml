@@ -37,7 +37,7 @@
       ${projectRootDir}/sarek/target/sarek-${project.version}-all.jar
     </sarek-all.jar>
     <mock.jar>
-      ${projectRootDir}/sarek-mock-parent/sarek-mock/target/sarek-mock-${project.version}-all.jar
+      ${projectRootDir}/sarek-mock/target/sarek-mock-${project.version}-all.jar
     </mock.jar>
     <aspect.jar>
       ${projectRootDir}/sarek-aspect/target/sarek-aspect-${project.version}-all.jar
@@ -466,7 +466,7 @@
     <module>sarek-aspect</module>
     <module>sarek-constructor-mock</module>
     <module>sarek-constructor-mock-javassist</module>
-    <module>sarek-mock-parent</module>
+    <module>sarek-mock</module>
     <module>sarek-agent-common</module>
     <module>sarek-agent</module>
     <module>sarek-test-parent</module>

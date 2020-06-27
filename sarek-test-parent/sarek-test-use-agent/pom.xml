@@ -80,13 +80,9 @@
 
   <dependencies>
 
-    <dependency>
-      <groupId>net.bytebuddy</groupId>
-      <artifactId>byte-buddy</artifactId>
-    </dependency>
-
     <!-- Test dependencies -->
 
+    <!-- Sarek multi agent uber JAR -->
     <dependency>
       <groupId>dev.sarek</groupId>
       <artifactId>sarek</artifactId>
@@ -94,7 +90,7 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
-    <!-- Needed on the command line for '-javaagent:...' -->
+    <!-- Sarek multi agent launcher - needed on command line for '-javaagent:...' -->
     <dependency>
       <groupId>dev.sarek</groupId>
       <artifactId>sarek-agent</artifactId>
