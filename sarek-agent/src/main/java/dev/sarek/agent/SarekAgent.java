@@ -8,7 +8,9 @@ import java.lang.instrument.Instrumentation;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
+import java.util.function.Function;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 
 // TODO:
 //   - In order to avoid possible collisions with clients using BB in a conflicting
@@ -60,14 +62,45 @@ public class SarekAgent {
     // Multiple agents could have been shaded into the same JAR file -> use a set of canonical file names
     Set<String> jarFileNames = new HashSet<>();
 
-    if (unFinalActive)
+    // ByteBuddy agent - TODO: check for relocated Sarek name too
+    jarFileNames.add(findJarFile("net/bytebuddy/agent/ByteBuddyAgent.class"));
+
+    if (unFinalActive) {
+      // Sarek unfinal
       jarFileNames.add(findJarFile("dev/sarek/agent/unfinal/UnFinalTransformer.class"));
-    if (mockActive)
+      // ByteBuddy ASM - TODO: check for relocated Sarek name too
+      jarFileNames.add(findJarFile("net/bytebuddy/jar/asm/ClassVisitor.class"));
+      // Sarek agent common
+      jarFileNames.add(findJarFile("dev/sarek/agent/Agent.class"));
+    }
+    if (mockActive) {
+      // Sarek mock
       jarFileNames.add(findJarFile("dev/sarek/agent/mock/MockFactory.class"));
-    if (aspectActive)
+      // Objenesis - TODO: check for relocated Sarek name too
+      jarFileNames.add(findJarFile("org/objenesis/ObjenesisStd.class"));
+      // ByteBuddy - TODO: check for relocated Sarek name too
+      jarFileNames.add(findJarFile("net/bytebuddy/matcher/ElementMatcher.class"));
+    }
+    if (aspectActive) {
+      // Sarek aspect
       jarFileNames.add(findJarFile("dev/sarek/agent/aspect/Weaver.class"));
-    if (constructorMockActive)
+      // ByteBuddy - TODO: check for relocated Sarek name too
+      jarFileNames.add(findJarFile("net/bytebuddy/asm/Advice.class"));
+      // Sarek common
+      jarFileNames.add(findJarFile("dev/sarek/agent/util/BiMultiMap.class"));
+      // Sarek agent commons
+      jarFileNames.add(findJarFile("dev/sarek/agent/Agent.class"));
+    }
+    if (constructorMockActive) {
+      // Sarek constructor mock
       jarFileNames.add(findJarFile("dev/sarek/agent/constructor_mock/ConstructorMockTransformer.class"));
+      // ByteBuddy - TODO: check for relocated Sarek name too
+      jarFileNames.add(findJarFile("net/bytebuddy/matcher/ElementMatcher.class"));
+      // Sarek common
+      jarFileNames.add(findJarFile("dev/sarek/agent/util/BiMultiMap.class"));
+      // Sarek agent common
+      jarFileNames.add(findJarFile("dev/sarek/agent/Agent.class"));
+    }
 
     jarFileNames
       .stream()
@@ -108,17 +141,30 @@ public class SarekAgent {
       // the runner insists on referring to the 'sarek-aspect' module locally via 'target/classes'
       // instead of to the JAR in the local Maven repository or in the module's 'target' directory.
       File targetDir = new File(resourceURL.replaceFirst("(/target)/classes/.*", "$1"));
-      jarFile = Arrays
-        .stream(Objects.requireNonNull(
-          targetDir.listFiles((dir, name) ->
-            // TODO: "-all" or "all-special" -> how to decide?
-            name.endsWith("-all.jar") && !name.endsWith("-javadoc.jar") && !name.endsWith("-sources.jar")
+      Map<String, File> mappedJarFiles = Arrays
+        .stream(
+          Objects.requireNonNull(
+            targetDir.listFiles((dir, name) ->
+              // TODO: "-all" or "all-special" -> how to decide?
+              name.endsWith(".jar") && !name.endsWith("-javadoc.jar") && !name.endsWith("-sources.jar")
+            )
           )
-        ))
-        .findFirst()
-        .orElseThrow(() -> new FileNotFoundException(
+        )
+        .collect(
+          Collectors.toMap(
+            file -> file.getName().replaceFirst(".+?(-all(-special)?)?\\.jar", "$1"),
+            Function.identity()
+          )
+        );
+      jarFile = mappedJarFiles.get("-all.jar");
+      if (jarFile == null)
+        jarFile = mappedJarFiles.get("");
+      if (jarFile == null)
+        jarFile = mappedJarFiles.get("-all-special");
+      if (jarFile == null)
+        throw new FileNotFoundException(
           "Cannot find JAR file containing resource " + ressourcePath + " in directory " + targetDir
-        ));
+        );
     }
     else {
       jarFile = new File(new URL(resourceURL).toURI());
