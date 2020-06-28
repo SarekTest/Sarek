@@ -4,12 +4,11 @@ import dev.sarek.agent.util.TransformedClassFileWriter;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
 import net.bytebuddy.asm.AsmVisitorWrapper;
-import net.bytebuddy.description.field.FieldDescription;
-import net.bytebuddy.description.field.FieldList;
-import net.bytebuddy.description.method.MethodList;
+import net.bytebuddy.asm.AsmVisitorWrapper.ForDeclaredMethods.MethodVisitorWrapper;
+import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.implementation.Implementation;
-import net.bytebuddy.jar.asm.ClassVisitor;
+import net.bytebuddy.jar.asm.MethodVisitor;
 import net.bytebuddy.pool.TypePool;
 
 import java.util.Arrays;
@@ -86,7 +85,13 @@ public class ConstructorMockTransformer<T> implements AutoCloseable {
           .and(not(anyOf(transformerBuilder.excludedSuperClasses)))
       )
       .transform((builder, typeDescription, classLoader, module) ->
-        builder.visit(new ConstructorMockVisitorWrapper(transformerBuilder.logVerbose))
+        builder.visit(
+          new AsmVisitorWrapper
+            .ForDeclaredMethods()
+            .constructor(any(), new ConstructorMockMethodVisitorWrapper(transformerBuilder.logVerbose))
+            .writerFlags(COMPUTE_FRAMES)
+            .readerFlags(0)
+        )
       )
       .installOn(getInstrumentation());
     resetTransformationOnClose = transformerBuilder.resetTransformationOnClose;
@@ -99,36 +104,27 @@ public class ConstructorMockTransformer<T> implements AutoCloseable {
     getInstrumentation().removeTransformer(transformer);
   }
 
-  private static class ConstructorMockVisitorWrapper implements AsmVisitorWrapper {
-    private ConstructorMockVisitorWrapper(boolean logVerbose) {
+  private static class ConstructorMockMethodVisitorWrapper implements MethodVisitorWrapper {
+    private ConstructorMockMethodVisitorWrapper(boolean logVerbose) {
       this.logVerbose = logVerbose;
     }
 
     private final boolean logVerbose;
 
     @Override
-    public int mergeWriter(int flags) {
-      return COMPUTE_FRAMES;
-    }
-
-    @Override
-    public int mergeReader(int flags) {
-      return 0;
-    }
-
-    @Override
-    public ClassVisitor wrap(
+    public MethodVisitor wrap(
       TypeDescription instrumentedType,
-      ClassVisitor classVisitor,
+      MethodDescription instrumentedMethod,
+      MethodVisitor methodVisitor,
       Implementation.Context implementationContext,
       TypePool typePool,
-      FieldList<FieldDescription.InDefinedShape> fields,
-      MethodList<?> methods,
       int writerFlags,
-      int readerFlags
-    )
+      int readerFlags)
     {
-      return new ConstructorMockClassVisitor(instrumentedType, classVisitor, logVerbose);
+      if (logVerbose)
+        System.out.println("[Constructor Mock Transformer] Mocking constructor " + instrumentedMethod);
+      return new ConstructorMockMethodVisitor(instrumentedType, methodVisitor);
     }
   }
+
 }
