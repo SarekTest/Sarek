@@ -57,6 +57,14 @@ public class ConstructorMockRegistry {
    * @return boolean value specifying if the object under construction ought to be a mock or not
    */
   public static boolean isMockUnderConstruction() {
+    // TODO:
+    //   - Under Java 8, according to Rafael Winterhalter it would be quicker and more efficient (as in not
+    //     materialising the whole stack) to use sun.misc.JavaLangAccess, e.g.
+    //       sun.misc.SharedSecrets.getJavaLangAccess().getStackTraceElement(new Throwable(), 2)
+    //   - Java 9+ has the Stack Walking API (https://www.baeldung.com/java-9-stackwalking-api).
+    //   - In oder to dynamically switch between the two, look into method handles for dispatching to the appropriate
+    //     API (https://www.baeldung.com/java-method-handles).
+
     // This is said to be faster than Thread.currentThread().getStackTrace()
     StackTraceElement[] stackTrace = new Throwable().getStackTrace();
     int constructorIndex = -1;
