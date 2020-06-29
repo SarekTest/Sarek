@@ -12,7 +12,7 @@
   <artifactId>sarek-test-no-agent</artifactId>
 
   <properties>
-    <maven-failsafe.argLine>-Xbootclasspath/a:${sarek-all.jar}</maven-failsafe.argLine>
+    <maven-failsafe.argLine>-Xbootclasspath/a:${sarek.jar}</maven-failsafe.argLine>
   </properties>
 
   <build>
@@ -43,10 +43,15 @@
     <dependency>
       <groupId>dev.sarek</groupId>
       <artifactId>sarek</artifactId>
-      <classifier>all</classifier>
-      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
+<!--
+    <dependency>
+      <groupId>dev.sarek</groupId>
+      <artifactId>sarek-all</artifactId>
+      <scope>test</scope>
+    </dependency>
+-->
 
   </dependencies>
 

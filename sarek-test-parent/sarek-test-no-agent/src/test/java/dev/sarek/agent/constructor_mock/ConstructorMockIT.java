@@ -37,7 +37,7 @@ public class ConstructorMockIT {
   public static void beforeClass() throws IOException, UnmodifiableClassException {
     // This property is usually set in Maven in order to tell us the path to the constructor mock agent.
     // Important: The JAR needs to contain Javassist too, so it should be the '-all' or '-all-special' artifact.
-    JarFile sarekAllJar = new JarFile(System.getProperty("sarek-all.jar"));
+    JarFile sarekAllJar = new JarFile(System.getProperty("sarek.jar"));
     // Inject constructor mock agent JAR into bootstrap classloader
     INSTRUMENTATION.appendToBootstrapClassLoaderSearch(sarekAllJar);
   }

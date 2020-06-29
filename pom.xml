@@ -30,21 +30,18 @@
     <!--suppress UnresolvedMavenProperty -->
     <projectRootDir>${rootlocation}</projectRootDir>
 
-    <sarek-agent.jar>
-      ${projectRootDir}/sarek-agent/target/sarek-agent-${project.version}.jar
-    </sarek-agent.jar>
-    <sarek-all.jar>
-      ${projectRootDir}/sarek/target/sarek-${project.version}-all.jar
-    </sarek-all.jar>
-    <mock.jar>
-      ${projectRootDir}/sarek-mock/target/sarek-mock-${project.version}-all.jar
-    </mock.jar>
-    <aspect.jar>
-      ${projectRootDir}/sarek-aspect/target/sarek-aspect-${project.version}-all.jar
-    </aspect.jar>
-    <unfinal-agent.jar>
-      ${projectRootDir}/sarek-unfinal-parent/sarek-unfinal-agent/target/sarek-unfinal-agent-${project.version}-all.jar
-    </unfinal-agent.jar>
+    <sarek.jar>
+      ${projectRootDir}/sarek/target/sarek-${project.version}.jar
+    </sarek.jar>
+    <sarek-special.jar>
+      ${projectRootDir}/sarek-special/target/sarek-special-${project.version}.jar
+    </sarek-special.jar>
+    <unfinal.jar>
+      ${projectRootDir}/sarek-unfinal/target/sarek-unfinal-${project.version}.jar
+    </unfinal.jar>
+    <unfinal-special.jar>
+      ${projectRootDir}/sarek-unfinal-special/target/sarek-unfinal-special-${project.version}.jar
+    </unfinal-special.jar>
     <instrumented-jre.jar>
       ${projectRootDir}/sarek-test-parent/sarek-test-instrument-jre/target/sarek-test-instrument-jre-${project.version}.jar
     </instrumented-jre.jar>
@@ -66,6 +63,21 @@
         </plugin>
 
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.2.0</version>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <phase>package</phase>
+              <goals>
+                <goal>jar-no-fork</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <!--
             TODO:
@@ -78,11 +90,10 @@
             <!-- Fix for "[WARNING] Corrupted STDOUT by directly writing to native stream in forked JVM" -->
             <!--            <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>-->
             <systemPropertyVariables>
-              <sarek-agent.jar>${sarek-agent.jar}</sarek-agent.jar>
-              <sarek-all.jar>${sarek-all.jar}</sarek-all.jar>
-              <mock.jar>${mock.jar}</mock.jar>
-              <aspect.jar>${aspect.jar}</aspect.jar>
-              <unfinal-agent.jar>${unfinal-agent.jar}</unfinal-agent.jar>
+              <sarek.jar>${sarek.jar}</sarek.jar>
+              <sarek-special.jar>${sarek-special.jar}</sarek-special.jar>
+              <unfinal.jar>${unfinal.jar}</unfinal.jar>
+              <unfinal-special.jar>${unfinal-special.jar}</unfinal-special.jar>
             </systemPropertyVariables>
           </configuration>
           <executions>
@@ -130,11 +141,10 @@
             <!-- Fix for "[WARNING] Corrupted STDOUT by directly writing to native stream in forked JVM" -->
             <!--            <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>-->
             <systemPropertyVariables>
-              <sarek-agent.jar>${sarek-agent.jar}</sarek-agent.jar>
-              <sarek-all.jar>${sarek-all.jar}</sarek-all.jar>
-              <mock.jar>${mock.jar}</mock.jar>
-              <aspect.jar>${aspect.jar}</aspect.jar>
-              <unfinal-agent.jar>${unfinal-agent.jar}</unfinal-agent.jar>
+              <sarek.jar>${sarek.jar}</sarek.jar>
+              <sarek-special.jar>${sarek-special.jar}</sarek-special.jar>
+              <unfinal.jar>${unfinal.jar}</unfinal.jar>
+              <unfinal-special.jar>${unfinal-special.jar}</unfinal-special.jar>
             </systemPropertyVariables>
           </configuration>
           <executions>
@@ -177,77 +187,9 @@
           <artifactId>maven-shade-plugin</artifactId>
           <version>3.2.3</version>
           <configuration>
-            <filters>
-              <!--  Include own manifest -->
-              <filter>
-                <artifact>dev.sarek:${project.artifactId}</artifact>
-                <includes>
-                  <include>META-INF/MANIFEST.MF</include>
-                </includes>
-              </filter>
-              <filter>
-                <artifact>dev.sarek:sarek-agent-common</artifact>
-                <includes>
-                  <include>dev/sarek/agent/**</include>
-                  <!-- Includes copies of ByteBuddy, ASM and Objenesis licences in module sarek-agent-common -->
-                  <include>META-INF/license/**</include>
-                </includes>
-              </filter>
-              <filter>
-                <artifact>dev.sarek:sarek-aspect</artifact>
-                <excludes>
-                  <exclude>META-INF/**</exclude>
-                </excludes>
-              </filter>
-              <filter>
-                <artifact>dev.sarek:*</artifact>
-                <excludes>
-                  <exclude>META-INF/maven/**</exclude>
-                </excludes>
-              </filter>
-              <filter>
-                <artifact>net.bytebuddy:*</artifact>
-                <excludes>
-                  <exclude>META-INF/**</exclude>
-                </excludes>
-              </filter>
-              <filter>
-                <artifact>org.objenesis:*</artifact>
-                <excludes>
-                  <exclude>META-INF/**</exclude>
-                </excludes>
-              </filter>
-              <filter>
-                <artifact>*:*</artifact>
-                <excludes>
-                  <exclude>META-INF/maven/**</exclude>
-                </excludes>
-              </filter>
-            </filters>
-            <!--
-              Caveat: For non-relocated artifacts, make sure to override relocation via
-              <relocations>
-                <relocation>
-                  <excludes>
-                    <exclude>*</exclude>
-                  </excludes>
-                </relocation>
-              </relocations>
-            -->
-            <relocations>
-              <relocation>
-                <pattern>net.bytebuddy.jar.asm</pattern>
-                <shadedPattern>dev.sarek.jar.asm</shadedPattern>
-              </relocation>
-              <relocation>
-                <pattern>net.bytebuddy</pattern>
-                <shadedPattern>dev.sarek.jar.bytebuddy</shadedPattern>
-              </relocation>
-              <relocation>
-                <pattern>org.objenesis</pattern>
-                <shadedPattern>dev.sarek.jar.objenesis</shadedPattern>
-              </relocation>
-            </relocations>
+            <createSourcesJar>true</createSourcesJar>
+            <createDependencyReducedPom>false</createDependencyReducedPom>
+            <shadedArtifactAttached>false</shadedArtifactAttached>
           </configuration>
         </plugin>
 
@@ -316,6 +258,11 @@
         </executions>
       </plugin>
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
+
     </plugins>
 
   </build>
@@ -357,7 +304,7 @@
       <!-- Internal dependencies -->
       <dependency>
         <groupId>dev.sarek</groupId>
-        <artifactId>sarek-unfinal-agent</artifactId>
+        <artifactId>sarek-unfinal</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -388,11 +335,6 @@
       <dependency>
         <groupId>dev.sarek</groupId>
         <artifactId>sarek</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>dev.sarek</groupId>
-        <artifactId>sarek-agent</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -461,14 +403,16 @@
 
   <modules>
     <module>sarek</module>
+    <module>sarek-special</module>
     <module>sarek-common</module>
-    <module>sarek-unfinal-parent</module>
+    <module>sarek-unfinal</module>
+    <module>sarek-unfinal-special</module>
+    <module>sarek-unfinal-plugin</module>
     <module>sarek-aspect</module>
     <module>sarek-constructor-mock</module>
     <module>sarek-constructor-mock-javassist</module>
     <module>sarek-mock</module>
     <module>sarek-agent-common</module>
-    <module>sarek-agent</module>
     <module>sarek-test-parent</module>
   </modules>
 

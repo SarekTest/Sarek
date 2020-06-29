@@ -9,7 +9,7 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>sarek</artifactId>
+  <artifactId>sarek-unfinal</artifactId>
 
   <build>
     <plugins>
@@ -21,8 +21,8 @@
             <manifestEntries>
               <!-- Self-inject agent into bootstrap class path-->
               <Boot-Class-Path>${project.build.finalName}.jar</Boot-Class-Path>
-              <Agent-Class>dev.sarek.agent.SarekAgent</Agent-Class>
-              <Premain-Class>dev.sarek.agent.SarekAgent</Premain-Class>
+              <Agent-Class>dev.sarek.agent.unfinal.UnFinalAgent</Agent-Class>
+              <Premain-Class>dev.sarek.agent.unfinal.UnFinalAgent</Premain-Class>
               <Can-Redefine-Classes>true</Can-Redefine-Classes>
               <Can-Retransform-Classes>true</Can-Retransform-Classes>
               <Can-Set-Native-Method-Prefix>true</Can-Set-Native-Method-Prefix>
@@ -41,22 +41,16 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-              <minimizeJar>false</minimizeJar>
+              <!-- Make the unfinal agent as small as possible -->
+              <minimizeJar>true</minimizeJar>
               <filters>
 
                 <!--  Include own manifest & code -->
                 <filter>
-                  <artifact>dev.sarek:sarek</artifact>
+                  <artifact>dev.sarek:sarek-unfinal</artifact>
                   <includes>
                     <include>META-INF/MANIFEST.MF</include>
                     <include>dev/sarek/agent/**</include>
-                  </includes>
-                </filter>
-                <!-- Exclude content already shaded into sarek-unfinal -->
-                <filter>
-                  <artifact>dev.sarek:sarek-unfinal</artifact>
-                  <includes>
-                    <include>dev/sarek/agent/unfinal/**</include>
                   </includes>
                 </filter>
 
@@ -122,34 +116,14 @@
   </build>
 
   <dependencies>
-    <!--
-      Attention: Do not make dependencies optional because this only works in Maven, but not in IntelliJ IDEA. There
-      dependent modules like tests will no longer compile because IDEA ignores the class files for optional dependencies
-      inside the uber JAR.
-    -->
     <dependency>
-      <groupId>dev.sarek</groupId>
-      <artifactId>sarek-unfinal</artifactId>
+      <groupId>net.bytebuddy</groupId>
+      <artifactId>byte-buddy</artifactId>
     </dependency>
-    <dependency>
-      <groupId>dev.sarek</groupId>
-      <artifactId>sarek-aspect</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>dev.sarek</groupId>
-      <artifactId>sarek-constructor-mock</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>dev.sarek</groupId>
-      <artifactId>sarek-mock</artifactId>
-    </dependency>
-    <!-- TODO: make Sarek agent extend from base agent -->
-    <!--
     <dependency>
       <groupId>dev.sarek</groupId>
       <artifactId>sarek-agent-common</artifactId>
     </dependency>
-    -->
   </dependencies>
 
 </project>

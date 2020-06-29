@@ -33,7 +33,7 @@
         -->
         <maven-failsafe.argLine>
           -Xbootclasspath/p:${instrumented-jre.jar}
-          -javaagent:${sarek-agent.jar}=UnFinal,Mock,verXXXbose
+          -javaagent:${sarek.jar}=UnFinal,Mock,verXXXbose
         </maven-failsafe.argLine>
       </properties>
 
@@ -55,7 +55,7 @@
         -->
         <maven-failsafe.argLine>
           --patch-module java.base=${instrumented-jre.jar}
-          -javaagent:${sarek-agent.jar}=UnFinal,Mock,verXXXbose
+          -javaagent:${sarek.jar}=UnFinal,Mock,verXXXbose
           <!-- Needed for hot-attaching agents (e.g. PowerMock) on Java 9+ -->
           -Djdk.attach.allowAttachSelf=true
         </maven-failsafe.argLine>
@@ -86,14 +86,6 @@
     <dependency>
       <groupId>dev.sarek</groupId>
       <artifactId>sarek</artifactId>
-      <classifier>all</classifier>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <!-- Sarek multi agent launcher - needed on command line for '-javaagent:...' -->
-    <dependency>
-      <groupId>dev.sarek</groupId>
-      <artifactId>sarek-agent</artifactId>
       <scope>test</scope>
     </dependency>
     <!-- Classes under test & test tool classes -->

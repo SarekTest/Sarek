@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>dev.sarek</groupId>
+    <artifactId>sarek-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>sarek-special</artifactId>
+
+  <build>
+    <plugins>
+
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <!-- Self-inject agent into bootstrap class path-->
+              <Boot-Class-Path>${project.build.finalName}.jar</Boot-Class-Path>
+              <Agent-Class>dev.sarek.agent.SarekAgent</Agent-Class>
+              <Premain-Class>dev.sarek.agent.SarekAgent</Premain-Class>
+              <Can-Redefine-Classes>true</Can-Redefine-Classes>
+              <Can-Retransform-Classes>true</Can-Retransform-Classes>
+              <Can-Set-Native-Method-Prefix>true</Can-Set-Native-Method-Prefix>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-shade-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>shade-relocate</id>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <minimizeJar>false</minimizeJar>
+              <shadeSourcesContent>true</shadeSourcesContent>
+              <filters>
+                <filter>
+                  <artifact>dev.sarek:sarek-special</artifact>
+                  <includes>
+                    <include>META-INF/MANIFEST.MF</include>
+                  </includes>
+                </filter>
+                <filter>
+                  <artifact>dev.sarek:sarek</artifact>
+                  <excludes>
+                    <exclude>META-INF/MANIFEST.MF</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <relocations>
+                <relocation>
+                  <pattern>net.bytebuddy.jar.asm</pattern>
+                  <shadedPattern>dev.sarek.jar.asm</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>net.bytebuddy</pattern>
+                  <shadedPattern>dev.sarek.jar.bytebuddy</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.objenesis</pattern>
+                  <shadedPattern>dev.sarek.jar.objenesis</shadedPattern>
+                </relocation>
+              </relocations>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>dev.sarek</groupId>
+      <artifactId>sarek</artifactId>
+      <exclusions>
+        <!-- Just re-package existing uber JAR, avoid collisions with its dependencies -->
+        <!-- TODO: Test if this has negative affects on compilation in IntelliJ IDEA. If so, consider <artifactSet>. -->
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+
+</project>
