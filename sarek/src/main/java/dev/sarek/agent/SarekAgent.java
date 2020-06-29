@@ -1,6 +1,7 @@
 package dev.sarek.agent;
 
-import java.lang.instrument.ClassFileTransformer;
+import dev.sarek.agent.unfinal.UnFinalTransformer;
+
 import java.lang.instrument.Instrumentation;
 import java.util.Arrays;
 import java.util.List;
@@ -24,9 +25,6 @@ public class SarekAgent {
 
   private static boolean verbose;
   private static boolean unFinalActive;
-  private static boolean aspectActive;
-  private static boolean constructorMockActive;
-  private static boolean mockActive;
 
   public static void agentmain(String commandLineOptions, Instrumentation instr) throws Exception {
     premain(commandLineOptions, instr);
@@ -56,18 +54,11 @@ public class SarekAgent {
     if (verbose)
       System.out.println(AGENT_PREFIX + "command line options = " + commandLineOptions);
     unFinalActive = options.contains("unfinal");
-    mockActive = options.contains("mock");
-    aspectActive = mockActive || options.contains("aspect");
-    constructorMockActive = mockActive || options.contains("constructormock");
   }
 
-  private static void attachUnFinalTransformer(boolean logUnFinal) throws ReflectiveOperationException {
-    // TODO: refactor to use new Agent API
+  private static void attachUnFinalTransformer(boolean logUnFinal) {
     instrumentation.addTransformer(
-      (ClassFileTransformer) Class
-        .forName("dev.sarek.agent.unfinal.UnFinalTransformer")
-        .getDeclaredMethod("createTransformer", boolean.class)
-        .invoke(null, logUnFinal),
+      UnFinalTransformer.createTransformer(logUnFinal),
       false
     );
   }
@@ -86,18 +77,6 @@ public class SarekAgent {
 
   public static boolean isUnFinalActive() {
     return unFinalActive;
-  }
-
-  public static boolean isAspectActive() {
-    return aspectActive;
-  }
-
-  public static boolean isConstructorMockActive() {
-    return constructorMockActive;
-  }
-
-  public static boolean isMockActive() {
-    return mockActive;
   }
 
 }
