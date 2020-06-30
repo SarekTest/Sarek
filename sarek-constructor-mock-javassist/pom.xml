@@ -32,6 +32,10 @@
       <groupId>dev.sarek</groupId>
       <artifactId>sarek-constructor-mock</artifactId>
     </dependency>
+    <dependency>
+      <groupId>dev.sarek</groupId>
+      <artifactId>sarek-agent-common</artifactId>
+    </dependency>
 
     <!-- Test dependencies -->
 

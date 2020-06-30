@@ -1,5 +1,6 @@
 package dev.sarek.agent.unfinal;
 
+import dev.sarek.agent.Transformer;
 import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.build.Plugin;
 import net.bytebuddy.description.field.FieldDescription;
@@ -39,6 +40,6 @@ public class UnFinalPlugin implements Plugin {
 
   @Override
   public boolean matches(TypeDescription target) {
-    return UnFinalTransformer.shouldTransform(target.getName());
+    return Transformer.shouldTransform(target.getName());
   }
 }

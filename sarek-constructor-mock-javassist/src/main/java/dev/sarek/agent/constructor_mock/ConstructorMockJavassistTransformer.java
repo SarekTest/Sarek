@@ -1,5 +1,6 @@
 package dev.sarek.agent.constructor_mock;
 
+import dev.sarek.agent.Transformer;
 import javassist.*;
 
 import java.io.ByteArrayInputStream;
@@ -223,11 +224,7 @@ public class ConstructorMockJavassistTransformer implements ClassFileTransformer
     return shouldTransform(candidateClass.getName());
   }
 
-  /**
-   * TODO: make include/exclude list of class and package names configurable
-   */
   public boolean shouldTransform(String className) {
-
     // TODO: Which include/exclude method is better? A gives more power to the user, but is also more dangerous.
 
     // (A) If there is a target class list, ignore the global ignore list
@@ -239,35 +236,7 @@ public class ConstructorMockJavassistTransformer implements ClassFileTransformer
       return false;
 
     // Default exclude list for transformation
-    return
-      // Sarek classes
-      !className.startsWith("dev.sarek.")
-        // The JVM does not tolerate definalisation of Object methods but says:
-        //   Error occurred during initialization of VM
-        //   Incompatible definition of java.lang.Object
-        && !className.equals("java.lang.Object")
-        // Byte code engineering
-        && !className.startsWith("net.bytebuddy.")
-        && !className.startsWith("org.objectweb.asm.")
-        && !className.startsWith("groovyjarjarasm.asm.")
-        && !className.startsWith("javassist.")
-        && !className.startsWith("org.objenesis.")
-        && !className.contains("$$EnhancerByCGLIB$$")
-        // Testing
-        && !className.startsWith("org.junit.")
-        && !className.startsWith("junit.")
-        && !className.startsWith("org.hamcrest.")
-        && !className.startsWith("org.spockframework.")
-        && !className.startsWith("spock.")
-        // Mocking
-        && !className.startsWith("org.mockito.")
-        && !className.startsWith("mockit.")
-        && !className.startsWith("org.powermock.")
-        && !className.startsWith("org.easymock.")
-        // Build
-        && !className.startsWith("org.apache.maven.")
-        // IDE
-        && !className.startsWith("com.intellij.");
+    return Transformer.shouldTransform(className);
   }
 
   /**

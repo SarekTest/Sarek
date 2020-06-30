@@ -1,5 +1,6 @@
 package dev.sarek.agent.constructor_mock;
 
+import dev.sarek.agent.Transformer;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.method.ParameterDescription;
 import net.bytebuddy.description.type.TypeDefinition;
@@ -119,43 +120,8 @@ public class ConstructorMockMethodVisitor extends MethodVisitor {
     super.visitLabel(labelOriginalCode);
   }
 
-
-  /**
-   * TODO: make include/exclude list of class and package names configurable
-   */
   public boolean shouldTransform() {
-    return shouldTransform(className);
+    return Transformer.shouldTransform(className);
   }
 
-  public static boolean shouldTransform(String className) {
-    // Default exclude list for transformation
-    return
-      // Sarek classes
-      !className.startsWith("dev.sarek.")
-        // Object has no super class -> no super constructor -> exclude from transformation
-        && !className.equals("java.lang.Object")
-        // Byte code engineering
-        && !className.startsWith("net.bytebuddy.")
-        && !className.startsWith("org.objectweb.asm.")
-        && !className.startsWith("groovyjarjarasm.asm.")
-        && !className.startsWith("javassist.")
-        && !className.startsWith("org.objenesis.")
-        && !className.contains("$$EnhancerByCGLIB$$")
-        // Testing
-        && !className.startsWith("org.junit.")
-        && !className.startsWith("junit.")
-        && !className.startsWith("org.hamcrest.")
-        && !className.startsWith("org.spockframework.")
-        && !className.startsWith("spock.")
-        // Mocking
-        && !className.startsWith("org.mockito.")
-        && !className.startsWith("mockit.")
-        && !className.startsWith("org.powermock.")
-        && !className.startsWith("org.easymock.")
-        // Build
-        && !className.startsWith("org.apache.maven.")
-        // IDE
-        && !className.startsWith("com.intellij.")
-      ;
-  }
 }
