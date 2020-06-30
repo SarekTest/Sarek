@@ -1,4 +1,4 @@
-package dev.sarek.app;
+package org.acme;
 
 public class Base {
   protected final int id;

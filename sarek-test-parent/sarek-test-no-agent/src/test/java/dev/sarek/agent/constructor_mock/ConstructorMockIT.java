@@ -1,8 +1,8 @@
 package dev.sarek.agent.constructor_mock;
 
-import dev.sarek.agent.test.SeparateJVM;
-import dev.sarek.app.*;
+import dev.sarek.test.util.SeparateJVM;
 import net.bytebuddy.agent.ByteBuddyAgent;
+import org.acme.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;

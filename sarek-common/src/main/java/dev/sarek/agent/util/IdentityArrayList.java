@@ -5,12 +5,7 @@
 
 package dev.sarek.agent.util;
 
-import java.util.AbstractList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.ConcurrentModificationException;
-import java.util.List;
-import java.util.RandomAccess;
+import java.util.*;
 
 /**
  * <b>Please note:</b> This class (including documentation bugs concerning was copied 100% from the source code of

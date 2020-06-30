@@ -1,8 +1,8 @@
 package dev.sarek.agent.unfinal;
 
 import dev.sarek.agent.Agent;
-import dev.sarek.agent.test.SeparateJVM;
-import dev.sarek.app.FinalClass;
+import dev.sarek.test.util.SeparateJVM;
+import org.acme.FinalClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -11,7 +11,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Modifier;
 import java.util.UUID;
 
-import static dev.sarek.agent.test.TestHelper.isClassLoaded;
+import static dev.sarek.test.util.TestHelper.isClassLoaded;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -31,7 +31,7 @@ public class UnFinalIT {
     assertFalse(
       "This test needs to run in its own JVM, otherwise it could be too late for the" +
         "'unfinal' transformation already",
-      isClassLoaded("dev.sarek.app.FinalClass")
+      isClassLoaded("org.acme.FinalClass")
     );
     assertFalse(
       "This test needs to run in its own JVM, otherwise it could be too late for the" +

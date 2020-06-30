@@ -96,9 +96,8 @@ public class UnFinalTransformer extends ClassVisitor {
   public static boolean shouldTransform(String className) {
     // Default exclude list for transformation
     return
-      // Our own agent-related stuff
-      !className.startsWith("dev.sarek.agent.")
-        && !className.startsWith("dev.sarek.jar")
+      // Sarek classes
+      !className.startsWith("dev.sarek.")
         // The JVM does not tolerate definalisation of Object methods but says:
         //   Error occurred during initialization of VM
         //   Incompatible definition of java.lang.Object

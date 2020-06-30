@@ -1,4 +1,4 @@
-package dev.sarek.agent.test;
+package dev.sarek.test.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

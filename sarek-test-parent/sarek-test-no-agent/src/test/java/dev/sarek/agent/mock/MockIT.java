@@ -1,12 +1,9 @@
 package dev.sarek.agent.mock;
 
-import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;
-import dev.sarek.agent.test.SeparateJVM;
-import dev.sarek.app.Base;
-import dev.sarek.app.FinalClass;
-import dev.sarek.app.Sub;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import dev.sarek.test.util.SeparateJVM;
+import org.acme.Base;
+import org.acme.FinalClass;
+import org.acme.Sub;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 

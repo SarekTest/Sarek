@@ -2,8 +2,7 @@ package dev.sarek.agent.mock;
 
 import dev.sarek.agent.Agent;
 import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;
-import dev.sarek.agent.test.SeparateJVM;
-import org.junit.AfterClass;
+import dev.sarek.test.util.SeparateJVM;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;

@@ -1,12 +1,11 @@
 package dev.sarek.agent.constructor_mock;
 
-import dev.sarek.agent.Agent;
 import dev.sarek.agent.aspect.GlobalInstance;
 import dev.sarek.agent.aspect.InstanceMethodAroundAdvice;
 import dev.sarek.agent.aspect.StaticMethodAroundAdvice;
 import dev.sarek.agent.aspect.Weaver;
-import dev.sarek.agent.test.SeparateJVM;
-import dev.sarek.app.FinalClass;
+import dev.sarek.test.util.SeparateJVM;
+import org.acme.FinalClass;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;

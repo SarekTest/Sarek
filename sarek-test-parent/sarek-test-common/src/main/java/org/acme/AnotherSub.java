@@ -1,4 +1,4 @@
-package dev.sarek.app;
+package org.acme;
 
 public class AnotherSub extends Base {
   protected final String name;

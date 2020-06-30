@@ -1,10 +1,10 @@
 package dev.sarek.agent.mock;
 
 import dev.sarek.agent.aspect.InstanceMethodAroundAdvice;
-import dev.sarek.app.ExtendsSub;
-import dev.sarek.app.Sub;
-import dev.sarek.app.UnderTest;
-import dev.sarek.app.UnderTestSub;
+import org.acme.ExtendsSub;
+import org.acme.Sub;
+import org.acme.UnderTest;
+import org.acme.UnderTestSub;
 import org.junit.Test;
 
 import java.util.Calendar;

@@ -105,7 +105,7 @@
               <configuration>
                 <!-- One JVM for multiple test classes -->
                 <reuseForks>true</reuseForks>
-                <excludedGroups>dev.sarek.agent.test.SeparateJVM</excludedGroups>
+                <excludedGroups>dev.sarek.test.util.SeparateJVM</excludedGroups>
               </configuration>
             </execution>
             <execution>
@@ -116,7 +116,7 @@
               <configuration>
                 <!-- One JVM per test class (per method is not possible) -->
                 <reuseForks>false</reuseForks>
-                <groups>dev.sarek.agent.test.SeparateJVM</groups>
+                <groups>dev.sarek.test.util.SeparateJVM</groups>
               </configuration>
             </execution>
             <!-- We have two other, mutually exclusive text executions already and do not need this one -->
@@ -156,7 +156,7 @@
               <configuration>
                 <!-- One JVM for multiple test classes -->
                 <reuseForks>true</reuseForks>
-                <excludedGroups>dev.sarek.agent.test.SeparateJVM</excludedGroups>
+                <excludedGroups>dev.sarek.test.util.SeparateJVM</excludedGroups>
               </configuration>
             </execution>
             <execution>
@@ -167,7 +167,7 @@
               <configuration>
                 <!-- One JVM per test class (per method is not possible) -->
                 <reuseForks>false</reuseForks>
-                <groups>dev.sarek.agent.test.SeparateJVM</groups>
+                <groups>dev.sarek.test.util.SeparateJVM</groups>
               </configuration>
             </execution>
             <execution>
@@ -413,6 +413,7 @@
     <module>sarek-constructor-mock-javassist</module>
     <module>sarek-mock</module>
     <module>sarek-agent-common</module>
+    <module>sarek-junit4-runner</module>
     <module>sarek-test-parent</module>
   </modules>
 

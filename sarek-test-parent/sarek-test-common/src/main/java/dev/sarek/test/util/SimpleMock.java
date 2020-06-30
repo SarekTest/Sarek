@@ -1,4 +1,4 @@
-package dev.sarek.agent.test;
+package dev.sarek.test.util;
 
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.implementation.FixedValue;

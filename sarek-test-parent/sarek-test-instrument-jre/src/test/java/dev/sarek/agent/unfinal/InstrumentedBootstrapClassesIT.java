@@ -1,7 +1,7 @@
 package dev.sarek.agent.unfinal;
 
-import dev.sarek.agent.test.SimpleMock;
-import dev.sarek.app.FinalClass;
+import dev.sarek.test.util.SimpleMock;
+import org.acme.FinalClass;
 import org.junit.Test;
 
 import java.io.ObjectOutputStream;

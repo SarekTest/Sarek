@@ -1,4 +1,4 @@
-package dev.sarek.app;
+package org.acme;
 
 import java.util.Arrays;
 

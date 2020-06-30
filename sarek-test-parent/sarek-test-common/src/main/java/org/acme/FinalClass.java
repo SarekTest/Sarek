@@ -1,4 +1,4 @@
-package dev.sarek.app;
+package org.acme;
 
 public final class FinalClass {
   private static int instanceCounter;

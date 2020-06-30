@@ -130,9 +130,8 @@ public class ConstructorMockMethodVisitor extends MethodVisitor {
   public static boolean shouldTransform(String className) {
     // Default exclude list for transformation
     return
-      // Our own agent-related stuff
-      !className.startsWith("dev.sarek.agent.")
-        && !className.startsWith("dev.sarek.jar")
+      // Sarek classes
+      !className.startsWith("dev.sarek.")
         // Object has no super class -> no super constructor -> exclude from transformation
         && !className.equals("java.lang.Object")
         // Byte code engineering

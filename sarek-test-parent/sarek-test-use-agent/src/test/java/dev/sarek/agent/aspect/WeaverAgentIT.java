@@ -1,6 +1,6 @@
 package dev.sarek.agent.aspect;
 
-import dev.sarek.app.UnderTest;
+import org.acme.UnderTest;
 import org.junit.After;
 import org.junit.Test;
 
@@ -9,7 +9,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
-import static dev.sarek.agent.test.TestHelper.isClassLoaded;
+import static dev.sarek.test.util.TestHelper.isClassLoaded;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 import static org.junit.Assert.*;
 
@@ -24,7 +24,7 @@ public class WeaverAgentIT {
 
   @Test
   public void weaveLoadedApplicationClass() {
-    final String CLASS_NAME = "dev.sarek.app.UnderTest";
+    final String CLASS_NAME = "org.acme.UnderTest";
 
     // Create application class instance
     UnderTest underTest = new UnderTest();

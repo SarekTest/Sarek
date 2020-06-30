@@ -1,6 +1,6 @@
 package dev.sarek.agent.constructor_mock;
 
-import dev.sarek.app.*;
+import org.acme.*;
 import org.junit.Test;
 
 import java.lang.instrument.UnmodifiableClassException;

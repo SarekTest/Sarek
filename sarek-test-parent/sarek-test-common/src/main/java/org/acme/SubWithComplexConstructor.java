@@ -1,4 +1,4 @@
-package dev.sarek.app;
+package org.acme;
 
 public class SubWithComplexConstructor extends BaseWithComplexConstructor {
   public SubWithComplexConstructor(byte aByte, char aChar, double aDouble, float aFloat, int anInt, long aLong, short aShort, boolean aBoolean, String string, int[][] ints) {

@@ -1,4 +1,4 @@
-package dev.sarek.app;
+package org.acme;
 
 public class UnderTestSub extends UnderTest {
   private int age;

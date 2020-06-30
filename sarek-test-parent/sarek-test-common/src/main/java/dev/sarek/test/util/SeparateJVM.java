@@ -1,4 +1,4 @@
-package dev.sarek.agent.test;
+package dev.sarek.test.util;
 
 /**
  * In JUnit 4, use {@code @Category(SeparateJVM.class)} on each class you wish to run in a separate JVM in order to

@@ -1,15 +1,15 @@
 package dev.sarek.agent.aspect;
 
-import dev.sarek.agent.test.SeparateJVM;
-import dev.sarek.app.StringWrapper;
-import dev.sarek.app.UnderTest;
+import dev.sarek.test.util.SeparateJVM;
+import org.acme.StringWrapper;
+import org.acme.UnderTest;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import java.util.UUID;
 
-import static dev.sarek.agent.test.TestHelper.isClassLoaded;
+import static dev.sarek.test.util.TestHelper.isClassLoaded;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 import static org.junit.Assert.*;
 
@@ -41,7 +41,7 @@ public class WeaverIT {
 
   @Test
   public void weaveLoadedApplicationClass() {
-    final String CLASS_NAME = "dev.sarek.app.UnderTest";
+    final String CLASS_NAME = "org.acme.UnderTest";
 
     // Load application class
     UnderTest underTest = new UnderTest();
