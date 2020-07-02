@@ -86,7 +86,7 @@ public abstract class ConstructorAspect extends Aspect<Constructor<?>> {
       // target.toString() -> getAroundAdvice(target) → adviceRegistry.get(target) → target.toString()
       // This recursion would get detected but still run away because after detection it would be printed again etc.
       // It is actually best to not call *any* target methods while just trying to access and call an around advice.
-      System.out.println("Recursion detected - origin: " + new Exception().getStackTrace()[2]);
+      System.out.println("Recursion detected - origin: " + new Throwable().getStackTrace()[2]);
       return null;
     }
     targets.push(target);
