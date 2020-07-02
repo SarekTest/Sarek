@@ -98,6 +98,13 @@
             </systemPropertyVariables>
             <!-- TODO: Got to use this until SUREFIRE-1809 is fixed in M6 -->
             <useModulePath>false</useModulePath>
+            <!--
+            <consoleOutputReporter implementation="org.apache.maven.plugin.surefire.extensions.SurefireConsoleOutputReporter">
+              &lt;!&ndash; Suppress Surefire/Failsafe output in favour of test output only &ndash;&gt;
+              <disable>true</disable>
+              <encoding>UTF-8</encoding>
+            </consoleOutputReporter>
+            -->
           </configuration>
           <executions>
             <execution>
@@ -152,6 +159,13 @@
             </systemPropertyVariables>
             <!-- TODO: Got to use this until SUREFIRE-1809 is fixed in M6 -->
             <useModulePath>false</useModulePath>
+            <!--
+            <consoleOutputReporter implementation="org.apache.maven.plugin.surefire.extensions.SurefireConsoleOutputReporter">
+              &lt;!&ndash; Suppress Surefire/Failsafe output in favour of test output only &ndash;&gt;
+              <disable>true</disable>
+              <encoding>UTF-8</encoding>
+            </consoleOutputReporter>
+            -->
           </configuration>
           <executions>
             <execution>
