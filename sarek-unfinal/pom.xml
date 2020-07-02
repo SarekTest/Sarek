@@ -112,6 +112,12 @@
         </executions>
       </plugin>
 
+      <!-- Remove shaded dependencies from uber JAR -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+      </plugin>
+
     </plugins>
   </build>
 

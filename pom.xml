@@ -196,6 +196,30 @@
         </plugin>
 
         <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>flatten-maven-plugin</artifactId>
+          <version>1.2.2</version>
+          <executions>
+            <!-- Remove shaded dependencies from uber JAR -->
+            <execution>
+              <id>flatten</id>
+              <phase>process-resources</phase>
+              <goals>
+                <goal>flatten</goal>
+              </goals>
+              <configuration>
+                <flattenMode>oss</flattenMode>
+                <pomElements>
+                  <dependencies>remove</dependencies>
+                </pomElements>
+                <outputDirectory>${project.build.directory}</outputDirectory>
+                <flattenedPomFilename>flattened-pom.xml</flattenedPomFilename>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
           <artifactId>maven-enforcer-plugin</artifactId>
           <version>3.0.0-M3</version>
           <executions>
