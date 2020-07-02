@@ -84,18 +84,20 @@
               - Switch to next milestone or stable release as soon as available on Maven Central
               - Attention: 3.0.0-RC1 is changing + unstable, e.g. freezes when running ITs with active agents
               - Attention: M5 has the same problems as RC1, see https://issues.apache.org/jira/browse/SUREFIRE-1788
+                The reason is https://issues.apache.org/jira/browse/SUREFIRE-1809, to be fixed in M6. Thus
           -->
-          <!--<version>3.0.0-RC1</version>-->
-          <version>3.0.0-M4</version>
+          <version>3.0.0-M5</version>
           <configuration>
             <!-- Fix for "[WARNING] Corrupted STDOUT by directly writing to native stream in forked JVM" -->
-            <!--<forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>-->
+            <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>
             <systemPropertyVariables>
               <sarek.jar>${sarek.jar}</sarek.jar>
               <sarek-special.jar>${sarek-special.jar}</sarek-special.jar>
               <unfinal.jar>${unfinal.jar}</unfinal.jar>
               <unfinal-special.jar>${unfinal-special.jar}</unfinal-special.jar>
             </systemPropertyVariables>
+            <!-- TODO: Got to use this until SUREFIRE-1809 is fixed in M6 -->
+            <useModulePath>false</useModulePath>
           </configuration>
           <executions>
             <execution>
@@ -136,18 +138,20 @@
               - Switch to next milestone or stable release as soon as available on Maven Central
               - Attention: 3.0.0-RC1 is changing + unstable, e.g. freezes when running ITs with active agents
               - Attention: M5 has the same problems as RC1, see https://issues.apache.org/jira/browse/SUREFIRE-1788
+                The reason is https://issues.apache.org/jira/browse/SUREFIRE-1809, to be fixed in M6. Thus
           -->
-          <!--<version>3.0.0-RC1</version>-->
-          <version>3.0.0-M4</version>
+          <version>3.0.0-M5</version>
           <configuration>
             <!-- Fix for "[WARNING] Corrupted STDOUT by directly writing to native stream in forked JVM" -->
-            <!--<forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>-->
+            <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>
             <systemPropertyVariables>
               <sarek.jar>${sarek.jar}</sarek.jar>
               <sarek-special.jar>${sarek-special.jar}</sarek-special.jar>
               <unfinal.jar>${unfinal.jar}</unfinal.jar>
               <unfinal-special.jar>${unfinal-special.jar}</unfinal-special.jar>
             </systemPropertyVariables>
+            <!-- TODO: Got to use this until SUREFIRE-1809 is fixed in M6 -->
+            <useModulePath>false</useModulePath>
           </configuration>
           <executions>
             <execution>
