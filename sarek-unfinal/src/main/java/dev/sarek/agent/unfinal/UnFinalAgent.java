@@ -1,88 +1,75 @@
 package dev.sarek.agent.unfinal;
 
-import dev.sarek.agent.Agent;
-import dev.sarek.agent.Agent.TransformerFactoryMethod.IllegalTransformerFactoryMethodException;
-import dev.sarek.agent.AgentRegistry.AgentAlreadyRegisteredException;
-import dev.sarek.agent.OptionParser.IllegalAgentIdException;
-import dev.sarek.agent.OptionParser.IllegalOptionNameException;
+import dev.sarek.agent.AgentException;
 
 import java.lang.instrument.Instrumentation;
+import java.util.Arrays;
+import java.util.List;
 
-public class UnFinalAgent extends Agent {
-  public UnFinalAgent(String options, Instrumentation instrumentation)
-    throws ReflectiveOperationException, AgentAlreadyRegisteredException, IllegalTransformerFactoryMethodException,
-    IllegalOptionNameException, IllegalAgentIdException
-  {
-    super(options, instrumentation);
-  }
+public class UnFinalAgent {
+  // TODO: write tests for minimised stand-alone agent
 
-  public UnFinalAgent(String options)
-    throws ReflectiveOperationException, AgentAlreadyRegisteredException, IllegalTransformerFactoryMethodException,
-    IllegalOptionNameException, IllegalAgentIdException
-  {
-    super(options);
-  }
+  private static final String AGENT_PREFIX = "[UnFinal Agent] ";
+  private static final String MANIFEST_MF = "META-INF/MANIFEST.MF";
+  private static final String BOOT_CLASS_PATH = "Boot-Class-Path:";
+
+  private static boolean active;
+  private static Instrumentation instrumentation;
+
+  private static boolean verbose;
 
   /**
    * Attach agent dynamically after JVM start-up
-   *
-   * @param options path to configuration properties file for class
-   *                {@link UnFinalTransformer}. Add this parameter on the command line
-   *                after the Java agent path via {@code =/path/to/my-config.properties}.
    */
-  public static void agentmain(String options, Instrumentation instrumentation)
-    throws ReflectiveOperationException, AgentAlreadyRegisteredException, IllegalTransformerFactoryMethodException,
-    IllegalOptionNameException, IllegalAgentIdException
-  {
-    premain(options, instrumentation);
+  public static void agentmain(String commandLineOptions, Instrumentation instr) throws AgentException {
+    premain(commandLineOptions, instr);
   }
 
   /**
    * Start agent via <code>-javaagent:/path/to/my-agent.jar=<i>options</i></code> JVM parameter
-   *
-   * @param options path to configuration properties file for class
-   *                {@link UnFinalTransformer}. Add this parameter on the command line
-   *                after the Java agent path via {@code =/path/to/my-config.properties}.
    */
-  public static void premain(String options, Instrumentation instrumentation)
-    throws AgentAlreadyRegisteredException, ReflectiveOperationException, IllegalTransformerFactoryMethodException,
-    IllegalOptionNameException, IllegalAgentIdException
-  {
+  public static void premain(String commandLineOptions, Instrumentation instr) throws AgentException {
     // TODO: Maybe catch exceptions + log errors instead so as to enable the system to start up anyway
-    new UnFinalAgent(options, instrumentation);
+    if (UnFinalAgent.class.getClassLoader() != null)
+      throw new AgentException(
+        "Java agent is not on boot class path. Please do not rename the agent JAR file. " +
+          "The file name at the end of the path specified with the '-javaagent:' parameter " +
+          "must be identical with the value of '" + BOOT_CLASS_PATH + "' in '" + MANIFEST_MF + "' " +
+          "inside the agent JAR."
+      );
+
+    active = true;
+    instrumentation = instr;
+
+    parseOptions(commandLineOptions);
+    attachUnFinalTransformer(verbose);
   }
 
-  @Override
-  public String getAgentId() {
-    return "UnFinal";
+  private static void parseOptions(String commandLineOptions) {
+    // TODO: document available options
+    List<String> options = Arrays.asList(commandLineOptions.trim().toLowerCase().split(","));
+    verbose = options.contains("verbose");
+    if (verbose)
+      System.out.println(AGENT_PREFIX + "command line options = " + commandLineOptions);
   }
 
-  @Override
-  public String[] getOptionKeys() {
-    return new String[] { "verbose" };
-  }
-
-  @Override
-  public boolean canRetransform() {
-    return false;
-  }
-
-  @Override
-  public TransformerFactoryMethod getTransformerFactoryMethod()
-    throws NoSuchMethodException, IllegalTransformerFactoryMethodException, ClassNotFoundException
-  {
-    return new TransformerFactoryMethod(
-      "dev.sarek.agent.unfinal.UnFinalTransformer",
-      "createTransformer",
-      new Class<?>[] { boolean.class }
+  private static void attachUnFinalTransformer(boolean logUnFinal) {
+    instrumentation.addTransformer(
+      UnFinalTransformer.createTransformer(logUnFinal),
+      false
     );
   }
 
-  @Override
-  public Object[] getDefaultTransformerArgs(Object... factoryMethodArgs) {
-    return new Object[] {
-      getOptions().containsKey("verbose")
-    };
+  public static boolean isActive() {
+    return active;
+  }
+
+  public static Instrumentation getInstrumentation() {
+    return instrumentation;
+  }
+
+  public static boolean isVerbose() {
+    return verbose;
   }
 
 }

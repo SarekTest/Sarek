@@ -6,15 +6,6 @@ import java.lang.instrument.Instrumentation;
 import java.util.Arrays;
 import java.util.List;
 
-// TODO:
-//   - In order to avoid possible collisions with clients using BB in a conflicting
-//     version already, I could relocate the BB classes (including ASM) to a
-//     separate base package such as dev.sarek.jar and exclude that package
-//     from both definalisation and aspect weaving.
-//   - A fat JAR version of the wrapper agent could contain the aspect framework
-//     JAR as a resource and unpack it upon start-up. This would make both JAR
-//     detection more reliable and also relieve the user from having to add the
-//     aspect framework to her class path.
 public class SarekAgent {
   private static final String AGENT_PREFIX = "[Sarek Agent] ";
   private static final String MANIFEST_MF = "META-INF/MANIFEST.MF";
@@ -26,13 +17,19 @@ public class SarekAgent {
   private static boolean verbose;
   private static boolean unFinalActive;
 
-  public static void agentmain(String commandLineOptions, Instrumentation instr) throws Exception {
+  /**
+   * Attach agent dynamically after JVM start-up
+   */
+  public static void agentmain(String commandLineOptions, Instrumentation instr) throws AgentException {
     premain(commandLineOptions, instr);
   }
 
-  public static void premain(String commandLineOptions, Instrumentation instr) throws Exception {
+  /**
+   * Start agent via <code>-javaagent:/path/to/my-agent.jar=<i>options</i></code> JVM parameter
+   */
+  public static void premain(String commandLineOptions, Instrumentation instr) throws AgentException {
     if (SarekAgent.class.getClassLoader() != null)
-      throw new IllegalArgumentException(
+      throw new AgentException(
         "Java agent is not on boot class path. Please do not rename the agent JAR file. " +
           "The file name at the end of the path specified with the '-javaagent:' parameter " +
           "must be identical with the value of '" + BOOT_CLASS_PATH + "' in '" + MANIFEST_MF + "' " +

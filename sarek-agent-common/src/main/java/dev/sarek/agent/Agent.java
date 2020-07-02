@@ -80,7 +80,7 @@ public abstract class Agent {
     return _instr;
   }
 
-  private static void setInstrumentation(Instrumentation instrumentation) {
+  static void setInstrumentation(Instrumentation instrumentation) {
     if (_instr == null && instrumentation != null)
       _instr = instrumentation;
   }

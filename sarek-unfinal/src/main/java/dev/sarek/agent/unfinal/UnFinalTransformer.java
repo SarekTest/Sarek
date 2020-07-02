@@ -10,7 +10,6 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.reflect.Modifier;
 import java.security.ProtectionDomain;
 
-import static dev.sarek.agent.AgentRegistry.AGENT_REGISTRY;
 import static net.bytebuddy.jar.asm.Opcodes.ASM8;
 
 public class UnFinalTransformer extends ClassVisitor {
@@ -32,7 +31,7 @@ public class UnFinalTransformer extends ClassVisitor {
   */
   public final static int PARSING_FLAGS = 0;
 
-  private final static String LOG_PREFIX = AGENT_REGISTRY.isRegistered(UnFinalAgent.class)
+  private final static String LOG_PREFIX = UnFinalAgent.isActive()
     ? "[UnFinal Agent] "
     : "[UnFinal Transformer] ";
 
@@ -86,10 +85,6 @@ public class UnFinalTransformer extends ClassVisitor {
     return super.visitMethod(access & ~Modifier.FINAL, name, desc, signature, exceptions);
   }
 
-  /**
-   * TODO: make include/exclude list of class and package names configurable
-   */
-//  @Override
   public boolean shouldTransform() {
     return Transformer.shouldTransform(className);
   }
