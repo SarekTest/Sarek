@@ -45,13 +45,11 @@
       <artifactId>sarek</artifactId>
       <scope>test</scope>
     </dependency>
-<!--
     <dependency>
       <groupId>dev.sarek</groupId>
-      <artifactId>sarek-all</artifactId>
+      <artifactId>sarek-junit4-runner</artifactId>
       <scope>test</scope>
     </dependency>
--->
 
   </dependencies>
 

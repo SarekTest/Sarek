@@ -1,47 +1,24 @@
 package dev.sarek.agent.constructor_mock;
 
+import dev.sarek.junit4.SarekRunner;
+import dev.sarek.junit4.SarekRunnerConfig;
 import dev.sarek.test.util.SeparateJVM;
-import net.bytebuddy.agent.ByteBuddyAgent;
 import org.acme.*;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
 
-import java.io.IOException;
-import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
-import java.util.jar.JarFile;
 
 import static org.junit.Assert.*;
 
-/**
- * This test runs without a Java agent set via command line. It attaches it dynamically after adding it to the
- * bootstrap class loader's search path. The latter is only necessary if we want to mock constructors of classes which
- * are either bootstrap classes themselves or have bootstrap classes in their ancestry (direct or indirect parent
- * classes).
- * <p></p>
- * Furthermore, the test demonstrates how to retransform an already loaded class (in this case also a bootstrap class)
- * in order to add constructor mock functionality to it. This proves that the constructor mock transformation does not
- * change the class structure but only instruments constructor bodies. I.e. that this is more flexible than e.g.
- * removing 'final' modifiers because the latter change class/method signatures and are not permitted in
- * retransformations, so they have to be done during class-loading.
- */
 @Category(SeparateJVM.class)
+@RunWith(SarekRunner.class)
+@SarekRunnerConfig(agentJarPathProperty = "sarek.jar")
 public class ConstructorMockIT {
-  private static final Instrumentation INSTRUMENTATION = ByteBuddyAgent.install();
-
-  @BeforeClass
-  public static void beforeClass() throws IOException, UnmodifiableClassException {
-    // This property is usually set in Maven in order to tell us the path to the constructor mock agent.
-    // Important: The JAR needs to contain Javassist too, so it should be the '-all' or '-all-special' artifact.
-    JarFile sarekAllJar = new JarFile(System.getProperty("sarek.jar"));
-    // Inject constructor mock agent JAR into bootstrap classloader
-    INSTRUMENTATION.appendToBootstrapClassLoaderSearch(sarekAllJar);
-  }
-
   Base base;
   AnotherSub anotherSub;
   Sub sub;

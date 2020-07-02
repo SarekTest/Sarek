@@ -52,7 +52,7 @@ public class UnFinalAgentIT {
         .getInstance(123, 456)
         .toString()
     );
-    System.out.println(new UUID(0x01234567CAFEABBAL, 0xFACE009876543210L));
+    //System.out.println(new UUID(0x01234567CAFEABBAL, 0xFACE009876543210L));
     assertEquals(
       "mocked String",
       SimpleMock

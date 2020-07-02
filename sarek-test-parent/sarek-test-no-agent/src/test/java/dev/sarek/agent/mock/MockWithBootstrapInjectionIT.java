@@ -1,24 +1,22 @@
 package dev.sarek.agent.mock;
 
-import dev.sarek.agent.Agent;
-import dev.sarek.agent.constructor_mock.ConstructorMockTransformer;
+import dev.sarek.junit4.SarekRunner;
+import dev.sarek.junit4.SarekRunnerConfig;
 import dev.sarek.test.util.SeparateJVM;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.instrument.Instrumentation;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Random;
 import java.util.UUID;
-import java.util.jar.JarFile;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static org.junit.Assert.*;
@@ -27,23 +25,9 @@ import static org.junit.Assert.*;
   { "ConstantConditions", "StringBufferReplaceableByString", "StringBufferMayBeStringBuilder", "unused" }
 )
 @Category(SeparateJVM.class)
+@RunWith(SarekRunner.class)
+@SarekRunnerConfig(agentJarPathProperty = "sarek.jar")
 public class MockWithBootstrapInjectionIT {
-  @BeforeClass
-  public static void addDependenciesToBootClassPath() throws IOException {
-    Instrumentation INSTRUMENTATION = Agent.getInstrumentation();
-
-    // This property is usually set in Maven in order to tell us the path to the constructor mock agent.
-    // Important: The JAR needs to contain Javassist too, so it should be the '-all' or '-all-special' artifact.
-    JarFile sarekAllJar = new JarFile(System.getProperty("sarek.jar"));
-    // Inject constructor mock agent JAR into bootstrap classloader
-    INSTRUMENTATION.appendToBootstrapClassLoaderSearch(sarekAllJar);
-    assertNull(
-      "Agent library classes must be loaded by the bootstrap class loader, which is not the case here. " +
-        "This indicates that you did not run this test in a separate JVM.",
-      ConstructorMockTransformer.class.getClassLoader()
-    );
-  }
-
   @Test
   public void canMockBootstrapClass_UUID() {
     // Try with resources works for Mock because it implements AutoCloseable

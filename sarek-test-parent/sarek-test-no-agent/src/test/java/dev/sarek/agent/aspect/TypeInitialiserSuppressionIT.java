@@ -13,7 +13,7 @@ import static org.junit.Assert.assertFalse;
 
 /**
  * This test checks features which do not involve bootloader classes.
- * So we do not need a Java agent here.
+ * So we do not need a Java agent or an agent-injecting JUnit runner here.
  */
 @Category(SeparateJVM.class)
 public class TypeInitialiserSuppressionIT {

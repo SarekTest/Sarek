@@ -1,35 +1,26 @@
 package dev.sarek.agent.aspect;
 
+import dev.sarek.junit4.SarekRunner;
+import dev.sarek.junit4.SarekRunnerConfig;
 import dev.sarek.test.util.SeparateJVM;
-import org.acme.StringWrapper;
 import org.acme.UnderTest;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.UUID;
 
 import static dev.sarek.test.util.TestHelper.isClassLoaded;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 import static org.junit.Assert.*;
 
-/**
- * This test checks features which do not involve bootloader classes.
- * So we do not need a Java agent here.
- * <ul>
- *   <li>
- *     TODO: multiple advices on same object
- *   </li>
- *   <li>
- *     TODO: inject ByteBuddy + aspect framework into boot class loader in order to use non-loaded JRE classes
- *   </li>
- *   <li>
- *     TODO: show how to weave already loaded classes via retransformation, also JRE bootstrap classes by adding
- *           the aspect agent JAR to to bootstrap class path
- *   </li>
- * </ul>
- */
 @Category(SeparateJVM.class)
+@RunWith(SarekRunner.class)
+@SarekRunnerConfig(agentJarPathProperty = "sarek.jar")
 public class WeaverIT {
   private Weaver weaver;
 
@@ -43,7 +34,7 @@ public class WeaverIT {
   public void weaveLoadedApplicationClass() {
     final String CLASS_NAME = "org.acme.UnderTest";
 
-    // Load application class
+    // Create application class instance
     UnderTest underTest = new UnderTest();
     assertTrue(isClassLoaded(CLASS_NAME));
 
@@ -51,7 +42,7 @@ public class WeaverIT {
     weaver = Weaver
       .forTypes(named(CLASS_NAME))
       .addAdvice(
-        named("add"),
+        isMethod().and(not(named("greet"))),
         new InstanceMethodAroundAdvice(
           null,
           (target, method, args, proceedMode, returnValue, throwable) -> ((int) returnValue) * 11
@@ -64,23 +55,29 @@ public class WeaverIT {
     assertEquals(55, underTest.add(2, 3));
     assertNotEquals(55, new UnderTest().add(2, 3));
 
+    // Matcher too broad (all methods of target class) + sloppy advice implementation
+    // (assuming specific parameter types) -> runtime exception
+    //noinspection ResultOfMethodCallIgnored
+    assertThrows(ClassCastException.class, underTest::getName);
+
     // After unregistering the transformer, the target is unaffected by the aspect
     weaver.unregisterTransformer();
     assertEquals(15, underTest.add(7, 8));
   }
 
   @Test
-  public void cannotWeaveJREUtilityBootstrapClass() {
+  public void weaveJREUtilityBootstrapClass() {
     final String CLASS_NAME = "java.util.UUID";
+    final String UUID_TEXT_STUB = "111-222-333-444";
 
     weaver = Weaver
       .forTypes(named(CLASS_NAME))
       .addAdvice(
-        // No-op advice just passing through results and exceptions
+        // Skip target method and return fixed result -> a classical stub
         named("toString"),
         new InstanceMethodAroundAdvice(
           (target, method, args) -> false,
-          (target, method, args, proceedMode, returnValue, throwable) -> false
+          (target, method, args, proceedMode, returnValue, throwable) -> UUID_TEXT_STUB
         )
       )
       .build();
@@ -89,46 +86,38 @@ public class WeaverIT {
     UUID uuid = UUID.randomUUID();
     assertTrue(isClassLoaded(CLASS_NAME));
 
-    // Even though no target instance has been registered on the weaver, the aspect runs in order to check
-    // if the advice should fire. But in order to do that, the aspect classes need to exist in the target
-    // class' class loader, which in this case they do not because the test runs without the Java agent
-    // injecting them into the boot class loader.
-    //noinspection ResultOfMethodCallIgnored
-    assertThrows(NoClassDefFoundError.class, uuid::toString);
+    // The target instance has not been registered on the weaver yet
+    assertNotEquals(UUID_TEXT_STUB, uuid.toString());
+
+    // After registration on the weaver, the aspect affects the target instance
+    weaver.addTarget(uuid);
+    assertEquals(UUID_TEXT_STUB, uuid.toString());
+
+    // Another instance is unaffected by the aspect
+    assertNotEquals(UUID_TEXT_STUB, UUID.randomUUID().toString());
+
+    // After deregistration, the target instance is also unaffected again
+    weaver.removeTarget(uuid);
+    assertNotEquals(UUID_TEXT_STUB, uuid.toString());
+
+    // The same instance can be registered again
+    weaver.addTarget(uuid);
+    assertEquals(UUID_TEXT_STUB, uuid.toString());
+
+    // After unregistering the whole transformer from instrumentation, the aspect is ineffective
+    weaver.unregisterTransformer();
+    assertNotEquals(UUID_TEXT_STUB, uuid.toString());
   }
 
   @Test
-  public void cannotWeaveJRECoreBootstrapClass() {
+  public void weaveJRECoreBootstrapClass() {
     final String CLASS_NAME = "java.lang.String";
+    final String TEXT = "To be, or not to be, that is the question";
 
     // Create weaver *after* bootstrap class is loaded (should not make a difference, but check anyway)
     assertTrue(isClassLoaded(CLASS_NAME));
     weaver = Weaver
       .forTypes(named(CLASS_NAME))
-      .addAdvice(
-        // No-op advice just passing through results and exceptions
-        named("replaceAll").and(takesArguments(String.class, String.class)),
-        new InstanceMethodAroundAdvice(
-          (target, method, args) -> false,
-          (target, method, args, proceedMode, returnValue, throwable) -> false
-        )
-      )
-      .build();
-
-    // Even though no target instance has been registered on the weaver, the aspect runs in order to check
-    // if the advice should fire. But in order to do that, the aspect classes need to exist in the target
-    // class' class loader, which in this case they do not because the test runs without the Java agent
-    // injecting them into the boot class loader.
-    //noinspection ResultOfMethodCallIgnored
-    assertThrows(NoClassDefFoundError.class, () -> "dummy".replaceAll("foo", "bar"));
-  }
-
-  @Test
-  public void complexAroundAdvice() {
-    StringWrapper TEXT = new StringWrapper("To be, or not to be, that is the question");
-
-    Weaver weaver = Weaver
-      .forTypes(is(StringWrapper.class))
       .addAdvice(
         named("replaceAll").and(takesArguments(String.class, String.class)),
         replaceAllAdvice()
@@ -150,7 +139,7 @@ public class WeaverIT {
     assertEquals("To ❤, or not to ❤, that is the question", TEXT.replaceAll("be", "modify"));
 
     // Negative test: aspect has no effect on an instance not registered as a target
-    StringWrapper noTarget = new StringWrapper("Let it be");
+    String noTarget = "Let it be";
     assertEquals("Let it go", noTarget.replaceAll("be", "go"));
     assertEquals("Let it skip", noTarget.replaceAll("be", "skip"));
     assertEquals("Let it modify", noTarget.replaceAll("be", "modify"));
@@ -158,6 +147,45 @@ public class WeaverIT {
     // After unregistering TEXT as an advice target instance, 'replaceAll' behaves normally again
     weaver.removeTarget(TEXT);
     assertEquals("To modify, or not to modify, that is the question", TEXT.replaceAll("be", "modify"));
+  }
+
+  @Test
+  public void weaveStaticJREMethods() {
+    weaver = Weaver
+      .forTypes(is(System.class))
+      .addAdvice(
+        named("getProperty"),
+        new StaticMethodAroundAdvice(
+          (method, args) -> !args[0].equals("java.version"),
+          (method, args, proceedMode, returnValue, throwable) -> proceedMode ? returnValue : "42"
+        )
+      )
+      .addTargets(System.class)
+      .build();
+
+    // Only system property 'java.version' is mocked
+    assertEquals("42", System.getProperty("java.version"));
+    assertEquals("42", System.getProperty("java.version", "1.2.3"));
+    assertNotEquals("42", System.getProperty("java.home"));
+    assertNotEquals("42", System.getProperty("line.separator"));
+  }
+
+  @Test
+  public void weavingNativeMethodsHasNoEffect() {
+    weaver = Weaver
+      .forTypes(is(System.class))
+      .addAdvice(
+        named("currentTimeMillis").or(named("nanoTime")),
+        new StaticMethodAroundAdvice(
+          (method, args) -> false,
+          (method, args, proceedMode, returnValue, throwable) -> 123
+        )
+      )
+      .addTargets(System.class)
+      .build();
+
+    assertNotEquals(123, System.currentTimeMillis());
+    assertNotEquals(123, System.nanoTime());
   }
 
   /**
@@ -185,10 +213,49 @@ public class WeaverIT {
         if (throwable != null)
           return "caught exception from proceed";
         if (!proceedMode)
-          return ((StringWrapper) target).replace("e", "ε").replace("o", "0");
+          return ((String) target).replace("e", "ε").replace("o", "0");
         return returnValue;
       }
     );
+  }
+
+  @Test
+  public void createFile() throws URISyntaxException {
+    final ThreadLocal<Integer> callCount = ThreadLocal.withInitial(() -> 0);
+
+    // Before registering the transformer, the class is unaffected by the aspect
+    assertEquals("foo", new File("foo").getName());
+    assertEquals(0, (int) callCount.get());
+
+    // Count all File constructor calls, modify first argument if it is a String
+    weaver = Weaver
+      .forTypes(is(File.class))
+      .addAdvice(
+        any(),
+        new ConstructorAroundAdvice(
+          (constructor, args) -> {
+            if (args[0] instanceof String)
+              args[0] = "ADVISED";
+            callCount.set(callCount.get() + 1);
+          },
+          null
+        )
+      )
+      .addTargets(File.class)
+      .build();
+
+    // First argument is a String -> the aspect modifies it + increments the call counter
+    assertEquals("ADVISED", new File("foo").getName());
+    assertEquals("ADVISED", new File("bar").getName());
+    assertEquals("ADVISED", new File("parent", "child").getParent());
+    // First argument is not a String -> the aspect only increments the call counter
+    assertEquals("bar", new File(new URI("file:///foo/bar")).getName());
+    assertEquals(4, (int) callCount.get());
+
+    // After unregistering the transformer, the class is unaffected by the aspect
+    weaver.unregisterTransformer();
+    assertEquals("foo", new File("foo").getName());
+    assertEquals(4, (int) callCount.get());
   }
 
   @Test
