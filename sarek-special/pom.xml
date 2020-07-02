@@ -48,12 +48,15 @@
                   <artifact>dev.sarek:sarek-special</artifact>
                   <includes>
                     <include>META-INF/MANIFEST.MF</include>
+                    <!-- Marker file with magic name to allow agent file & type detection on class path -->
+                    <include>META-INF/sarek-special.txt</include>
                   </includes>
                 </filter>
                 <filter>
                   <artifact>dev.sarek:sarek</artifact>
                   <excludes>
                     <exclude>META-INF/MANIFEST.MF</exclude>
+                    <exclude>META-INF/sarek.txt</exclude>
                   </excludes>
                 </filter>
               </filters>

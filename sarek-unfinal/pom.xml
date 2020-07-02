@@ -50,6 +50,8 @@
                   <artifact>dev.sarek:sarek-unfinal</artifact>
                   <includes>
                     <include>META-INF/MANIFEST.MF</include>
+                    <!-- Marker file with magic name to allow agent file & type detection on class path -->
+                    <include>META-INF/sarek-unfinal.txt</include>
                     <include>dev/sarek/agent/**</include>
                   </includes>
                 </filter>
