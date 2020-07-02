@@ -83,12 +83,13 @@
             TODO:
               - Switch to next milestone or stable release as soon as available on Maven Central
               - Attention: 3.0.0-RC1 is changing + unstable, e.g. freezes when running ITs with active agents
+              - Attention: M5 has the same problems as RC1, see https://issues.apache.org/jira/browse/SUREFIRE-1788
           -->
-          <!--          <version>3.0.0-RC1</version>-->
+          <!--<version>3.0.0-RC1</version>-->
           <version>3.0.0-M4</version>
           <configuration>
             <!-- Fix for "[WARNING] Corrupted STDOUT by directly writing to native stream in forked JVM" -->
-            <!--            <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>-->
+            <!--<forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>-->
             <systemPropertyVariables>
               <sarek.jar>${sarek.jar}</sarek.jar>
               <sarek-special.jar>${sarek-special.jar}</sarek-special.jar>
@@ -134,12 +135,13 @@
             TODO:
               - Switch to next milestone or stable release as soon as available on Maven Central
               - Attention: 3.0.0-RC1 is changing + unstable, e.g. freezes when running ITs with active agents
+              - Attention: M5 has the same problems as RC1, see https://issues.apache.org/jira/browse/SUREFIRE-1788
           -->
-          <!--          <version>3.0.0-RC1</version>-->
+          <!--<version>3.0.0-RC1</version>-->
           <version>3.0.0-M4</version>
           <configuration>
             <!-- Fix for "[WARNING] Corrupted STDOUT by directly writing to native stream in forked JVM" -->
-            <!--            <forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>-->
+            <!--<forkNode implementation="org.apache.maven.plugin.surefire.extensions.SurefireForkNodeFactory"/>-->
             <systemPropertyVariables>
               <sarek.jar>${sarek.jar}</sarek.jar>
               <sarek-special.jar>${sarek-special.jar}</sarek-special.jar>
@@ -385,10 +387,12 @@
 
   <pluginRepositories>
     <!-- TODO: As soon as the next Surefire milestone is available on Maven Central, get rid of this repository -->
+    <!--
     <pluginRepository>
       <id>maven-1575</id>
       <url>https://repository.apache.org/content/repositories/maven-1575/</url>
     </pluginRepository>
+    -->
     <!--
     <pluginRepository>
       <id>apache-snapshots</id>
