@@ -1,7 +1,6 @@
 package dev.sarek.agent.constructor_mock;
 
 import dev.sarek.junit4.SarekRunner;
-import dev.sarek.junit4.SarekRunnerConfig;
 import dev.sarek.test.util.SeparateJVM;
 import org.acme.*;
 import org.junit.Test;
@@ -17,7 +16,6 @@ import static org.junit.Assert.*;
 
 @Category(SeparateJVM.class)
 @RunWith(SarekRunner.class)
-@SarekRunnerConfig(agentJarPathProperty = "sarek.jar")
 public class ConstructorMockIT {
   Base base;
   AnotherSub anotherSub;

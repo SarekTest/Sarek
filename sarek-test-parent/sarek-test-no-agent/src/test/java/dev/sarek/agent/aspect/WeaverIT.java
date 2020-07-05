@@ -1,7 +1,6 @@
 package dev.sarek.agent.aspect;
 
 import dev.sarek.junit4.SarekRunner;
-import dev.sarek.junit4.SarekRunnerConfig;
 import dev.sarek.test.util.SeparateJVM;
 import org.acme.UnderTest;
 import org.junit.After;
@@ -20,7 +19,6 @@ import static org.junit.Assert.*;
 
 @Category(SeparateJVM.class)
 @RunWith(SarekRunner.class)
-@SarekRunnerConfig(agentJarPathProperty = "sarek.jar")
 public class WeaverIT {
   private Weaver weaver;
 

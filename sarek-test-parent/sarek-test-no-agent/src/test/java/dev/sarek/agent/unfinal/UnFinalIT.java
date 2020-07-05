@@ -1,7 +1,6 @@
 package dev.sarek.agent.unfinal;
 
 import dev.sarek.junit4.SarekRunner;
-import dev.sarek.junit4.SarekRunnerConfig;
 import dev.sarek.test.util.SeparateJVM;
 import dev.sarek.test.util.SimpleMock;
 import org.acme.FinalClass;
@@ -20,7 +19,6 @@ import static org.junit.Assert.assertFalse;
 
 @Category(SeparateJVM.class)
 @RunWith(SarekRunner.class)
-@SarekRunnerConfig(agentJarPathProperty = "unfinal.jar")
 public class UnFinalIT {
   @Test
   public void checkDefinaliser() throws NoSuchMethodException {

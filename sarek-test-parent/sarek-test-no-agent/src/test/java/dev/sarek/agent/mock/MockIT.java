@@ -2,7 +2,6 @@ package dev.sarek.agent.mock;
 
 import dev.sarek.agent.aspect.InstanceMethodAroundAdvice;
 import dev.sarek.junit4.SarekRunner;
-import dev.sarek.junit4.SarekRunnerConfig;
 import dev.sarek.test.util.SeparateJVM;
 import org.acme.Base;
 import org.acme.FinalClass;
@@ -31,7 +30,6 @@ import static org.junit.Assert.*;
 @SuppressWarnings("ConstantConditions")
 @Category(SeparateJVM.class)
 @RunWith(SarekRunner.class)
-@SarekRunnerConfig(agentJarPathProperty = "sarek.jar")
 public class MockIT {
   @Test
   public void canMockApplicationClasses() {

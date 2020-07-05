@@ -1,7 +1,6 @@
 package dev.sarek.agent.mock;
 
 import dev.sarek.junit4.SarekRunner;
-import dev.sarek.junit4.SarekRunnerConfig;
 import dev.sarek.test.util.SeparateJVM;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -26,7 +25,6 @@ import static org.junit.Assert.*;
 )
 @Category(SeparateJVM.class)
 @RunWith(SarekRunner.class)
-@SarekRunnerConfig(agentJarPathProperty = "sarek.jar")
 public class MockWithBootstrapInjectionIT {
   @Test
   public void canMockBootstrapClass_UUID() {

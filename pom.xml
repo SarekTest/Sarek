@@ -95,6 +95,7 @@
               <sarek-special.jar>${sarek-special.jar}</sarek-special.jar>
               <unfinal.jar>${unfinal.jar}</unfinal.jar>
               <unfinal-special.jar>${unfinal-special.jar}</unfinal-special.jar>
+              <dev.sarek.agent.path>${sarek.jar}</dev.sarek.agent.path>
             </systemPropertyVariables>
             <!-- TODO: Got to use this until SUREFIRE-1809 is fixed in M6 -->
             <useModulePath>false</useModulePath>
@@ -156,6 +157,7 @@
               <sarek-special.jar>${sarek-special.jar}</sarek-special.jar>
               <unfinal.jar>${unfinal.jar}</unfinal.jar>
               <unfinal-special.jar>${unfinal-special.jar}</unfinal-special.jar>
+              <dev.sarek.agent.path>${sarek.jar}</dev.sarek.agent.path>
             </systemPropertyVariables>
             <!-- TODO: Got to use this until SUREFIRE-1809 is fixed in M6 -->
             <useModulePath>false</useModulePath>
@@ -391,6 +393,11 @@
         <artifactId>sarek-agent-common</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>dev.sarek</groupId>
+        <artifactId>sarek-attach</artifactId>
+        <version>${project.version}</version>
+      </dependency>
 
       <!-- Test dependencies -->
       <dependency>
@@ -465,7 +472,9 @@
     <module>sarek-constructor-mock-javassist</module>
     <module>sarek-mock</module>
     <module>sarek-agent-common</module>
+    <module>sarek-attach</module>
     <module>sarek-junit4-runner</module>
+    <module>sarek-spock-extension</module>
     <module>sarek-test-parent</module>
   </modules>
 
