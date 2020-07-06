@@ -22,6 +22,8 @@
     <bytebuddy.version>1.10.13</bytebuddy.version>
     <javassist.version>3.27.0-GA</javassist.version>
     <objenesis.version>3.1</objenesis.version>
+    <junit4.version>4.13</junit4.version>
+    <junit5.version>5.6.2</junit5.version>
 
     <!--
       Defined by build-helper:rootlocation.
@@ -96,6 +98,8 @@
               <unfinal.jar>${unfinal.jar}</unfinal.jar>
               <unfinal-special.jar>${unfinal-special.jar}</unfinal-special.jar>
               <dev.sarek.agent.path>${sarek.jar}</dev.sarek.agent.path>
+              <!-- Necessary for SarekJUnit5Extension auto-detection -->
+              <junit.jupiter.extensions.autodetection.enabled>true</junit.jupiter.extensions.autodetection.enabled>
             </systemPropertyVariables>
             <!-- TODO: Got to use this until SUREFIRE-1809 is fixed in M6 -->
             <useModulePath>false</useModulePath>
@@ -158,6 +162,8 @@
               <unfinal.jar>${unfinal.jar}</unfinal.jar>
               <unfinal-special.jar>${unfinal-special.jar}</unfinal-special.jar>
               <dev.sarek.agent.path>${sarek.jar}</dev.sarek.agent.path>
+              <!-- Necessary for SarekJUnit5Extension auto-detection -->
+              <junit.jupiter.extensions.autodetection.enabled>true</junit.jupiter.extensions.autodetection.enabled>
             </systemPropertyVariables>
             <!-- TODO: Got to use this until SUREFIRE-1809 is fixed in M6 -->
             <useModulePath>false</useModulePath>
@@ -340,11 +346,18 @@
         <version>${javassist.version}</version>
       </dependency>
 
-      <!-- Objenesis, used for creating injectable mocks for  final classes  -->
+      <!-- Objenesis, used for creating injectable mocks for final classes  -->
       <dependency>
         <groupId>org.objenesis</groupId>
         <artifactId>objenesis</artifactId>
         <version>${objenesis.version}</version>
+      </dependency>
+
+      <!-- JUnit 5 Jupiter API for Sarek extension  -->
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-api</artifactId>
+        <version>${junit5.version}</version>
       </dependency>
 
       <!-- Internal dependencies -->
@@ -403,7 +416,13 @@
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.13</version>
+        <version>${junit4.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-engine</artifactId>
+        <version>${junit5.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -474,6 +493,7 @@
     <module>sarek-agent-common</module>
     <module>sarek-attach</module>
     <module>sarek-junit4-runner</module>
+    <module>sarek-junit5-extension</module>
     <module>sarek-spock-extension</module>
     <module>sarek-test-parent</module>
   </modules>
