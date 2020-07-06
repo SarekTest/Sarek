@@ -24,6 +24,7 @@
     <objenesis.version>3.1</objenesis.version>
     <junit4.version>4.13</junit4.version>
     <junit5.version>5.6.2</junit5.version>
+    <testng.version>7.1.0</testng.version>
 
     <!--
       Defined by build-helper:rootlocation.
@@ -424,6 +425,12 @@
         <version>${junit5.version}</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>org.testng</groupId>
+        <artifactId>testng</artifactId>
+        <version>${testng.version}</version>
+        <scope>test</scope>
+      </dependency>
 
       <dependency>
         <groupId>dev.sarek</groupId>
@@ -494,6 +501,7 @@
     <module>sarek-attach</module>
     <module>sarek-junit4-runner</module>
     <module>sarek-junit5-extension</module>
+    <module>sarek-testng-extension</module>
     <module>sarek-spock-extension</module>
     <module>sarek-test-parent</module>
   </modules>
