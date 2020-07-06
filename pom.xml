@@ -353,13 +353,6 @@
         <version>${objenesis.version}</version>
       </dependency>
 
-      <!-- JUnit 5 Jupiter API for Sarek extension  -->
-      <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-api</artifactId>
-        <version>${junit5.version}</version>
-      </dependency>
-
       <!-- Internal dependencies -->
       <dependency>
         <groupId>dev.sarek</groupId>
@@ -425,6 +418,13 @@
         <version>${junit5.version}</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-api</artifactId>
+        <version>${junit5.version}</version>
+        <scope>test</scope>
+      </dependency>
+
       <dependency>
         <groupId>dev.sarek</groupId>
         <artifactId>sarek-test-common</artifactId>
