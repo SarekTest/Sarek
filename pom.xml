@@ -499,10 +499,7 @@
     <module>sarek-mock</module>
     <module>sarek-agent-common</module>
     <module>sarek-attach</module>
-    <module>sarek-junit4-runner</module>
-    <module>sarek-junit5-extension</module>
-    <module>sarek-testng-extension</module>
-    <module>sarek-spock-extension</module>
+    <module>sarek-test-extensions-parent</module>
     <module>sarek-test-parent</module>
   </modules>
 
