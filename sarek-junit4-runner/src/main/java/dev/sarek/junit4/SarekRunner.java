@@ -9,7 +9,10 @@ import org.junit.runners.model.InitializationError;
 
 @SarekRunnerDelegate
 public class SarekRunner extends Runner implements Filterable, Sortable {
+  // TODO: make logging configurable
+  private final static String LOG_PREFIX = "[Sarek JUnit 4 Runner] ";
   private SarekRunnerDelegate sarekRunnerDelegate;
+
   private final Runner delegate;
 
   public SarekRunner(Class<?> testClass) throws InitializationError {
@@ -18,6 +21,8 @@ public class SarekRunner extends Runner implements Filterable, Sortable {
 
   public SarekRunner(Class<?> testClass, Runner delegate) throws InitializationError {
     try {
+      log("going to attach Sarek agent (if not attached yet)");
+
       // IMPORTANT: Create runner delegate instance (and with it an instance of the test class) *after* bootstrap
       // injection, because the test class might reference Sarek classes or its dependencies. Those would be resolved as
       // soon as the test class is loaded, resulting in them being loaded via application class loader (uh-oh!) instead
@@ -83,6 +88,10 @@ public class SarekRunner extends Runner implements Filterable, Sortable {
     // Sputnik also implements it, so it cannot hurt.
     if (delegate instanceof Sortable)
       ((Sortable) delegate).sort(sorter);
+  }
+
+  private static void log(String message) {
+    System.out.println(LOG_PREFIX + message);
   }
 
 }
