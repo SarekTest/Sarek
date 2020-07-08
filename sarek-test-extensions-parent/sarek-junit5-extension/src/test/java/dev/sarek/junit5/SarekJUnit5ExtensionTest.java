@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("ConstantConditions")
 public class SarekJUnit5ExtensionTest {

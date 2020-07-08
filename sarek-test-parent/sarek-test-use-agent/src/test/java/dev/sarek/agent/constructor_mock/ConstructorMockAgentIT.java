@@ -3,7 +3,6 @@ package dev.sarek.agent.constructor_mock;
 import org.acme.*;
 import org.junit.Test;
 
-import java.lang.instrument.UnmodifiableClassException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
@@ -24,7 +23,7 @@ public class ConstructorMockAgentIT {
   }
 
   @Test
-  public void constructorMockOnApplicationClass() throws UnmodifiableClassException {
+  public void constructorMockOnApplicationClass() {
     final String className_Sub = Sub.class.getName();
 
     // (1) Before activating constructor mock mode for class Sub, everything is normal
@@ -93,7 +92,7 @@ public class ConstructorMockAgentIT {
   }
 
   @Test
-  public void constructorMockOnAlreadyLoadedBootstrapClass() throws UnmodifiableClassException {
+  public void constructorMockOnAlreadyLoadedBootstrapClass() {
     // (1) Before activating constructor mock mode for class UUID, everything is normal
     assertFalse(ConstructorMockRegistry.isMock(UUID.class.getName()));
     assertEquals("00000000-0000-abba-0000-00000000cafe", new UUID(0xABBA, 0xCAFE).toString());
