@@ -157,10 +157,22 @@ public class ConstructorMockJavassistTransformer implements ClassFileTransformer
     for (CtConstructor ctConstructor : targetClass.getDeclaredConstructors()) {
       if (LOG_CONSTRUCTOR_MOCK)
         log("Adding constructor mock capability to constructor " + ctConstructor.getLongName());
+
+      // Actually this is not what we want because the visibility scope of a local variable declared this way is the
+      // whole constructor A variable visible only within our inserted code's scope is actually better.
+      //ctConstructor.addLocalVariable("constructorStackDepth", CtPrimitiveType.intType);
+
       String ifCondition = String.join("\n",
-        "if (dev.sarek.agent.constructor_mock.ConstructorMockRegistry.isMockUnderConstruction()) {",
-        "  " + superCall,
-        "  return;",
+        "{",
+        "  int constructorStackDepth = " + MOCK_REGISTRY + "#isMockUnderConstruction();",
+//        "  constructorStackDepth = " + MOCK_REGISTRY + "#isMockUnderConstruction();",
+        "  if (constructorStackDepth > 0) {",
+        "    " + superCall,
+        "    if (constructorStackDepth == 1) {",
+        "      " + MOCK_REGISTRY + "#registerMockInstance($0);",
+        "    }",
+        "    return;",
+        "  }",
         "}"
       );
       if (LOG_CONSTRUCTOR_MOCK)

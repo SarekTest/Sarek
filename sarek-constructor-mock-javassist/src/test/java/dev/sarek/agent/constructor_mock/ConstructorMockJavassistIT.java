@@ -1,5 +1,6 @@
 package dev.sarek.agent.constructor_mock;
 
+import dev.sarek.junit4.SarekRunner;
 import dev.sarek.test.util.SeparateJVM;
 import net.bytebuddy.agent.ByteBuddyAgent;
 import org.acme.*;
@@ -7,14 +8,13 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
 
-import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
-import java.util.jar.JarFile;
 
 import static org.junit.Assert.*;
 
@@ -31,7 +31,9 @@ import static org.junit.Assert.*;
  * retransformations, so they have to be done during class-loading.
  */
 @Category(SeparateJVM.class)
-public class JavassistConstructorMockIT {
+@RunWith(SarekRunner.class)
+//@Ignore("Only working with '-noverify'  because of https://github.com/jboss-javassist/javassist/issues/328")
+public class ConstructorMockJavassistIT {
   private static final Instrumentation INSTRUMENTATION = ByteBuddyAgent.install();
   private static final Class<?>[] TRANSFORMATION_TARGETS = {
     Sub.class, Base.class,
@@ -41,12 +43,12 @@ public class JavassistConstructorMockIT {
   private static ConstructorMockJavassistTransformer constructorMockTransformer;
 
   @BeforeClass
-  public static void beforeClass() throws IOException, UnmodifiableClassException {
-    // This property is usually set in Maven in order to tell us the path to the constructor mock agent.
-    // Important: The JAR needs to contain Javassist too, so it should be the '-all' or '-all-special' artifact.
-    JarFile sarekAllJar = new JarFile(System.getProperty("sarek.jar"));
-    // Inject constructor mock agent JAR into bootstrap classloader
-    INSTRUMENTATION.appendToBootstrapClassLoaderSearch(sarekAllJar);
+  public static void beforeClass() throws UnmodifiableClassException {
+
+    // Please note: There is no need to add Javassist and this module's JAR to the bootstrap class path, because in
+    // contrast to the aspect and mock APIs, the API itself or its dependencies are never used by transformed code. The
+    // only thing that must be on the bootstrap class loader is the ConstructorMockRegistry from module
+    // 'sarek-constructor-mock', which is already part of the Sarek uber JAR and will be injected via SarekRunner.
 
 //    ConstructorMockJavassistTransformer.LOG_CONSTRUCTOR_MOCK = true;
 //    ConstructorMockJavassistTransformer.DUMP_CLASS_FILES = true;

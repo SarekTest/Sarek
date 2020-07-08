@@ -14,9 +14,18 @@
   <build>
     <plugins>
 
-      <!-- Note that here we use Surefire, not Failsafe, i.e. no agent JARs -->
       <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <!-- TODO: remove '-noverify' after https://github.com/jboss-javassist/javassist/issues/328 is fixed -->
+          <argLine>-noverify</argLine>
+        </configuration>
+        <executions>
+          <execution>
+            <id>reuse-jvm</id>
+            <phase>none</phase>
+          </execution>
+        </executions>
       </plugin>
 
     </plugins>
@@ -42,6 +51,11 @@
     <dependency>
       <groupId>dev.sarek</groupId>
       <artifactId>sarek-test-common</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>dev.sarek</groupId>
+      <artifactId>sarek-junit4-runner</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

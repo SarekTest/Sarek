@@ -1,6 +1,8 @@
 package dev.sarek.agent.constructor_mock;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Set;
 
 /**
@@ -13,6 +15,9 @@ public class ConstructorMockRegistry {
   //       to modify isMockUnderConstruction() and the generated constructor code to pass on the calling class.
   //       Alternatively, if one day we drop Java 8 support we can use the StackWalker API.
   private static Set<String> mockClasses = new HashSet<>();
+
+  // This is effectively an IdentityHashSet, see https://stackoverflow.com/a/48096408/1082681
+  private static Set<Object> mockInstances = Collections.newSetFromMap(new IdentityHashMap<>());
 
   /**
    * Determine whether a given class has been registered for constructor mocking
@@ -56,7 +61,7 @@ public class ConstructorMockRegistry {
    *
    * @return boolean value specifying if the object under construction ought to be a mock or not
    */
-  public static boolean isMockUnderConstruction() {
+  public static int isMockUnderConstruction() {
     // TODO:
     //   - Under Java 8, according to Rafael Winterhalter it would be quicker and more efficient (as in not
     //     materialising the whole stack) to use sun.misc.JavaLangAccess, e.g.
@@ -73,6 +78,17 @@ public class ConstructorMockRegistry {
         break;
       constructorIndex = i;
     }
-    return constructorIndex > 0 && isMock(stackTrace[constructorIndex].getClassName());
+    return constructorIndex > 0 && isMock(stackTrace[constructorIndex].getClassName())
+      ? constructorIndex
+      : -1;
+  }
+
+  public static void registerMockInstance(Object mockInstance) {
+    // Caveat: Do not log anything here, especially not mock objects with possibly stubbed toString methods. Otherwise
+    // you might see strange exceptions in then failing tests.
+    mockInstances.add(mockInstance);
+    // TODO:
+    //   - 'unregister' method
+    //   - automatic unregistration if mock class is deactivated
   }
 }

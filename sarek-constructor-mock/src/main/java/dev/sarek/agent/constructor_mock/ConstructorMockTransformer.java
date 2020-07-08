@@ -123,7 +123,7 @@ public class ConstructorMockTransformer<T> implements AutoCloseable {
     {
       if (logVerbose)
         System.out.println("[Constructor Mock Transformer] Mocking constructor " + instrumentedMethod);
-      return new ConstructorMockMethodVisitor(instrumentedType, methodVisitor);
+      return new ConstructorMockMethodVisitor(instrumentedType, methodVisitor, instrumentedMethod);
     }
   }
 

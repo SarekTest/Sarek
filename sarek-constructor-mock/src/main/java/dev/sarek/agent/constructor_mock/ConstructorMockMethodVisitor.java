@@ -7,6 +7,7 @@ import net.bytebuddy.description.type.TypeDefinition;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.jar.asm.Label;
 import net.bytebuddy.jar.asm.MethodVisitor;
+import net.bytebuddy.utility.visitor.LocalVariableAwareMethodVisitor;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -15,8 +16,9 @@ import java.util.stream.Collectors;
 
 import static net.bytebuddy.jar.asm.Opcodes.*;
 
-public class ConstructorMockMethodVisitor extends MethodVisitor {
+public class ConstructorMockMethodVisitor extends LocalVariableAwareMethodVisitor {
   private static final int ASM_API_VERSION = ASM8;
+  private static final String CONSTRUCTOR_MOCK_REGISTRY = "dev/sarek/agent/constructor_mock/ConstructorMockRegistry";
 
   private final String className;
   private final boolean shouldTransform;
@@ -24,8 +26,15 @@ public class ConstructorMockMethodVisitor extends MethodVisitor {
   private final String superConstructorSignatureJVM;
   private final List<String> superConstructorParameterTypes;
 
-  public ConstructorMockMethodVisitor(TypeDescription instrumentedType, MethodVisitor mv) {
-    super(ASM_API_VERSION, mv);
+  public ConstructorMockMethodVisitor(
+    TypeDescription instrumentedType,
+    MethodVisitor methodVisitor,
+    MethodDescription methodDescription
+  )
+  {
+    // TODO: ASM_API_VERSION is ASM8, ByteBuddy also uses ASM8 -> check if it can be synchronised
+    // super(ASM_API_VERSION, methodVisitor);
+    super(methodVisitor, methodDescription);
 
     className = instrumentedType.getTypeName();
     shouldTransform = shouldTransform();
@@ -62,17 +71,27 @@ public class ConstructorMockMethodVisitor extends MethodVisitor {
     if (!shouldTransform)
       return;
 
-    // Constructor mock code starts here
+    // First free offset in local variable table
+    final int freeOffset = getFreeOffset();
+
+    // Define labels we want to insert as markers or jump targets later
     Label labelMockCode = new Label();
+    Label labelOriginalCode = new Label();
+    Label labelReturn = new Label();
+
+    // Constructor mock code starts here
     super.visitLabel(labelMockCode);
 
     // If class for instance under construction is registered for constructor mocking, call super constructor with
     // dummy values (null, 0, false), otherwise jump to original code
-    super.visitMethodInsn(INVOKESTATIC, "dev/sarek/agent/constructor_mock/ConstructorMockRegistry", "isMockUnderConstruction", "()Z", false);
-    Label labelOriginalCode = new Label();
-    super.visitJumpInsn(IFEQ, labelOriginalCode);
+    super.visitMethodInsn(INVOKESTATIC, CONSTRUCTOR_MOCK_REGISTRY, "isMockUnderConstruction", "()I", false);
+    final int mockUnderConstructionResult = freeOffset;
+    super.visitVarInsn(ISTORE, mockUnderConstructionResult);
+    super.visitVarInsn(ILOAD, mockUnderConstructionResult);
+    super.visitInsn(ICONST_0);
+    super.visitJumpInsn(IF_ICMPLE, labelOriginalCode);
 
-    // Push uninitialised 'this' onto the stack
+    // Push uninitialised 'this' onto the stack as first super constructor parameter
     super.visitVarInsn(ALOAD, 0);
 
     // Push dummy values for all super constructor parameters onto the stack
@@ -113,7 +132,18 @@ public class ConstructorMockMethodVisitor extends MethodVisitor {
 
     // Invoke super constructor
     super.visitMethodInsn(INVOKESPECIAL, superClassNameJVM, "<init>", superConstructorSignatureJVM, false);
-    // Skip original constructor code
+
+    // If we are in the top-most constructor (mockUnderConstructionResult == 1), register mock via
+    // ConstructorMockRegistry.registerMockInstance(this)
+    super.visitVarInsn(ILOAD, mockUnderConstructionResult);
+    super.visitInsn(ICONST_1);
+    super.visitJumpInsn(IF_ICMPNE, labelReturn);
+    // Now after super constructor was called, 'this' is initialised and can be used normally
+    super.visitVarInsn(ALOAD, 0);
+    super.visitMethodInsn(INVOKESTATIC, CONSTRUCTOR_MOCK_REGISTRY, "registerMockInstance", "(Ljava/lang/Object;)V", false);
+
+    // Skip original constructor code by RETURN
+    super.visitLabel(labelReturn);
     super.visitInsn(RETURN);
 
     // Original constructor code starts here
