@@ -15,8 +15,19 @@
     <plugins>
 
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <configuration>
+          <!-- Re-create original source JAR in order to avoid re-shading already shaded JAR in non-clean builds -->
+          <forceCreation>true</forceCreation>
+        </configuration>
+      </plugin>
+
+      <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
+          <!-- Re-create original JAR in order to avoid re-shading already shaded JAR in non-clean builds -->
+          <forceCreation>true</forceCreation>
           <archive>
             <manifestEntries>
               <!-- Self-inject agent into bootstrap class path-->
