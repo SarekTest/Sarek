@@ -90,7 +90,7 @@ public class ConstructorMockRegistry {
     // TODO:
     //   - add 'unregister' method
     //   - automatic unregistration if mock class is deactivated
-    //   - group instances by class or class name -> turn mockInstances Set into a Map
+    //   - group instances by class or class name -> turn mockInstances Set into a Map
     //   - make registration optional (default: off) via fluent mock API
   }
 }
