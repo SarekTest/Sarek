@@ -88,7 +88,9 @@ public class ConstructorMockRegistry {
     // you might see strange exceptions in then failing tests.
     mockInstances.add(mockInstance);
     // TODO:
-    //   - 'unregister' method
+    //   - add 'unregister' method
     //   - automatic unregistration if mock class is deactivated
+    //   - group instances by class or class name -> turn mockInstances Set into a Map
+    //   - make registration optional (default: off) via fluent mock API
   }
 }
