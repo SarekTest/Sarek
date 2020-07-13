@@ -158,14 +158,9 @@ public class ConstructorMockJavassistTransformer implements ClassFileTransformer
       if (LOG_CONSTRUCTOR_MOCK)
         log("Adding constructor mock capability to constructor " + ctConstructor.getLongName());
 
-      // Actually this is not what we want because the visibility scope of a local variable declared this way is the
-      // whole constructor A variable visible only within our inserted code's scope is actually better.
-      //ctConstructor.addLocalVariable("constructorStackDepth", CtPrimitiveType.intType);
-
       String ifCondition = String.join("\n",
         "{",
         "  int constructorStackDepth = " + MOCK_REGISTRY + "#isMockUnderConstruction();",
-//        "  constructorStackDepth = " + MOCK_REGISTRY + "#isMockUnderConstruction();",
         "  if (constructorStackDepth > 0) {",
         "    " + superCall,
         "    if (constructorStackDepth == 1) {",
@@ -183,7 +178,7 @@ public class ConstructorMockJavassistTransformer implements ClassFileTransformer
 
   private String getSuperCall(CtClass superClass) throws NotFoundException {
     // Get declared non-private constructors (we cannot call private ones via 'super()')
-    // TODO: Maybe transform private constructors, too -> `.getInstance()` methods in typical singleton classes!
+    // TODO: Maybe transform private constructors, too -> '.getInstance()' methods in typical singleton classes!
     CtConstructor[] superConstructors = superClass.getConstructors();
     assert superConstructors.length > 0
       : "There has to be at least one accessible super class constructor";
