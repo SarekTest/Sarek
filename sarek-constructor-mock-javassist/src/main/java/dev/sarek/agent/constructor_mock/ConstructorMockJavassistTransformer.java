@@ -130,7 +130,7 @@ public class ConstructorMockJavassistTransformer implements ClassFileTransformer
     }
 
     // TODO: remove after fix for https://github.com/jboss-javassist/javassist/issues/328 is released
-    final boolean REPAIR = true;
+    final boolean REPAIR = false;
     if (REPAIR)
       transformedBytecode = repairStackMapUsingASM(className, transformedBytecode);
 
