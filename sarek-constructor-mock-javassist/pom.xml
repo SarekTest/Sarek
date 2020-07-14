@@ -16,10 +16,6 @@
 
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <configuration>
-          <!-- TODO: remove '-noverify' after https://github.com/jboss-javassist/javassist/issues/328 is fixed -->
-          <argLine>-noverify</argLine>
-        </configuration>
         <executions>
           <execution>
             <id>reuse-jvm</id>
@@ -44,6 +40,14 @@
     <dependency>
       <groupId>dev.sarek</groupId>
       <artifactId>sarek-agent-common</artifactId>
+    </dependency>
+    <!--
+      Temporary dependency for repairing stack map frames
+      TODO: remove after fix for https://github.com/jboss-javassist/javassist/issues/328 is released
+    -->
+    <dependency>
+      <groupId>net.bytebuddy</groupId>
+      <artifactId>byte-buddy</artifactId>
     </dependency>
 
     <!-- Test dependencies -->

@@ -2,6 +2,7 @@ package dev.sarek.agent.constructor_mock;
 
 import dev.sarek.agent.Transformer;
 import javassist.*;
+import net.bytebuddy.jar.asm.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -128,6 +129,11 @@ public class ConstructorMockJavassistTransformer implements ClassFileTransformer
       return null;
     }
 
+    // TODO: remove after fix for https://github.com/jboss-javassist/javassist/issues/328 is released
+    final boolean REPAIR = true;
+    if (REPAIR)
+      transformedBytecode = repairStackMapUsingASM(className, transformedBytecode);
+
     if (DUMP_CLASS_FILES) {
       Path path = new File(DUMP_CLASS_BASE_DIR + "/" + className + ".class").toPath();
       try {
@@ -142,6 +148,47 @@ public class ConstructorMockJavassistTransformer implements ClassFileTransformer
     }
 
     return transformedBytecode;
+  }
+
+  private byte[] repairStackMapUsingASM(String className, byte[] transformedBytecode) {
+    if (DUMP_CLASS_FILES) {
+      Path path = new File(DUMP_CLASS_BASE_DIR + "/" + className + ".unrepaired.class").toPath();
+      try {
+        Files.createDirectories(path.getParent());
+        log("Dumping (unrepaired) transformed class file " + path.toAbsolutePath());
+        Files.write(path, transformedBytecode);
+      }
+      catch (Exception e) {
+        log("ERROR: Cannot write (unrepaired) class file to " + path.toAbsolutePath());
+        e.printStackTrace();
+      }
+    }
+
+    // Repair stack map frames via ASM
+    ClassReader classReader = new ClassReader(transformedBytecode);
+
+    // Directly passing the writer to the reader leads to re-ordering of the constant pool table. This is not a
+    // problem with regard to functionality as such, but more difficult to diff when comparing the 'javap' output with
+    // the corresponding result created directly via ASM.
+    //
+    //   ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+    //   classReader.accept(classWriter, ClassReader.SKIP_FRAMES);
+    //
+    // So we use this slightly more complicated method which copies the original constant pool, new entries only being
+    // appended to it as needed. Solution taken from https://stackoverflow.com/a/46644677/1082681.
+    ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_FRAMES);
+    classReader.accept(
+      new ClassVisitor(Opcodes.ASM5, classWriter) {
+        @Override
+        public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+          MethodVisitor writer = super.visitMethod(access, name, desc, signature, exceptions);
+          return new MethodVisitor(Opcodes.ASM5, writer) {};
+        }
+      },
+      ClassReader.SKIP_FRAMES
+    );
+
+    return classWriter.toByteArray();
   }
 
   // TODO: This only works if all classes are being transformed via class-loading. Implement recursive manual mode which
