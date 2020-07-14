@@ -61,7 +61,8 @@ public class ConstructorMockRegistry {
    *
    * @return boolean value specifying if the object under construction ought to be a mock or not
    */
-  public static int isMockUnderConstruction() {
+  public static int isMockUnderConstruction(Class<?> callingConstructorClass) {
+    System.out.println("callingConstructorClass = " + callingConstructorClass);
     // TODO:
     //   - Under Java 8, according to Rafael Winterhalter it would be quicker and more efficient (as in not
     //     materialising the whole stack) to use sun.misc.JavaLangAccess, e.g.

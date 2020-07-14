@@ -207,7 +207,7 @@ public class ConstructorMockJavassistTransformer implements ClassFileTransformer
 
       String ifCondition = String.join("\n",
         "{",
-        "  int constructorStackDepth = " + MOCK_REGISTRY + "#isMockUnderConstruction();",
+        "  int constructorStackDepth = " + MOCK_REGISTRY + "#isMockUnderConstruction(" + targetClass.getName() + ".class);",
         "  if (constructorStackDepth > 0) {",
         "    " + superCall,
         "    if (constructorStackDepth == 1) {",

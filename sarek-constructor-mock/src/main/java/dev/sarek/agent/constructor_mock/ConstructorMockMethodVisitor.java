@@ -7,6 +7,7 @@ import net.bytebuddy.description.type.TypeDefinition;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.jar.asm.Label;
 import net.bytebuddy.jar.asm.MethodVisitor;
+import net.bytebuddy.jar.asm.Type;
 import net.bytebuddy.utility.visitor.LocalVariableAwareMethodVisitor;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class ConstructorMockMethodVisitor extends LocalVariableAwareMethodVisito
   private final String superClassNameJVM;
   private final String superConstructorSignatureJVM;
   private final List<String> superConstructorParameterTypes;
+  private final Type type;
 
   public ConstructorMockMethodVisitor(
     TypeDescription instrumentedType,
@@ -36,6 +38,7 @@ public class ConstructorMockMethodVisitor extends LocalVariableAwareMethodVisito
     // super(ASM_API_VERSION, methodVisitor);
     super(methodVisitor, methodDescription);
 
+    type = Type.getType(instrumentedType.getDescriptor());
     className = instrumentedType.getTypeName();
     shouldTransform = shouldTransform();
 
@@ -84,7 +87,8 @@ public class ConstructorMockMethodVisitor extends LocalVariableAwareMethodVisito
 
     // If class for instance under construction is registered for constructor mocking, call super constructor with
     // dummy values (null, 0, false), otherwise jump to original code
-    super.visitMethodInsn(INVOKESTATIC, CONSTRUCTOR_MOCK_REGISTRY, "isMockUnderConstruction", "()I", false);
+    super.visitLdcInsn(type);
+    super.visitMethodInsn(INVOKESTATIC, CONSTRUCTOR_MOCK_REGISTRY, "isMockUnderConstruction", "(Ljava/lang/Class;)I", false);
     final int mockUnderConstructionResult = freeOffset;
     super.visitVarInsn(ISTORE, mockUnderConstructionResult);
     super.visitVarInsn(ILOAD, mockUnderConstructionResult);
