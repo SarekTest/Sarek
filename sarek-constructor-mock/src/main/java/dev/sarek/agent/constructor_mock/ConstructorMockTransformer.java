@@ -81,6 +81,7 @@ public class ConstructorMockTransformer<T> implements AutoCloseable {
     transformer = agentBuilder
       .type(
         isSuperTypeOf(transformerBuilder.targetClass)
+          .and(not(is(Object.class)))
           .and(not(isInterface()))
           .and(not(anyOf(transformerBuilder.excludedSuperClasses)))
       )
