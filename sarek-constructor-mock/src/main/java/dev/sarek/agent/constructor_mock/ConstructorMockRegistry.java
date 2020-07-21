@@ -30,10 +30,11 @@ public class ConstructorMockRegistry {
    */
   public static final boolean IS_JAVA_9 = JAVA_VERSION > 8;
 
-  // TODO: Maybe use Map<Class<?>, BlockingQueue<Object>> instead because with strings we cannot differentiate class
-  //       cloaders. But then we need to modify the API in order to pass on the classes rather than class names in
-  //       general. Another idea is to support both CLass instances and class names. The former would be class loader
-  //       specific, the latter would apply to all class loaders.
+  // TODO:
+  //   Should we support support both Class<?> (cLass instances) and String (class names)? The former would be class
+  //   loader specific, the latter would apply to all class loaders. Maybe there are situations in which only the class
+  //   name is known when at mock configuration time because the actual target class is loaded later by another class
+  //   loader.
   private static final Map<Class<?>, BlockingQueue<Object>> registry = new HashMap<>();
   private static final ClassContextExposingSecurityManager securityManager = new ClassContextExposingSecurityManager();
 
@@ -84,7 +85,13 @@ public class ConstructorMockRegistry {
    * @return boolean value specifying if the object under construction ought to be a mock or not
    */
   public static int isMockUnderConstruction(Class<?> callingConstructorClass) {
-    // TODO:
+    // TODO primary:
+    //   Parameter 'callingConstructorClass' is not used -> maybe delete it again.
+    //   Background: It is more or less irrelevant by which constructor this method was called because we have to look
+    //   at the top level constructor, i.e. the actual class of the instance under construction. First I though it would
+    //   be helpful to know the currently executed constructor, but now it seems I do not need it.
+    //
+    // TODO secondary:
     //   - Under Java 8, according to Rafael Winterhalter it would be quicker and more efficient (as in not
     //     materialising the whole stack) to use sun.misc.JavaLangAccess, e.g.
     //       sun.misc.SharedSecrets.getJavaLangAccess().getStackTraceElement(new Throwable(), 2)
@@ -172,10 +179,8 @@ public class ConstructorMockRegistry {
     // you might see strange exceptions in then failing tests.
     registry.get(mockInstance.getClass()).add(mockInstance);
     // TODO:
-    //   - add 'unregister' method
-    //   - automatic unregistration if mock class is deactivated
-    //   - group instances by class or class name -> turn mockInstances Set into a Map
-    //   - make registration optional (default: off) via fluent mock API
+    //   - add 'unregister' method?
+    //   - make registration optional (default: off) via fluent mock API?
   }
 
   public static class ClassContextExposingSecurityManager extends SecurityManager {
