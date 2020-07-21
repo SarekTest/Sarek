@@ -5,6 +5,7 @@
 
   <groupId>dev.sarek</groupId>
   <artifactId>sarek-parent</artifactId>
+  <!-- TODO after first non-snapshot Maven Central release: comment https://issues.sonatype.org/browse/OSSRH-59166 -->
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
