@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
+import static dev.sarek.agent.constructor_mock.ConstructorMockRegistry.pollMockInstance;
 import static org.junit.Assert.*;
 
 public class ConstructorMockAgentIT {
@@ -24,11 +25,9 @@ public class ConstructorMockAgentIT {
 
   @Test
   public void constructorMockOnApplicationClass() {
-    final String className_Sub = Sub.class.getName();
-
     // (1) Before activating constructor mock mode for class Sub, everything is normal
 
-    assertFalse(ConstructorMockRegistry.isMock(className_Sub));
+    assertFalse(ConstructorMockRegistry.isMock(Sub.class));
     initialiseSubjectsUnderTest();
     assertEquals(11, base.getId());
     assertEquals(22, sub.getId());
@@ -55,10 +54,11 @@ public class ConstructorMockAgentIT {
     try (
       ConstructorMockTransformer<Sub> constructorMockTransformer =
         ConstructorMockTransformer.forClass(Sub.class).build()
-    ) {
+    )
+    {
       // TODO: add auto activation/cleanup features to ConstructorMockTransformer
-      ConstructorMockRegistry.activate(className_Sub);
-      assertTrue(ConstructorMockRegistry.isMock(className_Sub));
+      ConstructorMockRegistry.activate(Sub.class);
+      assertTrue(ConstructorMockRegistry.isMock(Sub.class));
       initialiseSubjectsUnderTest();
       // No change in behaviour for base class Base
       assertEquals(11, base.getId());
@@ -77,8 +77,8 @@ public class ConstructorMockAgentIT {
 
       // (3) After deactivating constructor mock mode for class Sub, everything is normal again
 
-      ConstructorMockRegistry.deactivate(className_Sub);
-      assertFalse(ConstructorMockRegistry.isMock(className_Sub));
+      ConstructorMockRegistry.deactivate(Sub.class);
+      assertFalse(ConstructorMockRegistry.isMock(Sub.class));
       initialiseSubjectsUnderTest();
       assertEquals(11, base.getId());
       assertEquals(22, sub.getId());
@@ -94,7 +94,7 @@ public class ConstructorMockAgentIT {
   @Test
   public void constructorMockOnAlreadyLoadedBootstrapClass() {
     // (1) Before activating constructor mock mode for class UUID, everything is normal
-    assertFalse(ConstructorMockRegistry.isMock(UUID.class.getName()));
+    assertFalse(ConstructorMockRegistry.isMock(UUID.class));
     assertEquals("00000000-0000-abba-0000-00000000cafe", new UUID(0xABBA, 0xCAFE).toString());
 
     // (2a) Retransform already loaded (bootstrap) class UUID in order to make constructors mockable
@@ -104,14 +104,15 @@ public class ConstructorMockAgentIT {
     try (
       ConstructorMockTransformer<UUID> constructorMockTransformer =
         ConstructorMockTransformer.forClass(UUID.class).build()
-    ) {
-      ConstructorMockRegistry.activate(UUID.class.getName());
-      assertTrue(ConstructorMockRegistry.isMock(UUID.class.getName()));
+    )
+    {
+      ConstructorMockRegistry.activate(UUID.class);
+      assertTrue(ConstructorMockRegistry.isMock(UUID.class));
       assertEquals("00000000-0000-0000-0000-000000000000", new UUID(0xABBA, 0xCAFE).toString());
 
       // (3) After deactivating constructor mock mode for class UUID, everything is normal again
-      ConstructorMockRegistry.deactivate(UUID.class.getName());
-      assertFalse(ConstructorMockRegistry.isMock(UUID.class.getName()));
+      ConstructorMockRegistry.deactivate(UUID.class);
+      assertFalse(ConstructorMockRegistry.isMock(UUID.class));
       assertEquals("00000000-0000-abba-0000-00000000cafe", new UUID(0xABBA, 0xCAFE).toString());
     }
   }
@@ -124,12 +125,12 @@ public class ConstructorMockAgentIT {
    */
   @Test
   public void constructorMockComplexConstructor() {
-    String className = SubWithComplexConstructor.class.getName();
     try (
       ConstructorMockTransformer<SubWithComplexConstructor> constructorMockTransformer =
         ConstructorMockTransformer.forClass(SubWithComplexConstructor.class).build()
-    ) {
-      ConstructorMockRegistry.activate(className);
+    )
+    {
+      ConstructorMockRegistry.activate(SubWithComplexConstructor.class);
       assertTrue(
         new SubWithComplexConstructor(
           (byte) 123, '@', 123.45, 67.89f,
@@ -141,7 +142,31 @@ public class ConstructorMockAgentIT {
             "string='null', ints=null"
         )
       );
-      ConstructorMockRegistry.deactivate(className);
+      ConstructorMockRegistry.deactivate(SubWithComplexConstructor.class);
+    }
+  }
+
+  @Test
+  public void nonInjectableMock() {
+    try (
+      ConstructorMockTransformer<Sub> constructorMockTransformer =
+        ConstructorMockTransformer.forClass(Sub.class).build()
+    )
+    {
+      new SubUser().doSomething();
+      assertNull(pollMockInstance(Sub.class));
+      ConstructorMockRegistry.activate(Sub.class);
+      new SubUser().doSomething();
+      assertTrue(pollMockInstance(Sub.class) instanceof Sub);
+      assertNull(pollMockInstance(Sub.class));
+      new SubUser().doSomething();
+      new SubUser().doSomething();
+      assertTrue(pollMockInstance(Sub.class) instanceof Sub);
+      assertTrue(pollMockInstance(Sub.class) instanceof Sub);
+      assertNull(pollMockInstance(Sub.class));
+      ConstructorMockRegistry.deactivate(Sub.class);
+      new SubUser().doSomething();
+      assertNull(pollMockInstance(Sub.class));
     }
   }
 

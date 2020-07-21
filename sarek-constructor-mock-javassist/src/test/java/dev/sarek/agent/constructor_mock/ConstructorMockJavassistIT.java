@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
+import static dev.sarek.agent.constructor_mock.ConstructorMockRegistry.pollMockInstance;
 import static org.junit.Assert.*;
 
 /**
@@ -55,13 +56,26 @@ public class ConstructorMockJavassistIT {
 
     // Create global transformer without includes list in order to test if there is any problem with transforming
     // additional JRE bootstrap classes with dormant constructor mocking code.
-    constructorMockTransformer = new ConstructorMockJavassistTransformer();
+    //
+    // Update: After latest changes in ConstructorMockRegistry concerning mock instence queues and indexing classes by
+    // Class<?> instance instead of by class name, this error occurs when using a global transformer here:
+    //   Exception in thread "main" java.lang.NoClassDefFoundError:
+    //   Could not initialize class dev.sarek.agent.constructor_mock.ConstructorMockRegistry
+    //     at java.base/java.util.LinkedHashMap$LinkedKeyIterator.<init>(LinkedHashMap.java)
+    //     at java.base/java.util.LinkedHashMap$LinkedKeySet.iterator(LinkedHashMap.java:564)
+    //     (...)
+    //     at dev.sarek.junit4.SarekRunner.run(SarekRunner.java:70)
+    //     at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+    //     (...)
+    // constructorMockTransformer = new ConstructorMockJavassistTransformer();
+
     // Alternatively just mock target classes incl. parents
-    //constructorMockTransformer = new ConstructorMockJavassistTransformer(TRANSFORMATION_TARGETS);
+    constructorMockTransformer = new ConstructorMockJavassistTransformer(TRANSFORMATION_TARGETS);
 
     // Important: set 'canRetransform' parameter to true
     INSTRUMENTATION.addTransformer(constructorMockTransformer, true);
     INSTRUMENTATION.retransformClasses(TRANSFORMATION_TARGETS);
+    System.out.println("ConstructorMockRegistry class loader = " + ConstructorMockRegistry.class.getClassLoader());
   }
 
   @AfterClass
@@ -88,11 +102,10 @@ public class ConstructorMockJavassistIT {
 
   @Test
   public void constructorMockOnApplicationClass() throws UnmodifiableClassException {
-    final String className_Sub = Sub.class.getName();
 
     // (1) Before activating constructor mock mode for class Sub, everything is normal
 
-    assertFalse(ConstructorMockRegistry.isMock(className_Sub));
+    assertFalse(ConstructorMockRegistry.isMock(Sub.class));
     initialiseSubjectsUnderTest();
     assertEquals(11, base.getId());
     assertEquals(22, sub.getId());
@@ -116,8 +129,8 @@ public class ConstructorMockJavassistIT {
     //   - When instantiating child classes of Sub, their own constructors will not be mocked either, but the
     //     parent constructors from Sub upwards (i.e. Sub, Base) will be.
 
-    ConstructorMockRegistry.activate(className_Sub);
-    assertTrue(ConstructorMockRegistry.isMock(className_Sub));
+    ConstructorMockRegistry.activate(Sub.class);
+    assertTrue(ConstructorMockRegistry.isMock(Sub.class));
     initialiseSubjectsUnderTest();
     // No change in behaviour for base class Base
     assertEquals(11, base.getId());
@@ -136,8 +149,8 @@ public class ConstructorMockJavassistIT {
 
     // (3) After deactivating constructor mock mode for class Sub, everything is normal again
 
-    ConstructorMockRegistry.deactivate(className_Sub);
-    assertFalse(ConstructorMockRegistry.isMock(className_Sub));
+    ConstructorMockRegistry.deactivate(Sub.class);
+    assertFalse(ConstructorMockRegistry.isMock(Sub.class));
     initialiseSubjectsUnderTest();
     assertEquals(11, base.getId());
     assertEquals(22, sub.getId());
@@ -152,20 +165,20 @@ public class ConstructorMockJavassistIT {
   @Test
   public void constructorMockOnAlreadyLoadedBootstrapClass() throws UnmodifiableClassException {
     // (1) Before activating constructor mock mode for class UUID, everything is normal
-    assertFalse(ConstructorMockRegistry.isMock(UUID.class.getName()));
+    assertFalse(ConstructorMockRegistry.isMock(UUID.class));
     assertEquals("00000000-0000-abba-0000-00000000cafe", new UUID(0xABBA, 0xCAFE).toString());
 
     // (2a) Retransform already loaded (bootstrap) class UUID in order to make constructors mockable
     INSTRUMENTATION.retransformClasses(UUID.class);
 
     // (2b) Make UUID constructor mockable
-    ConstructorMockRegistry.activate(UUID.class.getName());
-    assertTrue(ConstructorMockRegistry.isMock(UUID.class.getName()));
+    ConstructorMockRegistry.activate(UUID.class);
+    assertTrue(ConstructorMockRegistry.isMock(UUID.class));
     assertEquals("00000000-0000-0000-0000-000000000000", new UUID(0xABBA, 0xCAFE).toString());
 
     // (3) After deactivating constructor mock mode for class UUID, everything is normal again
-    ConstructorMockRegistry.deactivate(UUID.class.getName());
-    assertFalse(ConstructorMockRegistry.isMock(UUID.class.getName()));
+    ConstructorMockRegistry.deactivate(UUID.class);
+    assertFalse(ConstructorMockRegistry.isMock(UUID.class));
     assertEquals("00000000-0000-abba-0000-00000000cafe", new UUID(0xABBA, 0xCAFE).toString());
   }
 
@@ -177,8 +190,7 @@ public class ConstructorMockJavassistIT {
    */
   @Test
   public void constructorMockComplexConstructor() {
-    String className = SubWithComplexConstructor.class.getName();
-    ConstructorMockRegistry.activate(className);
+    ConstructorMockRegistry.activate(SubWithComplexConstructor.class);
     assertTrue(
       new SubWithComplexConstructor(
         (byte) 123, '@', 123.45, 67.89f,
@@ -190,6 +202,25 @@ public class ConstructorMockJavassistIT {
           "string='null', ints=null"
       )
     );
-    ConstructorMockRegistry.deactivate(className);
+    ConstructorMockRegistry.deactivate(SubWithComplexConstructor.class);
   }
+
+  @Test
+  public void nonInjectableMock() {
+    new SubUser().doSomething();
+    assertNull(pollMockInstance(Sub.class));
+    ConstructorMockRegistry.activate(Sub.class);
+    new SubUser().doSomething();
+    assertTrue(pollMockInstance(Sub.class) instanceof Sub);
+    assertNull(pollMockInstance(Sub.class));
+    new SubUser().doSomething();
+    new SubUser().doSomething();
+    assertTrue(pollMockInstance(Sub.class) instanceof Sub);
+    assertTrue(pollMockInstance(Sub.class) instanceof Sub);
+    assertNull(pollMockInstance(Sub.class));
+    ConstructorMockRegistry.deactivate(Sub.class);
+    new SubUser().doSomething();
+    assertNull(pollMockInstance(Sub.class));
+  }
+
 }

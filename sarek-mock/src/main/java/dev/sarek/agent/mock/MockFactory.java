@@ -174,7 +174,7 @@ public class MockFactory<T> implements AutoCloseable {
     // already mocked constructors during setup.
     weaver = builder.weaverBuilder.build();
     if (constructorMockTransformer != null)
-      ConstructorMockRegistry.activate(targetClass.getName());
+      ConstructorMockRegistry.activate(targetClass);
   }
 
   public MockFactory<T> addTarget(Object target) throws IllegalArgumentException {
@@ -233,7 +233,7 @@ public class MockFactory<T> implements AutoCloseable {
       System.out.println("Closing Mock");
       // Important: First deactivate constructor mock targets, then shut down weaver. Otherwise the weaver might call
       // mocked constructors during shutdown.
-      ConstructorMockRegistry.deactivate(targetClass.getName());
+      ConstructorMockRegistry.deactivate(targetClass);
       targetClass = null;
       weaver.unregisterTransformer();
       weaver = null;

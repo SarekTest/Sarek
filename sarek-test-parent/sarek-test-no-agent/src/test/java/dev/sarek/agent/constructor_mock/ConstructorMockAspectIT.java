@@ -78,7 +78,7 @@ public class ConstructorMockAspectIT {
     assertEquals(12, FinalClass.multiply(3, 4), 1e-6);
 
     // (2) Mock both constructors and methods
-    ConstructorMockRegistry.activate(FinalClass.class.getName());
+    ConstructorMockRegistry.activate(FinalClass.class);
     weaver = Weaver
       .forTypes(is(FinalClass.class))
       .addAdvice(
