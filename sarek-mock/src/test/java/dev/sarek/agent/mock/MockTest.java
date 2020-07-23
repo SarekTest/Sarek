@@ -1,6 +1,7 @@
 package dev.sarek.agent.mock;
 
 import dev.sarek.agent.aspect.InstanceMethodAroundAdvice;
+import dev.sarek.agent.constructor_mock.ConstructorMockRegistry;
 import org.acme.*;
 import org.junit.Test;
 
@@ -8,7 +9,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import static dev.sarek.agent.constructor_mock.ConstructorMockRegistry.pollMockInstance;
 import static dev.sarek.agent.mock.MockFactory.forClass;
 import static java.util.Calendar.MAY;
 import static net.bytebuddy.matcher.ElementMatchers.*;
@@ -464,9 +464,11 @@ public class MockTest {
 
   @Test
   public void nonInjectableMock() throws InterruptedException {
+    Sub sub;
     try (
       MockFactory<Sub> mockFactory = forClass(Sub.class)
         .global()
+        .addGlobalInstance()
         .build()
     )
     {
@@ -474,15 +476,15 @@ public class MockTest {
 
       // (1) Poll single instance from queue
       new SubUser().doSomething();
-      assertTrue(pollMockInstance(Sub.class) instanceof Sub);
-      assertNull(pollMockInstance(Sub.class));
+      assertTrue(mockFactory.pollGlobalInstance() instanceof Sub);
+      assertNull(mockFactory.pollGlobalInstance());
 
       // (2) Poll 2 instances from queue
       new SubUser().doSomething();
       new SubUser().doSomething();
-      assertTrue(pollMockInstance(Sub.class) instanceof Sub);
-      assertTrue(pollMockInstance(Sub.class) instanceof Sub);
-      assertNull(pollMockInstance(Sub.class));
+      assertTrue(mockFactory.pollGlobalInstance() instanceof Sub);
+      assertTrue(mockFactory.pollGlobalInstance() instanceof Sub);
+      assertNull(mockFactory.pollGlobalInstance());
 
       // (B) Asynchronous method calls
 
@@ -490,19 +492,34 @@ public class MockTest {
 
       // (1) Poll synchronously -> cannot fetch mock instance
       new SubUser().doSomethingAsynchronously(pauseMillis);
-      assertNull(pollMockInstance(Sub.class));
+      assertNull(mockFactory.pollGlobalInstance());
 
       // (2) Poll timeout long enough -> can fetch mock instance
-      Sub sub = (Sub) pollMockInstance(Sub.class, pauseMillis * 3 / 2);
+      sub = mockFactory.pollGlobalInstance(pauseMillis * 3 / 2);
+      assertNull(sub.getName());
+      // (2a) As expected, 'sub' behaves like a mock due to '.addGlobalInstance()'
+      sub.setName("Alice");
+      assertNull(sub.getName());
+      // (2b) No more mock behaviour after 'removeGlobalInstance()'
+      mockFactory.removeGlobalInstance();
+      assertNull(sub.getName());
+      sub.setName("Bob");
+      assertEquals("Bob", sub.getName());
+      // (2c) Buf if we manually register the previously fetched instance, we have mock behaviour again
+      mockFactory.addTarget(sub);
       assertNull(sub.getName());
 
       // (3) Poll timeout too short -> cannot fetch mock instance
       new SubUser().doSomethingAsynchronously(pauseMillis);
-      assertNull(pollMockInstance(Sub.class, pauseMillis / 2));
+      assertNull(mockFactory.pollGlobalInstance(pauseMillis / 2));
     }
 
+    // After mock factory was closed, instance no longer is a mock
+    assertEquals("Bob", sub.getName());
+
     new SubUser().doSomething();
-    assertNull(pollMockInstance(Sub.class));
+    // Cannot use out-of-scope MockFactory here, got to directly check ConstructorMockRegistry
+    assertNull(ConstructorMockRegistry.pollMockInstance(Sub.class));
   }
 
 }

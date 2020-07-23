@@ -1,7 +1,7 @@
 package org.acme;
 
 public class Sub extends Base {
-  protected final String name;
+  protected String name;
 
   public Sub(int id, String name) {
     super(new Expensive(id).getId());
@@ -16,6 +16,10 @@ public class Sub extends Base {
 
   public String getName() {
     return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 
   @Override
