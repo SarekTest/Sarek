@@ -66,8 +66,8 @@ public abstract class ConstructorAspect extends Aspect<Constructor<?>> {
   /**
    * Keep this method public because it must be callable from advice code woven into other classes
    *
-   * @param constructor
-   * @return
+   * @param constructor constructor to find around advice for
+   * @return constructor around advice if found, {@code null} otherwise
    */
   public static ConstructorAroundAdvice getAroundAdvice(Constructor<?> constructor) {
     return doGetAdvice(constructor.getDeclaringClass(), constructor);

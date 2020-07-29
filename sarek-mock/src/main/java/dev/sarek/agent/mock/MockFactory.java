@@ -68,7 +68,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
  *     final classes, as mentioned above.
  *   </li>
  * </ol>
- * <p></p>
+ * <p>
  * The generic usage pattern is:
  * <ol>
  *   <li>Create a {@link Builder} via {@link #forClass(Class)} or {@link #forClass(String)}</li>
@@ -158,7 +158,7 @@ public class MockFactory<T> implements AutoCloseable {
      * {@code new MyTargetClass(..)}. This enables users to also create mocks outside the direct control of the test
      * using them. Those non-injectable mocks cannot be created by conventionals means, i.e. creating a mock within a
      * test and then injecting it into a class under test.
-     * <p></p>
+     * <p>
      * Technically, global mocks are implemented by instrumenting target class constructors and their super class
      * constructors. The instrumented constructors will dynamically check if the defining class of the object under
      * construction is registered in the {@link ConstructorMockRegistry}, which will be the case if either the builder
@@ -168,7 +168,7 @@ public class MockFactory<T> implements AutoCloseable {
      * global mocking flexible, because it can be dynamically (de)activated during runtime, such that not necessarily
      * all instances of a target class created during a whole test have to be mocks, but only the desired ones. I.e.
      * that global mocks can be used both like a surgeon's scalpel and like a big axe.
-     * <p></p>
+     * <p>
      * Because non-injectable or global mocks are created outside the control of the test using them, the instrumented
      * constructor also makes sure that after creation each mock is added to a queue from which it can be polled, if
      * necessary. The user can obtain access to global mock instances via {@link #pollGlobalInstance()} or
@@ -185,7 +185,7 @@ public class MockFactory<T> implements AutoCloseable {
      * There are two basic types of test doubles: mock and spy. Mocks return null-ish values by default, spies wrap real
      * objects and pass through method calls and results by default. See {@link MockType#MOCK} and {@link MockType#SPY}
      * for more details.
-     * <p></p>
+     * <p>
      * The default mode for methods not explicitly stubbed otherwise is mock behaviour, so you only need to call this
      * method if you want spy behaviour instead.
      *
@@ -198,7 +198,7 @@ public class MockFactory<T> implements AutoCloseable {
 
     /**
      * Define mock/stub behaviour for a (set of) instance method(s), using an in-line pair of before/after advices.
-     * <p></p>
+     * <p>
      * This is a convenience method for situations in which you have no predefined {@link InstanceMethodAroundAdvice} to
      * work with but would have to create one yourself using its constructor. This method will just pass on the
      * before/after advices and create the around advice instance for you.
@@ -247,7 +247,7 @@ public class MockFactory<T> implements AutoCloseable {
 
     /**
      * Define mock/stub behaviour for a (set of) static method(s), using an in-line pair of before/after advices.
-     * <p></p>
+     * <p>
      * This is a convenience method for situations in which you have no predefined {@link StaticMethodAroundAdvice} to
      * work with but would have to create one yourself using its constructor. This method will just pass on the
      * before/after advices and create the around advice instance for you.
@@ -323,7 +323,7 @@ public class MockFactory<T> implements AutoCloseable {
      * {@link #equals(Object)} methods will be overwritten by versions stritcly depending on object identity, not on
      * equality as usual. This helps avoid problems with those methods depending on initialised fields when in reality
      * constructor execution and thus proper object initialisation has been skipped in order to create mock objects.
-     * <p></p>
+     * <p>
      * If for some reason you do not wish to use auto-generated {@link #hashCode()} and {@link #equals(Object)} methods,
      * you can deactivate their creation by calling this method with a parameter value of {@code false}.
      *
@@ -465,7 +465,7 @@ public class MockFactory<T> implements AutoCloseable {
 
   /**
    * Register a target class instance as an active mock.
-   * <p></p>
+   * <p>
    * Technical background: Sarek mocks are based on byte code transformations applied to target classes, not on dynamic
    * proxies implemented as subclasses. Thus, a transformation always affects a whole class. In order to avoid turning
    * each target class into a global mock (i.e. all instances behave like mocks), we need a way to differentiate mock
@@ -488,7 +488,7 @@ public class MockFactory<T> implements AutoCloseable {
 
   /**
    * Unregister a target class instance as an active mock.
-   * <p></p>
+   * <p>
    * Technical background: Sarek mocks are based on byte code transformations applied to target classes, not on dynamic
    * proxies implemented as subclasses. Thus, a transformation always affects a whole class. In order to avoid turning
    * each target class into a global mock (i.e. all instances behave like mocks), we need a way to differentiate mock
@@ -524,7 +524,7 @@ public class MockFactory<T> implements AutoCloseable {
    * Activate global instance method mocking for the target class, i.e. after calling this method all target class
    * instances will behave according to the mock/stub/spy behaviour configured for the target class. Use
    * {@link #removeGlobalInstance()} in order to deactivate global mocking again.
-   * <p></p>
+   * <p>
    * Technical background: see {@link #addTarget(Object)}
    *
    * @return the same mock factory instance, i.e. {@code this}
@@ -585,7 +585,7 @@ public class MockFactory<T> implements AutoCloseable {
   /**
    * Check for available mock instances via synchronous polling according to {@link Queue#poll()}. In asynchronous
    * scenarios, please use {@link #pollGlobalInstance(int)} instead.
-   * <p></p>
+   * <p>
    * See {@link ConstructorMockRegistry#pollMockInstance(Class)} for more details.
    *
    * @return mock instance, if available in the queue; {@code null} otherwise
@@ -598,7 +598,7 @@ public class MockFactory<T> implements AutoCloseable {
    * Check for available mock instances via asynchronous polling with a timeout. This works according to
    * {@link BlockingQueue#poll(long, TimeUnit)}. In synchronous scenarios, please use {@link #pollGlobalInstance()}
    * instead.
-   * <p></p>
+   * <p>
    * See {@link ConstructorMockRegistry#pollMockInstance(Class, int)} for more details.
    *
    * @param timeoutMillis polling timeout in milliseconds
@@ -612,7 +612,7 @@ public class MockFactory<T> implements AutoCloseable {
    * Closes the mock factory, reverting the corresponding code instrumentation for the target class and also
    * unregistering all existing mocks, emptying global mock polling queues and freeing other resources. After closing
    * the mock factory, please do not use it anymore.
-   * <p></p>
+   * <p>
    * Please note that this method makes {@link MockFactory} implement {@link AutoCloseable}, which means that you can
    * use try-with-resources in order to let the JVM take care of automatically closing it.
    */

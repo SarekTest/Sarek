@@ -21,7 +21,7 @@ public @interface SarekRunnerDelegate {
   /**
    * JUnit 4 runner class to delegate execution to. Defaults to {@link JUnit4}, but can be changed to something else,
    * e.g. to a Spock 1.x {@code Sputnik} runner or a {@code PowerMockRunner}.
-   * <p></p>
+   * <p>
    * The delegate class must have a public constructor taking a single {@code Class<?> testClass} argument. If you want
    * to use an incompatible type of runner, please be advised to just run Sarek as a Java agent via {@code -javaagent}
    * command line parameter, then there is no need to use {@link SarekRunner} or {@link SarekRunnerDelegate} at all.

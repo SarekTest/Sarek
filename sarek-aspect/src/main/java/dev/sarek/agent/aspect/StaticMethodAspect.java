@@ -82,6 +82,9 @@ public abstract class StaticMethodAspect extends Aspect<Method> {
 
   /**
    * Keep this method public because it must be callable from advice code woven into other classes
+   *
+   * @param method static method to find advice for
+   * @return static method around advice if found, {@code null} otherwise
    */
   public static synchronized StaticMethodAroundAdvice getAroundAdvice(Method method) {
     return doGetAdvice(method.getDeclaringClass(), method);

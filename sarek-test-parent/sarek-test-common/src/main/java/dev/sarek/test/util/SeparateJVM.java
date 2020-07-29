@@ -7,7 +7,7 @@ package dev.sarek.test.util;
  *   <li>certain bootstrap or application classes have not been loaded yet,</li>
  *   <li>certain byte code transformers have not been registered yet.</li>
  * </ul>
- * <p></p>
+ * <p>
  * <b>Please only use on class level</b>, because in Maven Surefire/Failsafe the highest test isolation level is
  * one JVM per class. So if a test class contains multiple methods requiring separate JVMs, please split them
  * into separate classes.

@@ -23,7 +23,7 @@ import java.util.stream.Stream;
  * object, i.e. all its instance fields have default values such as {@code null</code>, <code>0},
  * {@code false}. Such an object can then be used as the basis for a mock by stubbing its methods by another byte
  * code instrumentation stage.
- * <p></p>
+ * <p>
  * TODO: implement configurability
  */
 public class ConstructorMockJavassistTransformer implements ClassFileTransformer {
@@ -270,9 +270,13 @@ public class ConstructorMockJavassistTransformer implements ClassFileTransformer
   private String appendValue;
 
   /**
-   * This method is meant to be delegated to from a subclass of
-   * {@link de.icongmbh.oss.maven.plugin.javassist.ClassTransformer} in order to enable build time bytecode
+   * This method is meant to be delegated to by a subclass of
+   * {@code de.icongmbh.oss.maven.plugin.javassist.ClassTransformer} in order to enable build time bytecode
    * instrumentation.
+   *
+   * @param candidateClass class for which to check if it should be transformed or not
+   * @return {@code true} if the class should be transformed, {@code false} if it should not be, e.g. because it was
+   * found on an excludes list
    */
   public boolean shouldTransform(final CtClass candidateClass) {
     return shouldTransform(candidateClass.getName());
@@ -294,9 +298,11 @@ public class ConstructorMockJavassistTransformer implements ClassFileTransformer
   }
 
   /**
-   * This method is meant to be delegated to from a subclass of
-   * {@link de.icongmbh.oss.maven.plugin.javassist.ClassTransformer} in order to enable build time bytecode
+   * This method is meant to be delegated to by a subclass of
+   * {@code de.icongmbh.oss.maven.plugin.javassist.ClassTransformer} in order to enable build time bytecode
    * instrumentation.
+   *
+   * @param targetClass target class to be transformed
    */
   public void applyTransformations(CtClass targetClass) {
     targetClass.defrost();
@@ -310,11 +316,13 @@ public class ConstructorMockJavassistTransformer implements ClassFileTransformer
   }
 
   /**
-   * This method is meant to be delegated to from a subclass of
-   * {@link de.icongmbh.oss.maven.plugin.javassist.ClassTransformer} in order to enable build time bytecode
+   * This method is meant to be delegated to by a subclass of
+   * {@code de.icongmbh.oss.maven.plugin.javassist.ClassTransformer} in order to enable build time bytecode
    * instrumentation.
-   * <p></p>
+   * <p>
    * TODO: implement configurability
+   *
+   * @param properties configuration properties
    */
   public void configure(final Properties properties) {
     if (null == properties) {

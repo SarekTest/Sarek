@@ -74,15 +74,15 @@ public abstract class Aspect<T> {
 
   /**
    * There are two principal types of advice targets: instance or class.
-   * <p></p>
+   * <p>
    * If an instance is registered on a {@link Weaver}, the case is clear: It only applies to a
    * {@link InstanceMethodAroundAdvice} if and only if that advice matches any instance methods.
-   * <p></p>
+   * <p>
    * If a class is registered on a {@link Weaver}, though, it could mean several things: For a
    * {@link InstanceMethodAroundAdvice} it could mean to globally match all instances for instance methods or to only match
    * static methods. So just registering a class here is ambiguous already. But further meanings are to match
    * constructors or type initialisers (static blocks) for the corresponding class.
-   * <p></p>
+   * <p>
    * This enumeration can express those registerable advice target types. See the description of each defined enum
    * constant for more details.
    */
@@ -91,7 +91,7 @@ public abstract class Aspect<T> {
      * The target object registered on the {@link Weaver} is meant to be a target for an instance method advice. This is
      * useful for mocking methods of specific target class instances. It is equally useful for cross-cutting concerns
      * such as logging, timing etc., the effect of which should be limited so certain object instances.
-     * <p></p>
+     * <p>
      * While this constant seems to be superfluous at first glance, in reality it is not because theoretically if the
      * target is a {@link Class} instance, it could also mean that an instance method advice for class {@link Class}
      * exists and is to be applied only to certain classes. This might be kind of esoteric, but it does not hurt to keep

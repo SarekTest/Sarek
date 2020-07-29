@@ -11,14 +11,14 @@ import java.util.*;
  * <b>Please note:</b> This class (including documentation bugs concerning was copied 100% from the source code of
  * Oracle JDK 14.0.1. Only the package name {@code sun.awt.util} was changed. This was done in order to avoid problems
  * accessing the original Java module {@code java.desktop}.
- * <p></p>
+ * <p>
  * Please also note that the original class contains documentation bugs for methods {@link #contains(Object)},
  * {@link #indexOf(Object)}, {@link #lastIndexOf(Object)} and {@link #remove(Object)}. The Javadoc says that
  * {@link #equals(Object)} is used to check for object equality, but the opposite is true: This class is based on object
  * identity, not equality. I reported the documentation bugs to Oracle, hopefully they will be fixed in the future.
- * <p></p>
+ * <p>
  * <b><i>Please do not use this class in user code, it is meant for internal use by the Sarek framework.</i></b>
- * <p></p><hr><p></p>
+ * <p><hr><p>
  *
  * Resizable-array implementation of the {@code List} interface.  Implements
  * all optional list operations, and permits all elements, including

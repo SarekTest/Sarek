@@ -13,7 +13,7 @@ import static net.bytebuddy.implementation.bytecode.assign.Assigner.Typing.DYNAM
  *   <li>
  *     avoid recursions such as {@code getAroundAdvice(target)} → {@code adviceRegistry.get(target)} →
  *     {@code target.hashCode()} → {@code getAroundAdvice(target)}, which would normally be caught by private
- *     helper methods such as {@link InstanceMethodAspect#doGetAdvice(Object, Method, boolean)} but still take time to
+ *     helper methods such as {@code InstanceMethodAspect.doGetAdvice(Object, Method)} but still take time to
  *     execute,
  *   </li>
  *   <li>

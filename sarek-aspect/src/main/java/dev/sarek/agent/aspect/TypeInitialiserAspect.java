@@ -57,6 +57,9 @@ public abstract class TypeInitialiserAspect extends Aspect<Class<?>> {
 
   /**
    * Keep this method public because it must be callable from advice code woven into other classes
+   *
+   * @param target target class to find advice for
+   * @return type initialiser around advice if found, {@code null} otherwise
    */
   public static TypeInitialiserAroundAdvice getAroundAdvice(Class<?> target) {
     return adviceRegistry
@@ -70,6 +73,10 @@ public abstract class TypeInitialiserAspect extends Aspect<Class<?>> {
 
   /**
    * Keep this method public because it must be callable from advice code woven into other classes
+   *
+   * @param className class name to be converted into a {@link Class}
+   * @return class instance
+   * @throws ClassNotFoundException if class for the given name was not found
    */
   public static Class<?> toClass(String className) throws ClassNotFoundException {
     return Class.forName(className, false, ClassLoader.getSystemClassLoader());

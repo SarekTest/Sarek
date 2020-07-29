@@ -89,6 +89,10 @@ public abstract class InstanceMethodAspect extends Aspect<Method> {
 
   /**
    * Keep this method public because it must be callable from advice code woven into other classes
+   *
+   * @param target target object to find advice for
+   * @param method instance method to find advice for
+   * @return instance method around advice if found, {@code null} otherwise
    */
   public static synchronized InstanceMethodAroundAdvice getAroundAdvice(Object target, Method method) {
     InstanceMethodAroundAdvice advice = null;

@@ -20,7 +20,7 @@ import static org.junit.Assert.*;
  * bootstrap class loader's search path. The latter is only necessary if we want to mock constructors of classes which
  * are either bootstrap classes themselves or have bootstrap classes in their ancestry (direct or indirect parent
  * classes).
- * <p></p>
+ * <p>
  * Furthermore, the test demonstrates how to retransform an already loaded class in order to not just create a mock
  * without subclassing but also add stub behaviour to it. This proves that both the constructor mock transformation as
  * well as the aspect advices do not change the class structure but only instrument constructor and method bodies. I.e.

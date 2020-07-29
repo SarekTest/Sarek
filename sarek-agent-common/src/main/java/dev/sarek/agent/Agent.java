@@ -54,7 +54,7 @@ public abstract class Agent {
 
   /**
    * Obtain an instrumentation instance, lazily creating it via {@link ByteBuddyAgent#install()} if necessary.
-   * <p></p>
+   * <p>
    * <b>Please note:</b>
    * <ul>
    *   <li>

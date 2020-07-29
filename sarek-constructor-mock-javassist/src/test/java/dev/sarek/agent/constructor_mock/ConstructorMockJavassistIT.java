@@ -24,7 +24,7 @@ import static org.junit.Assert.*;
  * bootstrap class loader's search path. The latter is only necessary if we want to mock constructors of classes which
  * are either bootstrap classes themselves or have bootstrap classes in their ancestry (direct or indirect parent
  * classes).
- * <p></p>
+ * <p>
  * Furthermore, the test demonstrates how to retransform an already loaded class (in this case also a bootstrap class)
  * in order to add constructor mock functionality to it. This proves that the constructor mock transformation does not
  * change the class structure but only instruments constructor bodies. I.e. that this is more flexible than e.g.
