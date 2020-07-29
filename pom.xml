@@ -3,6 +3,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>9</version>
+  </parent>
+
   <groupId>dev.sarek</groupId>
   <artifactId>sarek-parent</artifactId>
   <!-- TODO after first non-snapshot Maven Central release: comment https://issues.sonatype.org/browse/OSSRH-59166 -->
@@ -13,6 +19,13 @@
     <name>Scrum-Master.de - Agile Project Management</name>
     <url>https://scrum-master.de</url>
   </organization>
+
+  <scm>
+    <url>https://github.com/SarekTest/Sarek</url>
+    <connection>scm:git:https://github.com/SarekTest/Sarek.git</connection>
+    <developerConnection>scm:git:git@github.com:SarekTest/Sarek.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -51,6 +64,20 @@
     <instrumented-jre.jar>
       ${projectRootDir}/sarek-test-parent/sarek-test-instrument-jre/target/sarek-test-instrument-jre-${project.version}.jar
     </instrumented-jre.jar>
+
+    <!--
+      If you want to build from an IDE like IDEA or Eclipse and use GnuPG version >= v2.0, set the parameter to true in
+      order to get a nice GUI dialog for entering the passphrase. If you want to build from a console, set it to false
+      or override it via -DgpgGuiPassphrase=false.
+    -->
+    <gpgGuiPassphrase>false</gpgGuiPassphrase>
+
+    <!--
+      If you have multiple GnuPG signing keys on your keyring, the first one is used as the default key. In order to use
+      another one, specify the desired key ID here, otherwise you may just leave the parameter empty or override it via
+      -DgpgKeyId=. It does not hurt to always specify it, though.
+    -->
+    <gpgKeyId>70CC1444</gpgKeyId>
 
   </properties>
 
@@ -91,6 +118,57 @@
               </goals>
             </execution>
           </executions>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+          <configuration>
+            <installAtEnd>true</installAtEnd>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+          <configuration>
+            <deployAtEnd>true</deployAtEnd>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <!--
+            Quick release process, after you ran all tests already from a clean work directory:
+              1a) Prepare release, skipping tests:
+                  mvn release:prepare ‐Darguments=‐DskipTests
+              1b) Even quicker: don't compile tests
+                  mvn release:prepare ‐Darguments=‐Dmaven.test.skip=true
+              1c) Even quicker still: don't build anything, just run clean goal:
+                  mvn release:prepare ‐DpreparationGoals=clean
+              2a) Perform release, skipping tests:
+                  mvn release:perform ‐Darguments=‐DskipTests
+              2b) Even quicker: don't compile tests
+                  mvn release:perform ‐Darguments=‐Dmaven.test.skip=true
+              3)  Push commits + release tag
+                  git push origin master ‐‐tags
+            Note: '-Psonatype-oss-release' is already preconfigured in the Sonatype parent POM.
+          -->
+          <artifactId>maven-release-plugin</artifactId>
+          <version>2.5.3</version>
+          <configuration>
+            <!-- Submodules automatically get parent version -->
+            <autoVersionSubmodules>true</autoVersionSubmodules>
+            <!-- Release tags look like 'release/1.0.0' -->
+            <tagNameFormat>release/@{project.version}</tagNameFormat>
+            <!--
+              Do not push Git commits + release tag to up-stream repository during 'release:prepare', just in case
+              something goes wrong during the release. It is easier to revert locally than on GitHub. But do not forget
+              'git push origin ‐‐tags' after a successful 'release:perform'.
+            -->
+            <pushChanges>false</pushChanges>
+            <!-- Because of 'pushChanges=false', 'release:perform' needs to check out locally -->
+            <localCheckout>true</localCheckout>
+          </configuration>
         </plugin>
 
         <plugin>
