@@ -121,6 +121,12 @@
         </plugin>
 
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.2.0</version>
+        </plugin>
+
+        <plugin>
           <artifactId>maven-install-plugin</artifactId>
           <version>2.5.2</version>
           <configuration>
@@ -558,6 +564,33 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>sonatype-oss-release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <!-- Create an aggregate Javadoc JAR -->
+              <!-- TODO: Can this be generated for uber JARs too? -->
+              <execution>
+                <id>create-aggregate-javadoc-jar</id>
+                <goals>
+                  <goal>aggregate-jar</goal>
+                </goals>
+                <configuration>
+                  <excludePackageNames>org.acme</excludePackageNames>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
   <pluginRepositories>
     <!-- TODO: As soon as the next Surefire milestone is available on Maven Central, get rid of this repository -->
