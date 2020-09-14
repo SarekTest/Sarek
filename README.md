@@ -20,6 +20,7 @@ from JUnit. Some key features are:
     returning uninitialised objects, not unlike what Objenesis creates, but using a different approach. This also works
     globally, i.e. for objects created beyond user control. This problem cannot be solved via dependency injection
     without refactoring, which usually is not an option when dealing with third party libraries.
+  * Stub static methods.
   * Mocking constructors and stubbing methods also works for final classes and methods.
   * Given proper JVM configuration, all of these features also work for bootstrap classes (usually JRE/JDK classes),
     some even for classes which have already been loaded by retransforming them by means of Java instrumentation.
