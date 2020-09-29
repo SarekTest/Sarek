@@ -117,7 +117,7 @@ public class MockTest {
 
   @Test
   public void globalMock() {
-    try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).global().build()) {
+    try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).mockConstructors().build()) {
       // Global mock → instance methods are stubbed even for objects created via constructor call if we add them as
       // mock targets
       UnderTest underTest = new UnderTest();
@@ -134,7 +134,8 @@ public class MockTest {
 
       // If we activate global instance mode, adding mocks as targets manually is no longer necessary, but it also means
       // that instances created outside the control of this thread/method will automatically become mocks. What else
-      // would you expect after using both `.global()` and `.addGlobalInstance()`? It is as global as it gets...
+      // would you expect after using both `.mockConstructors()` and `.addGlobalInstance()`? It is as global as it
+      // gets...
       mockFactory.addGlobalInstance();
       underTest = new UnderTest();
       assertEquals(0, underTest.add(1, 2));
@@ -145,7 +146,7 @@ public class MockTest {
 
   @Test
   public void globalMockGlobalInstance() {
-    try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).global().addGlobalInstance().build()) {
+    try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).mockConstructors().addGlobalInstance().build()) {
       // Global mock + global instance → instance methods are stubbed even for objects created via constructor. We do
       // not even need to register them as mock targets
       UnderTest underTest = new UnderTest();
@@ -205,7 +206,7 @@ public class MockTest {
 
   @Test
   public void globalSpyWithoutStubbing() {
-    try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).spy().global().build()) {
+    try (MockFactory<UnderTest> mockFactory = forClass(UnderTest.class).spy().mockConstructors().build()) {
       // Global spy → instance methods are not stubbed by default
       UnderTest underTest = new UnderTest();
       mockFactory.addTarget(underTest);
@@ -219,7 +220,7 @@ public class MockTest {
   public void globalSpyWithStubbing() {
     try (
       MockFactory<UnderTest> mockFactory = forClass(UnderTest.class)
-        .spy().global().addGlobalInstance()
+        .spy().mockConstructors().addGlobalInstance()
         .mock(named("multiply"), InstanceMethodAroundAdvice.MOCK)
         .mock(
           named("getName"),
@@ -398,7 +399,7 @@ public class MockTest {
     // fields, because no constructors were executed during object creation.
     try (
       MockFactory<UnderTest> mockFactory = forClass(UnderTest.class)
-        .global()
+        .mockConstructors()
         .addGlobalInstance()
         .build()
     )
@@ -413,7 +414,7 @@ public class MockTest {
     // option to manually stub/advise those methods.
     try (
       MockFactory<UnderTest> mockFactory = forClass(UnderTest.class)
-        .global()
+        .mockConstructors()
         .addGlobalInstance()
         .provideHashCodeEquals(false)
         .build()
@@ -430,7 +431,7 @@ public class MockTest {
     // methods to be added.
     try (
       MockFactory<Sub> mockFactory = forClass(Sub.class)
-        .global()
+        .mockConstructors()
         .addGlobalInstance()
         .provideHashCodeEquals(true) // This is the default anyway, but just to make it clear...
         .build()
@@ -451,7 +452,7 @@ public class MockTest {
     // methods but also to hashCode/equals.
     try (
       MockFactory<UnderTestSub> mockFactory = forClass(UnderTestSub.class)
-        .global()
+        .mockConstructors()
         .addGlobalInstance()
         .build()
     )
@@ -467,7 +468,7 @@ public class MockTest {
     Sub sub;
     try (
       MockFactory<Sub> mockFactory = forClass(Sub.class)
-        .global()
+        .mockConstructors()
         .addGlobalInstance()
         .build()
     )

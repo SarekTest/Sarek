@@ -10,9 +10,9 @@ class SarekSpockExtensionTest extends Specification {
 
   def canMockApplicationClasses() {
     given:
-    MockFactory<FinalClass> mockFactory1 = MockFactory.forClass(FinalClass).global().addGlobalInstance().build();
-    MockFactory<Sub> mockFactory2 = MockFactory.forClass(Sub).global().build();
-    MockFactory<Base> mockFactory3 = MockFactory.forClass(Base).global().build()
+    MockFactory<FinalClass> mockFactory1 = MockFactory.forClass(FinalClass).mockConstructors().addGlobalInstance().build()
+    MockFactory<Sub> mockFactory2 = MockFactory.forClass(Sub).mockConstructors().build()
+    MockFactory<Base> mockFactory3 = MockFactory.forClass(Base).mockConstructors().build()
 
     expect:
     new FinalClass().add(2, 3) == 0
@@ -35,7 +35,7 @@ class SarekSpockExtensionTest extends Specification {
     MockFactory<UUID> mockFactory = MockFactory
       .forClass(UUID.class)
       .mockStaticMethods(true)  // include static methods, too
-      .global()
+      .mockConstructors()
       .addGlobalInstance()
       .build()
     expect:

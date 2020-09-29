@@ -32,12 +32,14 @@ public class MockAgentIT {
   public void canMockApplicationClasses() {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
-      MockFactory<FinalClass> mockFactory1 = MockFactory.forClass(FinalClass.class).global().addGlobalInstance().build();
-      MockFactory<Sub> mockFactory2 = MockFactory.forClass(Sub.class).global().build();
-      MockFactory<Base> mockFactory3 = MockFactory.forClass(Base.class).global().build()
+      MockFactory<FinalClass> mockFactory1 = MockFactory.forClass(FinalClass.class).mockConstructors().addGlobalInstance().build();
+      MockFactory<Sub> mockFactory2 = MockFactory.forClass(Sub.class).mockConstructors().build();
+      MockFactory<Base> mockFactory3 = MockFactory.forClass(Base.class).mockConstructors().build()
     )
     {
+      // Method is mocked due to .mockConstructors().addGlobalInstance()
       assertEquals(0, new FinalClass().add(2, 3));
+      // Methods are not mocked, only instances are uninitialised due to .mockConstructors()
       assertEquals(0, new Base(11).getId());
       assertNull(new Sub("foo").getName());
     }
@@ -55,7 +57,7 @@ public class MockAgentIT {
       MockFactory<UUID> mockFactory = MockFactory
         .forClass(UUID.class)
         .mockStaticMethods(true)  // include static methods, too
-        .global()
+        .mockConstructors()
         .addGlobalInstance()
         .build()
     )
@@ -73,7 +75,8 @@ public class MockAgentIT {
   public void canMockBootstrapClass_GregorianCalendar() {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
-      MockFactory<GregorianCalendar> mockFactory = forClass(GregorianCalendar.class)
+      MockFactory<GregorianCalendar> mockFactory = MockFactory
+        .forClass(GregorianCalendar.class)
         .mock(
           named("get"),
           (target, method, args) -> false,
@@ -120,7 +123,7 @@ public class MockAgentIT {
   public void canMockBootstrapClass_FileInputStream() throws IOException {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
-      MockFactory<File> mockFactory1 = MockFactory.forClass(File.class).global().addGlobalInstance().build()
+      MockFactory<File> mockFactory1 = MockFactory.forClass(File.class).mockConstructors().addGlobalInstance().build()
     )
     {
       File file = new File("CTeWTxRxRTmdf8JtvzmC");
@@ -131,7 +134,7 @@ public class MockAgentIT {
 
     // Try with resources works for Mock because it implements AutoCloseable
     try (
-      MockFactory<FileInputStream> mockFactory2 = MockFactory.forClass(FileInputStream.class).global().addGlobalInstance().build()
+      MockFactory<FileInputStream> mockFactory2 = MockFactory.forClass(FileInputStream.class).mockConstructors().addGlobalInstance().build()
     )
     {
       File file = new File("CTeWTxRxRTmdf8JtvzmC");
@@ -153,7 +156,7 @@ public class MockAgentIT {
     try (
       MockFactory<StringBuffer> mockFactory1 = MockFactory
         .forClass(StringBuffer.class)
-        .global()
+        .mockConstructors()
         // Exclude super type which leads to JVM errors triggered by ByteBuddy:
         //   [Byte Buddy] REDEFINE COMPLETE *** java.lang.instrument ASSERTION FAILED ***:
         //     "!errorOutstanding" with message transform method call failed at
@@ -213,7 +216,7 @@ public class MockAgentIT {
   public void canMockBootstrapClass_URL() throws IOException, URISyntaxException {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
-      MockFactory<URL> mockFactory = MockFactory.forClass(URL.class).global().addGlobalInstance().build();
+      MockFactory<URL> mockFactory = MockFactory.forClass(URL.class).mockConstructors().addGlobalInstance().build();
     )
     {
       URL url = new URL("invalid URL, no problem");
@@ -223,7 +226,7 @@ public class MockAgentIT {
 
     // Try with resources works for Mock because it implements AutoCloseable
     try (
-      MockFactory<URI> mockFactory = MockFactory.forClass(URI.class).addGlobalInstance().global().build()
+      MockFactory<URI> mockFactory = MockFactory.forClass(URI.class).addGlobalInstance().mockConstructors().build()
     )
     {
       URI uri = new URI("invalid URI, no problem");
@@ -236,7 +239,7 @@ public class MockAgentIT {
   public void canMockBootstrapClass_Random() {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
-      MockFactory<Random> mockFactory = MockFactory.forClass(Random.class).global().addGlobalInstance().build()
+      MockFactory<Random> mockFactory = MockFactory.forClass(Random.class).mockConstructors().addGlobalInstance().build()
     )
     {
       Random random = new Random();
@@ -249,9 +252,9 @@ public class MockAgentIT {
   public void canMockBootstrapClasses_Swing() {
     // Try with resources works for Mock because it implements AutoCloseable
     try (
-      MockFactory<JTable> mockFactory1 = MockFactory.forClass(JTable.class).global().addGlobalInstance().build();
-      MockFactory<GroupLayout> mockFactory2 = MockFactory.forClass(GroupLayout.class).global().addGlobalInstance().build();
-      MockFactory<JTextField> mockFactory3 = MockFactory.forClass(JTextField.class).global().addGlobalInstance().build()
+      MockFactory<JTable> mockFactory1 = MockFactory.forClass(JTable.class).mockConstructors().addGlobalInstance().build();
+      MockFactory<GroupLayout> mockFactory2 = MockFactory.forClass(GroupLayout.class).mockConstructors().addGlobalInstance().build();
+      MockFactory<JTextField> mockFactory3 = MockFactory.forClass(JTextField.class).mockConstructors().addGlobalInstance().build()
     )
     {
       JTable jTable = new JTable(3, 3);
@@ -278,7 +281,7 @@ public class MockAgentIT {
       // Create mock and automatically register it as an active target
       assertNull(mockFactory.createInstance().toString());
 
-      // Create mock and manually automatically (de-)register it as an active target
+      // Create mock and manually (de-)register it as an active target
       UUID uuid = mockFactory.createInstance(false);
       assertNotNull(uuid.toString());
       mockFactory.addTarget(uuid);

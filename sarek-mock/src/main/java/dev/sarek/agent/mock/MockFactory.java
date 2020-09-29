@@ -154,6 +154,11 @@ public class MockFactory<T> implements AutoCloseable {
     }
 
     /**
+     * Mock constructors for target class, i.e. the constructor code will be skipped and the resulting objects have
+     * uninitialised fields, avoiding all side effects which would otherwise occur during constructor execution. This
+     * does not activate method mocking (which can be activated separately, either per instance or globally), but it is
+     * a precondition for globally mocking/stubbing methods.
+     * <p>
      * A global mock in this context is a special type of mock which gets created every time a client calls
      * {@code new MyTargetClass(..)}. This enables users to also create mocks outside the direct control of the test
      * using them. Those non-injectable mocks cannot be created by conventionals means, i.e. creating a mock within a
@@ -176,7 +181,7 @@ public class MockFactory<T> implements AutoCloseable {
      *
      * @return the same builder instance, i.e. {@code this}
      */
-    public Builder<T> global() {
+    public Builder<T> mockConstructors() {
       global = true;
       return this;
     }
@@ -385,7 +390,7 @@ public class MockFactory<T> implements AutoCloseable {
 
     /**
      * Define that global mock mode should be active for the target class right after mock factory creation. See also
-     * {@link #global()} for more details about global mocks.
+     * {@link #mockConstructors()} for more details about global mocks.
      *
      * @return the same builder instance, i.e. {@code this}
      */

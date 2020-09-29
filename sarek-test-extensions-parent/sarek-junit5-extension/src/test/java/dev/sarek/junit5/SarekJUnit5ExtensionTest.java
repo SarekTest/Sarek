@@ -17,9 +17,9 @@ public class SarekJUnit5ExtensionTest {
 
     // Try with resources works for Mock because it implements AutoCloseable
     try (
-      MockFactory<FinalClass> mockFactory1 = MockFactory.forClass(FinalClass.class).global().addGlobalInstance().build();
-      MockFactory<Sub> mockFactory2 = MockFactory.forClass(Sub.class).global().build();
-      MockFactory<Base> mockFactory3 = MockFactory.forClass(Base.class).global().build()
+      MockFactory<FinalClass> mockFactory1 = MockFactory.forClass(FinalClass.class).mockConstructors().addGlobalInstance().build();
+      MockFactory<Sub> mockFactory2 = MockFactory.forClass(Sub.class).mockConstructors().build();
+      MockFactory<Base> mockFactory3 = MockFactory.forClass(Base.class).mockConstructors().build()
     )
     {
       assertEquals(0, new FinalClass().add(2, 3));
@@ -40,7 +40,7 @@ public class SarekJUnit5ExtensionTest {
       MockFactory<UUID> mockFactory = MockFactory
         .forClass(UUID.class)
         .mockStaticMethods(true)  // include static methods, too
-        .global()
+        .mockConstructors()
         .addGlobalInstance()
         .build()
     )
