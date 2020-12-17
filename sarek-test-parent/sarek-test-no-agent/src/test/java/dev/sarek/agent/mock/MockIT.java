@@ -18,11 +18,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.Year;
 import java.util.GregorianCalendar;
 import java.util.Random;
 import java.util.UUID;
 
-import static dev.sarek.agent.mock.MockFactory.forClass;
 import static java.util.Calendar.*;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static org.junit.Assert.*;
@@ -72,6 +72,35 @@ public class MockIT {
     // After auto-close, class transformations have been reverted
     assertTrue(new UUID(0xABBA, 0xCAFE).toString().contains("abba"));
     assertTrue(UUID.randomUUID().toString().matches("\\p{XDigit}+(-\\p{XDigit}+){4}"));
+  }
+
+  @Test
+  public void canMockBootstrapClass_Year() {
+    // Try with resources works for Mock because it implements AutoCloseable
+    try (
+      MockFactory<Year> mockFactory = MockFactory
+        .forClass(Year.class)
+        .spy()
+        .addGlobalInstance()
+        .mockStatic(
+          named("now"),
+          (method, args) -> false,
+          (method, args, proceedMode, returnValue, throwable) -> Year.of(1971)
+        )
+        .mock(
+          named("isLeap"),
+          (target, method, args) -> false,
+          (target, method, args, proceedMode, returnValue, throwable) -> false
+        )
+        .build()
+    )
+    {
+      assertFalse(Year.of(1971).isLeap());
+      assertFalse(Year.of(1972).isLeap());
+      assertFalse(Year.of(1973).isLeap());
+      assertFalse(Year.of(1974).isLeap());
+      assertEquals(1971, Year.now().getValue());
+    }
   }
 
   @Test

@@ -295,6 +295,7 @@ public class MockFactory<T> implements AutoCloseable {
       StaticMethodAroundAdvice advice
     )
     {
+      needsTargetClassTarget = true;
       weaverBuilder.addAdvice(methodMatcher, advice);
       return this;
     }
@@ -318,7 +319,11 @@ public class MockFactory<T> implements AutoCloseable {
      */
     public Builder<T> addAdvice(ElementMatcher.Junction<MethodDescription> methodMatcher, AroundAdvice<?> advice) {
       weaverBuilder.addAdvice(methodMatcher, advice);
-      if (advice instanceof ConstructorAroundAdvice || advice instanceof TypeInitialiserAroundAdvice)
+      if (
+        advice instanceof ConstructorAroundAdvice ||
+          advice instanceof TypeInitialiserAroundAdvice ||
+          advice instanceof StaticMethodAroundAdvice
+      )
         needsTargetClassTarget = true;
       return this;
     }

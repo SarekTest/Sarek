@@ -227,7 +227,23 @@ public class MockTest {
           (target, method, args) -> true,
           (target, method, args, proceedMode, returnValue, throwable) -> ((String) returnValue).toUpperCase()
         )
-        // Off-topic: just because we can, let us also stub a static method
+        .build()
+    )
+    {
+      // Global spy → instance methods can be stubbed
+      UnderTest underTest = new UnderTest("John Doe");
+      // These methods are stubbed
+      assertEquals(0, underTest.multiply(1, 2));
+      assertEquals("JOHN DOE", underTest.getName());
+      // This method is not stubbed
+      assertEquals(3, underTest.add(1, 2));
+    }
+  }
+
+  @Test
+  public void mockStaticMethod() {
+    try (
+      MockFactory<UnderTest> mockFactory = forClass(UnderTest.class)
         .mockStatic(
           named("greet"),
           (method, args) -> {
@@ -239,15 +255,6 @@ public class MockTest {
         .build()
     )
     {
-      // Global spy → instance methods can be stubbed
-      UnderTest underTest = new UnderTest("John Doe");
-      // These methods are stubbed
-      assertEquals(0, underTest.multiply(1, 2));
-      assertEquals("JOHN DOE", underTest.getName());
-      // This method is not stubbed
-      assertEquals(3, underTest.add(1, 2));
-
-      // Off-topic: in global mode we can also mock static methods
       assertEquals("HELLO FOO BAR", UnderTest.greet("world"));
     }
   }
