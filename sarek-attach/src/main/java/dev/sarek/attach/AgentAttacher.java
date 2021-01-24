@@ -30,6 +30,9 @@ public class AgentAttacher {
       try {
         INSTANCE = new AgentAttacher();
       }
+      catch (AgentAttacherException agentAttacherException) {
+        throw agentAttacherException;
+      }
       catch (Exception e) {
         throw new AgentAttacherException("Cannot attach Sarek agent", e);
       }
@@ -89,8 +92,15 @@ public class AgentAttacher {
 
   private Properties getDefaultConfig() {
     Properties defaultConfig = new Properties();
+
+    // Auto-detect the agent JAR and from it the agent type
+    defaultConfig.setProperty(AGENT_TYPE.name, detectAgentType());
+
+    // Do not set agent path because the it gets evaluated first and overrides the agent type if both are configured.
+    // Setting the agent path here would mean that overriding the agent type would have no effect, which would make the
+    // property rather useless as a convenient shorthand for specifying a full agent path.
     defaultConfig.setProperty(AGENT_PATH.name, "");
-    defaultConfig.setProperty(AGENT_TYPE.name, "sarek");
+
     defaultConfig.setProperty(LOG_VERBOSE.name, "false");
     defaultConfig.setProperty(UNFINAL_ACTIVE.name, "true");
     log("default configuration = " + defaultConfig);
@@ -122,6 +132,20 @@ public class AgentAttacher {
     return config.getProperty(configKey.name);
   }
 
+  private String detectAgentType() {
+    for (AgentType agentType : AgentType.values()) {
+      try {
+        JarFile jarFile = typeToJar(agentType);
+        log("auto-detected agent JAR for type " + agentType + ": " + jarFile.getName());
+        return agentType.toConfigValue();
+      }
+      catch (URISyntaxException | IOException | AgentJarNotFoundException exception) {
+        log("auto-detection failed: " + exception.getMessage());
+      }
+    }
+    return "";
+  }
+
   private AgentType jarToType(JarFile jar) throws InvalidConfigException {
     for (AgentType agentType : AgentType.values()) {
       if (jar.getEntry(agentType.markerFile) != null)
@@ -149,12 +173,12 @@ public class AgentAttacher {
     URL agentMarkerURL = getResourceURL(type.markerFile);
     if (agentMarkerURL == null)
       throw new AgentJarNotFoundException(
-        "Cannot find agent JAR for configured agent type " + type.name() + " on class path"
+        "Cannot find agent JAR for type " + type.name() + " on class path"
       );
     File agentJarPath = getJarPath(agentMarkerURL);
     if (agentJarPath == null)
       throw new AgentJarNotFoundException(
-        "Cannot find agent JAR for configured agent type " + type.name() + " on class path, " +
+        "Cannot find agent JAR for type " + type.name() + " on class path, " +
           "marker file " + agentMarkerURL + " is not inside a JAR."
       );
     return getAgentJar(agentJarPath);
@@ -176,6 +200,7 @@ public class AgentAttacher {
   }
 
   private void appendAndStartAgent() throws ReflectiveOperationException {
+    log("attaching + starting agent " + jar.getName());
     INSTRUMENTATION.appendToBootstrapClassLoaderSearch(jar);
     if (jar.getName().contains("sarek-unfinal")) {
       Class

@@ -39,6 +39,17 @@ public enum AgentType {
   }
 
   /**
+   * @return value of config file property or system property {@code dev.sarek.agent.type} corresponding with this agent
+   * type, i.e. any of {@code sarek}, {@code sarek-special}, {@code unfinal}, {@code unfinal-special}
+   */
+  public String toConfigValue() {
+    return markerFile
+      .replaceFirst("^META-INF/", "")
+      .replaceFirst("\\.txt$", "")
+      .replaceFirst("^sarek-unfinal", "unfinal");
+  }
+
+  /**
    * @param configValue value of config file property or system property {@code dev.sarek.agent.type}, i.e. any of
    *                    {@code sarek}, {@code sarek-special}, {@code unfinal}, {@code unfinal-special}
    * @return {@link AgentType} enum value corresponding to <i>configValue</i>. If <i>configValue</i> is {@code null} or
